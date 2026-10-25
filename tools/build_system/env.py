@@ -107,6 +107,8 @@ class EnvironmentFiles:
     build_script: Path
     # Path to the original executable to disassemble/compare against.
     disk: Path
+    # Expected SHA-1 hash of the original executable.
+    disk_sha1: str
     # Path to a "ROM" of the original executable which is created by this script.
     # The "ROM" only contains functions and data, without ELF metadata, and is
     # what we actually compare to.
@@ -144,6 +146,7 @@ class EnvironmentFiles:
             ldmap=directories.build / f"{basename}.map",
             build_script=directories.root / "build.ninja",
             disk=directories.disks / basename,
+            disk_sha1="d176f71e6962f02b531942e80718906d42f31799",
             disk_rom=directories.disks / f"{basename}.rom",
             final_elf=directories.build / f"{basename}.elf",
             final_rom=directories.build / f"{basename}.rom",
