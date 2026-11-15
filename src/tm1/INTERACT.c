@@ -235,7 +235,7 @@ void UpdateWeapons(Car* car, u8 isPlayer)
         t = pad->timer++;
         if (t >= ammoRegenRate) {
             pad->timer = 0;
-            if ((s16)pad->ammo[WEAPON_SPECIAL] + 1 < 20) {
+            if (pad->ammo[WEAPON_SPECIAL] + 1 < 20) {
                 pad->ammo[WEAPON_SPECIAL] = pad->ammo[WEAPON_SPECIAL] + 1;
             } else {
                 pad->ammo[WEAPON_SPECIAL] = 20;
@@ -265,7 +265,7 @@ void UpdatePlayerWeaponPadStatus(PlayerCar* car)
             if (car->weap.cur >= WEAPON_MAX) {
                 car->weap.cur = WEAPON_FIRE_MISSILE;
             }
-            if ((s16)car->weap.ammo[car->weap.cur] > 0) {
+            if (car->weap.ammo[car->weap.cur] > 0) {
                 return;
             }
             if (car->weap.cur == start) {
@@ -284,7 +284,7 @@ void UpdatePlayerWeaponPadStatus(PlayerCar* car)
         } else {
             car->weap.cur--;
         }
-        if ((s16)car->weap.ammo[car->weap.cur] > 0) {
+        if (car->weap.ammo[car->weap.cur] > 0) {
             return;
         }
         for (;;) {
@@ -296,7 +296,7 @@ void UpdatePlayerWeaponPadStatus(PlayerCar* car)
             } else {
                 car->weap.cur--;
             }
-            if ((s16)car->weap.ammo[car->weap.cur] > 0) {
+            if (car->weap.ammo[car->weap.cur] > 0) {
                 return;
             }
         }
@@ -671,7 +671,7 @@ void FireSpecials(Car* car, u8 isPlayer)
     r[2] = -rsin(m->rot.vx) >> 6;
     switch (kind) {
     case UA_SEMI_TRUCK:
-        if ((s16)pad->ammo[WEAPON_SPECIAL] >= weaponCost30) {
+        if (pad->ammo[WEAPON_SPECIAL] >= weaponCost30) {
             d[2] = d[2] - 16;
             s_create_bullet(idx, r, d, 4, damage30, 12, 0);
             pad->ammo[WEAPON_SPECIAL] -= weaponCost30;
@@ -682,7 +682,7 @@ void FireSpecials(Car* car, u8 isPlayer)
         }
         break;
     case UA_LAMBORGHINI:
-        if ((s16)pad->ammo[WEAPON_SPECIAL] >= weaponCost60) {
+        if (pad->ammo[WEAPON_SPECIAL] >= weaponCost60) {
             s_create_bullet(idx, r, d, 6, damage60, 15, 0);
             pad->ammo[WEAPON_SPECIAL] -= weaponCost60;
             uasoundStopCarSpecialWeapon(SOUND_SPECIAL_LAMBORGHINI);
@@ -692,7 +692,7 @@ void FireSpecials(Car* car, u8 isPlayer)
         }
         break;
     case UA_TAXI_CAB:
-        if ((s16)pad->ammo[WEAPON_SPECIAL] >= weaponCost20) {
+        if (pad->ammo[WEAPON_SPECIAL] >= weaponCost20) {
             s_create_bullet(idx, r, d, 17, damage20, 30, 0);
             pad->ammo[WEAPON_SPECIAL] -= weaponCost20;
             uasoundStopCarSpecialWeapon(SOUND_SPECIAL_TAXI_CAB);
@@ -702,7 +702,7 @@ void FireSpecials(Car* car, u8 isPlayer)
         }
         break;
     case UA_DUNE_BUGGY:
-        if ((s16)pad->ammo[WEAPON_SPECIAL] >= weaponCost90) {
+        if (pad->ammo[WEAPON_SPECIAL] >= weaponCost90) {
             s_create_bullet(idx, r, d, 19, damage90, 30, 0);
             pad->ammo[WEAPON_SPECIAL] -= weaponCost90;
             uasoundStopCarSpecialWeapon(SOUND_SPECIAL_DUNE_BUGGY);
@@ -712,7 +712,7 @@ void FireSpecials(Car* car, u8 isPlayer)
         }
         break;
     case UA_ICE_CREAM_TRUCK:
-        if ((s16)pad->ammo[WEAPON_SPECIAL] >= weaponCost10) {
+        if (pad->ammo[WEAPON_SPECIAL] >= weaponCost10) {
             s_create_bullet(idx, r, d, 15, damage10, 30, 0);
             pad->ammo[WEAPON_SPECIAL] -= weaponCost10;
             uasoundStopCarSpecialWeapon(SOUND_SPECIAL_ICE_CREAM_TRUCK);
@@ -722,7 +722,7 @@ void FireSpecials(Car* car, u8 isPlayer)
         }
         break;
     case UA_HUMVEE:
-        if ((s16)pad->ammo[WEAPON_SPECIAL] >= weaponCost70) {
+        if (pad->ammo[WEAPON_SPECIAL] >= weaponCost70) {
             MATRIX* mat2;
             s32 res;
             carLockon(isPlayer, &tgt);
@@ -762,7 +762,7 @@ void FireSpecials(Car* car, u8 isPlayer)
         }
         break;
     case UA_HARLEY:
-        if ((s16)pad->ammo[WEAPON_SPECIAL] >= weaponCost80) {
+        if (pad->ammo[WEAPON_SPECIAL] >= weaponCost80) {
             s_create_bullet(idx, r, d, 21, damage80, 20, 0);
             pad->ammo[WEAPON_SPECIAL] -= weaponCost80;
             uasoundStopCarSpecialWeapon(SOUND_SPECIAL_HARLEY);
@@ -772,7 +772,7 @@ void FireSpecials(Car* car, u8 isPlayer)
         }
         break;
     case UA_CORVETTE:
-        if ((s16)pad->ammo[WEAPON_SPECIAL] >= weaponCost110) {
+        if (pad->ammo[WEAPON_SPECIAL] >= weaponCost110) {
             carLockon(isPlayer, &tgt);
             v[0] = (s16)cfg->dropPower;
             v[1] = 0;
@@ -787,7 +787,7 @@ void FireSpecials(Car* car, u8 isPlayer)
         }
         break;
     case UA_POLICE_CAR:
-        if ((s16)pad->ammo[WEAPON_SPECIAL] >= weaponCost50) {
+        if (pad->ammo[WEAPON_SPECIAL] >= weaponCost50) {
             if (fire_taser(car, isPlayer) != 0) {
                 if (isPlayer) {
                     pad->ammo[WEAPON_SPECIAL] -= weaponCost50;
@@ -802,7 +802,7 @@ void FireSpecials(Car* car, u8 isPlayer)
         }
         break;
     case UA_MAD_MAX:
-        if ((s16)pad->ammo[WEAPON_SPECIAL] >= weaponCost120) {
+        if (pad->ammo[WEAPON_SPECIAL] >= weaponCost120) {
             carLockon(isPlayer, &tgt);
             v[0] = (s16)cfg->dropPower;
             v[1] = 0;
@@ -817,7 +817,7 @@ void FireSpecials(Car* car, u8 isPlayer)
         }
         break;
     case UA_BOSS_CAR:
-        if ((s16)pad->ammo[WEAPON_SPECIAL] >= weaponCost100) {
+        if (pad->ammo[WEAPON_SPECIAL] >= weaponCost100) {
             VECTOR3 rot2;
             carLockon(isPlayer, &tgt);
             v[0] = (s16)cfg->dropPower;
@@ -840,7 +840,7 @@ void FireSpecials(Car* car, u8 isPlayer)
         }
         break;
     case UA_LOW_RIDER:
-        if ((s16)pad->ammo[WEAPON_SPECIAL] >= weaponCost100) {
+        if (pad->ammo[WEAPON_SPECIAL] >= weaponCost100) {
             fireFlameThrower(car, isPlayer, 2, r);
             CurrentSpecialLaunch(pad, weaponCost100, SOUND_SPECIAL_LOW_RIDER);
         }

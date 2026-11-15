@@ -267,7 +267,7 @@ typedef struct CarWeap {
     /*0x04*/ u8 unk04;
     /*0x05*/ u8 pad05[0x3];
     /*0x08*/ u32 cur;
-    /*0x0C*/ u16 ammo[WEAPON_AMMO_MAX];
+    /*0x0C*/ s16 ammo[WEAPON_AMMO_MAX];
     /*0x28*/ u16 maxAmmo;
     /*0x2A*/ u8 pad2A[0x2];
     /*0x2C*/ CarFrontProfile* foreProfile;

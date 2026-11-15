@@ -210,7 +210,7 @@ void UAdashDrawInstruments(s32 player, Db* cdb)
     for (i = sel; i < gDash[player].lifeCnt; i++) {
         AddPrim(ot, &gDash[player].lifeSpr[i]);
     }
-    n = (s16)pi->weap.ammo[WEAPON_SPECIAL] / (s8)pi->weap.unk48;
+    n = pi->weap.ammo[WEAPON_SPECIAL] / (s8)pi->weap.unk48;
     if (n >= 6) {
         n = 5;
     }
@@ -262,7 +262,7 @@ void UAdashDrawInstruments(s32 player, Db* cdb)
     }
     wep = pi->weap.cur;
     if (D_8018C2AC != 0 && wep < 12) {
-        n = (s16)pi->weap.ammo[wep];
+        n = pi->weap.ammo[wep];
         if (wep == 11) {
             n = n / (s8)pi->weap.unk48;
         }

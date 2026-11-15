@@ -2901,7 +2901,7 @@ void InitMonsterSmash(Car* carA, u8 isPlayerA, Car* carB, u8 isPlayerB, s16 unus
         uaIdx = AI_CAR(carB)->uaIndex;
     }
 
-    if ((s16)wa->ammo[WEAPON_SPECIAL] < getSpecialWeaponCost(UA_MONSTER_TRUCK)) {
+    if (wa->ammo[WEAPON_SPECIAL] < getSpecialWeaponCost(UA_MONSTER_TRUCK)) {
         return;
     }
     if (fa[27]) {
