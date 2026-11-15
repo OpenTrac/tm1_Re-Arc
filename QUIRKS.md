@@ -131,6 +131,20 @@ Assuming the behavior is uniform across the file,
 This enables PsyQ to optimize some calls by replacing them with inlined
 `__builtin` equivalents.
 
+## `ABS()` vs. `abs()` vs. `__builtin_abs()`
+
+When the function `abs()` is invoked in the code, the compiler will replace the call with
+an optimized/inlined version, `__builtin_abs()`, if the TU is compiled with `-fbuiltin`.
+
+Since humans never call `__builtin_abs()` themselves, any calls to it should be
+replaced with their original forms.
+
+**Under normal circumstances**, the macro `ABS()` will also be detected and automatically
+replaced with the builtin. However, because TM1 is compiled with `-fvolatile` globally,
+the `ABS()` macro technically behaves differently from a function call, and so the
+compiler cannot replace it. Thus, you may need to experiment with both `ABS()` and `abs()`
+in order to match "absolute value" instruction patterns.
+
 ## `do { } while (0)` affects codegen
 
 `do while (0)` is a common method that developers used to create multi-line
