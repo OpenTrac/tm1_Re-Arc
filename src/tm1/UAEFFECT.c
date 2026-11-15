@@ -237,7 +237,7 @@ void UAeffectInitTV(DbObject* node)
     }
     poly = node->polys;
     base = (u8*)(poly + 1);
-    uv = (DbPolyUV*)(base + poly->uvOfs * 4);
+    uv = (DbPolyUV*)(base + poly->uvOffset * 4);
     uv->u0 = 0x1c;
     uv->v0 = 0x3a;
     uv->u1 = 0xa2;
@@ -421,7 +421,7 @@ void UAeffectInitHealthStandLightning(DbObject* node)
         u8* q;
 
         q = (u8*)(p + 1);
-        gLightningPart[i] = q + p->uvOfs * 4;
+        gLightningPart[i] = q + p->uvOffset * 4;
         p = DB_POLY_NEXT(p);
     }
     gLightningUoffset = gLightningPart[0][0];

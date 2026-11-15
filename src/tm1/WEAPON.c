@@ -747,24 +747,24 @@ void InitContrails(void)
     for (i = 0; i < 10; i++) {
         for (j = 0; j < 18; j++) {
             mlist[i].pts[j].poly.unk0C = 0;
-            mlist[i].pts[j].poly.unk00 = 4;
+            mlist[i].pts[j].poly.numUV = 4;
             mlist[i].pts[j].poly.vi[2] = 2;
             mlist[i].pts[j].poly.vi[3] = 3;
             mlist[i].pts[j].color.cd = 0x2E;
-            mlist[i].pts[j].poly.unk01 = 1;
+            mlist[i].pts[j].poly.numColor = 1;
             mlist[i].pts[j].poly.len = 9;
-            mlist[i].pts[j].poly.unk03 = 9;
+            mlist[i].pts[j].poly.primLen = 9;
             mlist[i].pts[j].poly.vi[0] = 0;
             mlist[i].pts[j].poly.vi[1] = 1;
             mlist[i].pts[j].color.r = 0x80;
             mlist[i].pts[j].color.g = 0x80;
             mlist[i].pts[j].color.b = 0x80;
-            mlist[i].pts[j].poly.unk0C_16 = 4;
-            mlist[i].pts[j].poly.unk0C_19 = 0;
-            mlist[i].pts[j].poly.unk0C_22 = 2;
-            mlist[i].pts[j].poly.unk0C_24 = 0;
-            mlist[i].pts[j].poly.uvOfs = 1;
-            mlist[i].pts[j].poly.unk0C_31 = 0;
+            mlist[i].pts[j].poly.numVert = 4;
+            mlist[i].pts[j].poly.numNormal = 0;
+            mlist[i].pts[j].poly.vertStride = 2;
+            mlist[i].pts[j].poly.normalOffset = 0;
+            mlist[i].pts[j].poly.uvOffset = 1;
+            mlist[i].pts[j].poly.doubleSided = 0;
         }
     }
     for (i = 0; i < 10; i++) {
@@ -775,7 +775,7 @@ void InitContrails(void)
         mlist[i].obj.op = 0;
         mlist[i].obj.kind = 0;
         mlist[i].obj.verts = tp;
-        mlist[i].obj.unk08 = 0;
+        mlist[i].obj.normals = 0;
         fp = &mlist[i].obj.flags;
         *fp = 0x2000;
         mlist[i].obj.sub = 0;

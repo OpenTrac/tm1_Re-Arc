@@ -273,9 +273,9 @@ static Cs* view[2];
 static Db* curViewDb[2];
 static s32 curFovEntry[2];
 
-extern MATRIX swap;
-extern VECTOR3 worldSpaceTrans[2];
-extern MATRIX worldSpaceMat[2];
+static MATRIX swap;
+static VECTOR3 worldSpaceTrans[2];
+static MATRIX worldSpaceMat[2];
 
 
 s32 viewGetCurrentFOVH(s32 which)

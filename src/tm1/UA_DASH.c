@@ -936,7 +936,7 @@ void uadashInitSteeringWheel(DbObject* obj)
         f = obj->polys;
         setPolyFT4(&gDash[0].wheel);
         base = (u8*)(f + 1);
-        uv = (DbPolyUV*)(base + f->uvOfs * 4);
+        uv = (DbPolyUV*)(base + f->uvOffset * 4);
         SetSemiTrans(&gDash[0].wheel, 1);
         setRGB0(&gDash[0].wheel, 0xFF, 0xFF, 0xFF);
         gDash[0].wheel.x0 = vt[f->vi[0]].vx / 8 - 120;
