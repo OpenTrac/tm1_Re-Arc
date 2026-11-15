@@ -80,7 +80,7 @@ void AICarUpdate(AICar* car)
     if (car->stats.unk38 != 0 && (car->unk40 != 0 || shellGetCurrentLevel() == LEVEL6_ROOFTOPS)) {
         CheckHitDetection(car, 0);
         if (car->collision.unk0 != 0) {
-            diff = __builtin_abs(car->motion.rot.vz - car->motion.rot2.vz);
+            diff = abs(car->motion.rot.vz - car->motion.rot2.vz);
             if (diff >= 683) {
                 car->unk4B = 1;
             }
@@ -97,7 +97,7 @@ void AICarUpdate(AICar* car)
         rot = car->unk1C4;
         rot = ABS(rot);
         if (rot < 683 || car->unk160 == 0) {
-            maxRot = __builtin_abs(car->motion.rotDelta.vz);
+            maxRot = abs(car->motion.rotDelta.vz);
             if (CalcMaxRotBeforeDrift(car, 0) < maxRot) {
                 goto block_46;
             }
@@ -296,7 +296,7 @@ void AICarInitTransition(AICar* car)
         car->stats.unk22 = 0;
     }
     if (triggerPtGroups.count >= 2 && car->flags[0x0A] == 0 && car->unk34 >= 3201) {
-        d = __builtin_abs(triggerPtGroups.pos[car->unk176].y - car->motion.pos.vz);
+        d = abs(triggerPtGroups.pos[car->unk176].y - car->motion.pos.vz);
         if ((car->stats.unk6C * 2) < d) {
             car->stats.unk03 = 1;
             if (shellGetCurrentLevel() == LEVEL6_ROOFTOPS) {
@@ -555,14 +555,14 @@ u8 TimeToComeOutOfTurn(AICar* car, s32 diff)
                 spd = car->motion.vel.vy;
             }
             lo += ((hi - lo) * (spd - car->motion.vel.vy)) / spd;
-            res = lo < __builtin_abs((s16)car->motion.unk00);
+            res = lo < abs((s16)car->motion.unk00);
         } else {
             res = 1;
         }
     } else {
         res = 1;
     }
-    if (__builtin_abs((s16)car->motion.unk00) < 5) {
+    if (abs((s16)car->motion.unk00) < 5) {
         res = 0;
     }
     return res;
@@ -765,7 +765,7 @@ void AICarUpdateSwerve(AICar* car)
             car->unk1B8 = car->unk1BC;
         }
     } else {
-        v = __builtin_abs(car->motion.rot.vz - car->unk1BC);
+        v = abs(car->motion.rot.vz - car->unk1BC);
         if (v < 22) {
             car->unk161 = 0;
         }
@@ -796,7 +796,7 @@ u8 GetBeadOnPlayer(AICar* car, s32 range)
     pt = car->unk176;
     info = GetPlayerInfo(car->unk0E);
     ppt = info->unkC0;
-    d = __builtin_abs(car->motion.pos.vz - info->motion.pos.vz);
+    d = abs(car->motion.pos.vz - info->motion.pos.vz);
     result = 0;
     if (pt == (s16)ppt) {
         if (car->unk18A >= 81 && (s16)car->stats.unk22 < 6 && d < 200) {
@@ -1090,7 +1090,7 @@ void AICarHeliUpdate(AICar* car)
                 if (t1 < car->stats.unkAC) {
                     speed = car->stats.unkAC;
                 } else {
-                    speed = __builtin_abs(info->motion.vel.vy);
+                    speed = abs(info->motion.vel.vy);
                 }
             } else {
                 s32 t2 = info->motion.vel.vy;
@@ -1105,7 +1105,7 @@ void AICarHeliUpdate(AICar* car)
             }
         }
         if (speed > 0) {
-            s32 cur = __builtin_abs(car->motion.vel.vy);
+            s32 cur = abs(car->motion.vel.vy);
             if (cur < ((GetFieldsLastFrame() * 380) / 100) || car->unk34 > 0x1FFFFF
                 || (car->motion.vel.vy - speed)
                     < (((car->unk34 << 5) / car->motion.vel.vy) * (car->stats.unkBC / 10))) {
