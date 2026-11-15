@@ -31,7 +31,7 @@ void subPoly3(Db* db, SubPoly* f, s32 count)
     s32 nWords;
     s32 sub;
 
-    out = (u8*)db->unk8;
+    out = db->prim;
     for (i = 0; i < count; i++) {
         flags = f[i].flags;
         if ((flags[3] & 0x70000) == 0x30000) {
@@ -115,7 +115,7 @@ void subPoly3(Db* db, SubPoly* f, s32 count)
             subAddPrim(db, &f[i], (SubPacket**)&out, (void**)prim2D);
         }
     }
-    db->unk8 = (s32)out;
+    db->prim = out;
 }
 #else
 INCLUDE_ASM("asm/nonmatchings/tm1/HIER_SUB", subPoly3);
@@ -168,7 +168,7 @@ void subPoly4(Db* db, SubPoly* f, s32 count)
     s32 my2;
     s32 sub;
 
-    out = (u8*)db->unk8;
+    out = db->prim;
     for (i = 0; i < count; i++) {
         flags = f[i].flags;
         if ((flags[3] & 0x70000) == 0x40000) {
@@ -306,7 +306,7 @@ void subPoly4(Db* db, SubPoly* f, s32 count)
             subAddPrim(db, &f[i], (SubPacket**)&out, (void**)prim2D);
         }
     }
-    db->unk8 = (s32)out;
+    db->prim = out;
 }
 #else
 INCLUDE_ASM("asm/nonmatchings/tm1/HIER_SUB", subPoly4);
@@ -352,12 +352,12 @@ void subAddPrim(Db* db, SubPoly* f, SubPacket** cursor, void** extra)
         (*cursor)->w0 = *getScratchAddr(0x18);
         (*cursor)->w1 = *getScratchAddr(0x19);
         (*cursor)->w2 = *getScratchAddr(0x1A);
-        AddPrim((u32*)db->small + f->otIdx, *cursor);
+        AddPrim(db->ot + f->otIdx, *cursor);
         *cursor += 1;
-        AddPrim((u32*)db->small + f->otIdx, f->prim);
-        AddPrim((u32*)db->small + f->otIdx, extra[0]);
-        AddPrim((u32*)db->small + f->otIdx, extra[1]);
-        AddPrim((u32*)db->small + f->otIdx, extra[2]);
+        AddPrim(db->ot + f->otIdx, f->prim);
+        AddPrim(db->ot + f->otIdx, extra[0]);
+        AddPrim(db->ot + f->otIdx, extra[1]);
+        AddPrim(db->ot + f->otIdx, extra[2]);
         if (f->twoSided != 0) {
             (*cursor)->w0 = *getScratchAddr(0x1B);
             (*cursor)->w1 = *getScratchAddr(0x1C);
@@ -371,13 +371,13 @@ void subAddPrim(Db* db, SubPoly* f, SubPacket** cursor, void** extra)
             (*cursor)->w2 = *f->back;
             ((u8*)*cursor)[4] = f->code;
         }
-        AddPrim((u32*)db->small + f->otIdx, *cursor);
+        AddPrim(db->ot + f->otIdx, *cursor);
         *cursor += 1;
     } else {
-        AddPrim((u32*)db->small + f->otIdx, f->prim);
-        AddPrim((u32*)db->small + f->otIdx, extra[0]);
-        AddPrim((u32*)db->small + f->otIdx, extra[1]);
-        AddPrim((u32*)db->small + f->otIdx, extra[2]);
+        AddPrim(db->ot + f->otIdx, f->prim);
+        AddPrim(db->ot + f->otIdx, extra[0]);
+        AddPrim(db->ot + f->otIdx, extra[1]);
+        AddPrim(db->ot + f->otIdx, extra[2]);
     }
 }
 #else

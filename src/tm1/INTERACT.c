@@ -931,7 +931,7 @@ s32 fire_taser(Car* car, s32 isPlayer)
     return 1;
 }
 
-void draw_tasers(RenderCtx* ctx, s32 view)
+void draw_tasers(Db* db, s32 view)
 {
     volatile s32 tp[3];
     s32 w[3];
@@ -942,7 +942,7 @@ void draw_tasers(RenderCtx* ctx, s32 view)
     s32 cy;
     MATRIX* mat;
     VECTOR3* tr;
-    u32* ot;
+    u_long* ot;
     s32 hfov;
     s32 vfov;
     LINE_G2* p;
@@ -950,7 +950,7 @@ void draw_tasers(RenderCtx* ctx, s32 view)
     s32 j;
     s32 z;
 
-    ot = ctx->ot;
+    ot = db->ot;
     viewGetCenter(view, &cx, &cy);
     hfov = viewGetCurrentHorzFOVH(view);
     vfov = viewGetCurrentVertFOVH(view);
@@ -1017,10 +1017,10 @@ void draw_tasers(RenderCtx* ctx, s32 view)
             }
             for (j = 0; j < 15; j++) {
                 if (sc[j][2] > 0 && sc[j + 1][2] > 0 && sc[j][2] < 4091 && sc[j + 1][2] < 4091) {
-                    p = (LINE_G2*)ctx->prim;
-                    if ((u32)(ctx->prim + 0x50) < (u32)ctx->primEnd) {
+                    p = (LINE_G2*)db->prim;
+                    if ((u32)(db->prim + 0x50) < (u32)db->areaEnd) {
                         setLineG2(p);
-                        ctx->prim = ctx->prim + 0x50;
+                        db->prim = db->prim + 0x50;
                         p->r0 = -6 - j * 12;
                         p->g0 = -6 - j * 12;
                         p->b0 = 255;
@@ -1294,7 +1294,7 @@ void drawOil(POLY_FT4* prim, s32* pos, s32 view)
     prim->y3 = out[3].vy;
 }
 
-void displayDropWeapons(RenderCtx* ctx, s32 view)
+void displayDropWeapons(Db* db, s32 view)
 {
     s32 w[3];
     s32 t[3];
@@ -1346,9 +1346,9 @@ void displayDropWeapons(RenderCtx* ctx, s32 view)
             if (abs(t[0]) < 641) {
                 if (abs(t[1]) < 641 && z >= 16) {
                     if (z < 30001) {
-                        p = (POLY_FT4*)ctx->prim;
-                        if ((u8*)p < ctx->primEnd) {
-                            ctx->prim = ctx->prim + 160;
+                        p = (POLY_FT4*)db->prim;
+                        if ((u8*)p < db->areaEnd) {
+                            db->prim = db->prim + 160;
                             setPolyFT4(p);
                             setShadeTex(p, 1);
                             sp = dropweapon[i].sprite;
@@ -1394,7 +1394,7 @@ void displayDropWeapons(RenderCtx* ctx, s32 view)
                             } else {
                                 drawOil(p, w, view);
                             }
-                            AddPrim(ctx->ot + z, p);
+                            AddPrim(db->ot + z, p);
                         }
                     }
                 }

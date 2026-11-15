@@ -404,7 +404,7 @@ void display_bullets(Db* db, s32 which)
     s32 k;
     s32 d;
     s32 e;
-    s32 next;
+    u8* next;
     s32 hfov;
     s32 z0;
     s32 z1;
@@ -429,7 +429,7 @@ void display_bullets(Db* db, s32 which)
     VECTOR3* eye;
 
     sz = 1;
-    ot = (u_long*)db->small;
+    ot = db->ot;
     viewGetCenter(which, &cx, &cy);
     hfov = viewGetCurrentHorzFOVH(which);
     vfov = viewGetCurrentVertFOVH(which);
@@ -463,29 +463,29 @@ void display_bullets(Db* db, s32 which)
             continue;
         }
         if (b->kind & 1) {
-            ft = (POLY_FT4*)db->unk8;
-            next = db->unk8 + 160;
-            if ((u8*)next >= db->areaEnd) {
+            ft = (POLY_FT4*)db->prim;
+            next = db->prim + 160;
+            if (next >= db->areaEnd) {
                 continue;
             }
-            db->unk8 = next;
+            db->prim = next;
             setPolyFT4(ft);
             setSemiTrans(ft, 1);
         } else if (b->kind < 3) {
-            ln = (LINE_G2*)db->unk8;
-            next = db->unk8 + 80;
-            if ((u8*)next >= db->areaEnd) {
+            ln = (LINE_G2*)db->prim;
+            next = db->prim + 80;
+            if (next >= db->areaEnd) {
                 continue;
             }
-            db->unk8 = next;
+            db->prim = next;
             setLineG2(ln);
         } else {
-            g3 = (POLY_G3*)db->unk8;
-            next = db->unk8 + 112;
-            if ((u8*)next >= db->areaEnd) {
+            g3 = (POLY_G3*)db->prim;
+            next = db->prim + 112;
+            if (next >= db->areaEnd) {
                 continue;
             }
-            db->unk8 = next;
+            db->prim = next;
             SetPolyG3(g3);
             setSemiTrans(g3, 0);
         }
@@ -1549,7 +1549,7 @@ void bulBoltZap(VECTOR* p1, VECTOR* p2)
     u32* ot;
 
     cdb = rtGetCdb();
-    ot = (u32*)cdb->small;
+    ot = (u32*)cdb->ot;
     viewGetCenter(0, &cx, &cy);
     hfov = viewGetCurrentHorzFOVH(0);
     vfov = viewGetCurrentVertFOVH(0);
@@ -1600,10 +1600,10 @@ void bulBoltZap(VECTOR* p1, VECTOR* p2)
 
     for (i = 0; i < 15; i++) {
         if (scr[i][2] > 0 && scr[i + 1][2] > 0 && scr[i][2] < 4091 && scr[i + 1][2] < 4091) {
-            line = (LINE_G2*)cdb->unk8;
+            line = (LINE_G2*)cdb->prim;
             if ((u8*)line < cdb->areaEnd) {
                 setLineG2(line);
-                cdb->unk8 += 80;
+                cdb->prim += 80;
                 setRGB0(line, -6 - i * 12, -6 - i * 12, 255);
                 setRGB1(line, -6 - (i + 1) * 12, -6 - (i + 1) * 12, 255);
                 line->x0 = scr[i][0];

@@ -1034,7 +1034,7 @@ static inline void screenDrawVehicleFace(ScreenVehicleFace* faces, s32 player, D
     s32 dy3 = face->y;
     s32 y3 = (u16)p->y3 + dy3;
     setXY4(p, x0, y0, x1, y1, x2, y2, x3, y3);
-    AddPrim(((u_long*)cdb->small) + 4095, p);
+    AddPrim(cdb->ot + 4095, p);
 }
 s32 screenVehicleChoice(s32 players, u8 demo)
 {
@@ -1138,40 +1138,39 @@ s32 screenVehicleChoice(s32 players, u8 demo)
             cdb = db;
             imageRight = 0;
         }
-        cdb->unk8 = (s32)cdb->area;
+        cdb->prim = cdb->area;
         VSync(0);
         DrawSync(0);
-        ClearOTagR(((u_long*)cdb->small), 4096);
+        ClearOTagR(cdb->ot, 4096);
         fontBase = fonts;
         if (!demo) {
             selectedFont = fontBase;
             if (menu == 0)
                 selectedFont = &fonts[1];
-            fontSpritePrintXY(*selectedFont, 110, 40, &selectMode, selectSprites, menuLabels[0],
-                ((u_long*)cdb->small) + 4095);
+            fontSpritePrintXY(
+                *selectedFont, 110, 40, &selectMode, selectSprites, menuLabels[0], cdb->ot + 4095);
             selectedFont = fontBase;
             if (menu == 1)
                 selectedFont = &fonts[1];
-            fontSpritePrintXY(*selectedFont, 110, 60, &infoMode, infoSprites, menuLabels[1],
-                ((u_long*)cdb->small) + 4095);
+            fontSpritePrintXY(
+                *selectedFont, 110, 60, &infoMode, infoSprites, menuLabels[1], cdb->ot + 4095);
             selectedFont = fontBase;
             if (menu == 2)
                 selectedFont = &fonts[1];
-            fontSpritePrintXY(*selectedFont, 110, 80, &exitMode, exitSprites, menuLabels[2],
-                ((u_long*)cdb->small) + 4095);
+            fontSpritePrintXY(
+                *selectedFont, 110, 80, &exitMode, exitSprites, menuLabels[2], cdb->ot + 4095);
             if (!blink)
                 blink = 0xFF00;
             if (players >= 2) {
                 if (blink & 1)
                     fontSpritePrintCenteredXY(2, playerX[player], 30, &playerModes[player],
-                        playerSprites[player], playerLabels[player], ((u_long*)cdb->small) + 4095);
+                        playerSprites[player], playerLabels[player], cdb->ot + 4095);
 
                 fontSpritePrintCenteredXY(2, playerX[(player ^ 1)], 30, &playerModes[(player ^ 1)],
-                    playerSprites[(player ^ 1)], playerLabels[(player ^ 1)],
-                    ((u_long*)cdb->small) + 4095);
+                    playerSprites[(player ^ 1)], playerLabels[(player ^ 1)], cdb->ot + 4095);
             } else if (blink & 1) {
                 fontSpritePrintCenteredXY(2, playerX[0], 30, &playerModes[0], playerSprites[0],
-                    playerLabels[0], ((u_long*)cdb->small) + 4095);
+                    playerLabels[0], cdb->ot + 4095);
             }
             blink >>= 1;
             if ((left || right) && menu == 0) {
@@ -1182,14 +1181,12 @@ s32 screenVehicleChoice(s32 players, u8 demo)
                 lf = 0;
             }
             fontSpritePrintXY(arrowFonts[lf], screenVehicleArrows[0].x, screenVehicleArrows[0].y,
-                &arrowModes[0], &arrowSprites[0], screenVehicleArrows[0].label,
-                ((u_long*)cdb->small));
+                &arrowModes[0], &arrowSprites[0], screenVehicleArrows[0].label, cdb->ot);
             fontSpritePrintXY(arrowFonts[rf], screenVehicleArrows[1].x, screenVehicleArrows[1].y,
-                &arrowModes[1], &arrowSprites[1], screenVehicleArrows[1].label,
-                ((u_long*)cdb->small));
+                &arrowModes[1], &arrowSprites[1], screenVehicleArrows[1].label, cdb->ot);
         }
         fontSpritePrintCenteredXY(0, 159, 215, &carNameMode, carNameSprites[imageRight],
-            uaGetCarNameString(screenGetCarsEnum(car)), ((u_long*)cdb->small));
+            uaGetCarNameString(screenGetCarsEnum(car)), cdb->ot);
 
         if (shrinkFrames) {
             if (selected[(player ^ 1)] < 12) {
@@ -1340,7 +1337,7 @@ s32 screenVehicleChoice(s32 players, u8 demo)
         PutDispEnv(&cdb->disp);
         screenDisplayImage(imageRight, image, 0, 0);
         ++frames;
-        DrawOTag(((u_long*)cdb->small) + 4095);
+        DrawOTag(cdb->ot + 4095);
     }
     if (frames >= 18001) {
         selected[0] = -1;
@@ -3157,10 +3154,10 @@ void screenCarEnding(s32 which)
                 cur = db;
                 side = 0;
             }
-            cur->unk8 = (s32)cur->area;
+            cur->prim = cur->area;
             VSync(0);
             DrawSync(0);
-            ClearOTagR(((u_long*)cur->small), 0x1000);
+            ClearOTagR(cur->ot, 0x1000);
             cs->rot.vx += gDeltaRot.vx;
             cs->rot.vy += gDeltaRot.vy;
             cs->rot.vz += gDeltaRot.vz;
@@ -3172,7 +3169,7 @@ void screenCarEnding(s32 which)
             PutDispEnv(&cur->disp);
 
             screenDisplayImage(side, AUDIO_IMAGE, 0, 0);
-            DrawOTag(((u_long*)cur->small) + 4095);
+            DrawOTag(cur->ot + 4095);
         }
         DrawSync(0);
         db[0].draw.isbg = saved;
@@ -3211,10 +3208,10 @@ void screenCarEndingReset(ScreenCarEnding* e)
         e->cdb = e->db;
         e->imageRight = 0;
     }
-    e->cdb->unk8 = (s32)e->cdb->area;
+    e->cdb->prim = e->cdb->area;
     VSync(0);
     DrawSync(0);
-    ClearOTagR(((u_long*)e->cdb->small), 0x1000);
+    ClearOTagR(e->cdb->ot, 0x1000);
 }
 
 void screenCarEndingDrawCar(ScreenCarEnding* e)
@@ -3235,7 +3232,7 @@ void screenCarEndingDisplayCar(ScreenCarEnding* e)
     if (e->image != 0) {
         screenDisplayImage(e->imageRight, e->image, 0, 0);
     }
-    DrawOTag(((u_long*)e->cdb->small) + 4095);
+    DrawOTag(e->cdb->ot + 4095);
 }
 
 void screenCarEndingCleanup(ScreenCarEnding* e)

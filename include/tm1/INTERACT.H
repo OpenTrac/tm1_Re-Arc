@@ -5,13 +5,7 @@
 #include "tm1/CAR.H"
 #include "tm1/GRUTILS.H"
 #include "tm1/MATH.H"
-
-typedef struct {
-    /* 0x00 */ u32* ot;
-    /* 0x04 */ u8 pad04[4];
-    /* 0x08 */ u8* prim;
-    /* 0x0C */ u8* primEnd;
-} RenderCtx;
+#include "tm1/RT.H"
 
 void carSetPowerupDelaysBySkillLevel(s32 level);
 s32 getSpecialWeaponCost(s32 id);
@@ -25,7 +19,7 @@ void FireSpecials(Car* car, u8 isPlayer);
 s32 find_free_taser(void);
 void carInitTasers(void);
 s32 fire_taser(Car* car, s32 isPlayer);
-void draw_tasers(RenderCtx* ctx, s32 view);
+void draw_tasers(Db* db, s32 view);
 void LaunchDrops(Car* car, u8 isPlayer);
 void carAddWeapTex(GrObj* obj, s32 id);
 void carInitDropWeaps(void);
@@ -33,7 +27,7 @@ s32 FindFreeDropWeap(void);
 u8 carDropWeapon(u32 kind, s32 idx, s32* pos, s32 power);
 void check_dropweap_impact(s32 i);
 void drawOil(POLY_FT4* prim, s32* pos, s32 view);
-void displayDropWeapons(RenderCtx* ctx, s32 view);
+void displayDropWeapons(Db* db, s32 view);
 void carLockon(u8 who, VECTOR3** out);
 void carLockon2(u8 who, VECTOR3** out);
 void carInitFlamethrowers(void);

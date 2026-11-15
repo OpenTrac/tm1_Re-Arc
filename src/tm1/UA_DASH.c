@@ -249,7 +249,7 @@ void UAdashDrawInstruments(s32 player, Db* cdb)
     }
     if (gMaxCarryCapacity != 0 && rtIsSplitScreenOn() == 0) {
         fontSpritePrintCenteredXY(2, 0x9F, 0x9B, &gMaxCarryDrawMode, gMaxCarrySprites,
-            "Max Carrying Capacity", rtGetCdb()->small);
+            "Max Carrying Capacity", rtGetCdb()->ot);
         gMaxCarryCapacity--;
     }
     if (rtIsSplitScreenOn() == 0) {
