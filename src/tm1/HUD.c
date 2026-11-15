@@ -58,10 +58,10 @@ void hudDisplayRadar(u32* ot)
     if (rtIsSplitScreenOn() == 0 && radarOn != 0) {
         cdb = rtGetCdb();
         if (radar.sigCount0 != 0) {
-            p = (SPRT*)cdb->unk8;
-            if ((u32)(cdb->unk8 + 128) < (u32)cdb->areaEnd) {
+            p = (SPRT*)cdb->prim;
+            if ((u32)(cdb->prim + 128) < (u32)cdb->areaEnd) {
                 m = (DR_MODE*)((u8*)p + 20);
-                cdb->unk8 = cdb->unk8 + 128;
+                cdb->prim = cdb->prim + 128;
                 setSprt(p);
                 setRGB0(p, 0x80, 0x80, 0x80);
                 SetDrawMode(m, 0, 0, 0, NULL);
@@ -77,10 +77,10 @@ void hudDisplayRadar(u32* ot)
             }
         }
         if (radar.sigCount1 != 0) {
-            p = (SPRT*)cdb->unk8;
-            if ((u32)(cdb->unk8 + 128) < (u32)cdb->areaEnd) {
+            p = (SPRT*)cdb->prim;
+            if ((u32)(cdb->prim + 128) < (u32)cdb->areaEnd) {
                 m = (DR_MODE*)((u8*)p + 20);
-                cdb->unk8 = cdb->unk8 + 128;
+                cdb->prim = cdb->prim + 128;
                 setSprt(p);
                 setRGB0(p, 0x80, 0x80, 0x80);
                 SetDrawMode(m, 0, 0, 0, NULL);
@@ -96,9 +96,9 @@ void hudDisplayRadar(u32* ot)
             }
         }
         if (radar.sigCount3 != 0) {
-            p = (SPRT*)cdb->unk8;
-            cdb->unk8 = cdb->unk8 + 128;
-            if ((u32)(cdb->unk8 + 128) < (u32)cdb->areaEnd) {
+            p = (SPRT*)cdb->prim;
+            cdb->prim = cdb->prim + 128;
+            if ((u32)(cdb->prim + 128) < (u32)cdb->areaEnd) {
                 m = (DR_MODE*)((u8*)p + 20);
                 setSprt(p);
                 setRGB0(p, 0x80, 0x80, 0x80);
@@ -115,10 +115,10 @@ void hudDisplayRadar(u32* ot)
             }
         }
         if (radar.sigCount2 != 0) {
-            p = (SPRT*)cdb->unk8;
-            if ((u32)(cdb->unk8 + 128) < (u32)cdb->areaEnd) {
+            p = (SPRT*)cdb->prim;
+            if ((u32)(cdb->prim + 128) < (u32)cdb->areaEnd) {
                 m = (DR_MODE*)((u8*)p + 20);
-                cdb->unk8 = cdb->unk8 + 128;
+                cdb->prim = cdb->prim + 128;
                 setSprt(p);
                 setRGB0(p, 0x80, 0x80, 0x80);
                 SetDrawMode(m, 0, 0, 0, NULL);

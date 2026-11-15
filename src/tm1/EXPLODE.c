@@ -174,7 +174,7 @@ s32 find_free_explosion(void)
 //     s32 v[3];
 //     s32 r[3];
 
-//     ot = (u32 *)cdb->small;
+//     ot = (u32 *)cdb->ot;
 //     viewGetCenter(which, &cx, &cy);
 //     hfov = viewGetCurrentHorzFOVH(which);
 //     vfov = viewGetCurrentVertFOVH(which);
@@ -225,9 +225,9 @@ s32 find_free_explosion(void)
 //         }
 //         if (px >= -99 && px < 1000) {
 //             if (py >= -99 && py < 1000) {
-//                 p = (POLY_FT4 *)cdb->unk8;
-//                 if ((u8 *)(cdb->unk8 + 160) < cdb->areaEnd) {
-//                     cdb->unk8 += 160;
+//                 p = (POLY_FT4 *)cdb->prim;
+//                 if ((u8 *)(cdb->prim + 160) < cdb->areaEnd) {
+//                     cdb->prim += 160;
 //                     setPolyFT4(p);
 //                     setSemiTrans(p, 1);
 //                     t = e->unk28;
@@ -837,7 +837,7 @@ void explodeDisplayFragments(Db* cdb, s32 which)
     s32 v[3];
     s32 r[3];
 
-    ot = (u32*)cdb->small;
+    ot = (u32*)cdb->ot;
     viewGetCenter(which, &cx, &cy);
     hfov = viewGetCurrentHorzFOVH(which);
     vfov = viewGetCurrentVertFOVH(which);
@@ -863,9 +863,9 @@ void explodeDisplayFragments(Db* cdb, s32 which)
                     sx = cx + sx;
                     sy = cy + sy;
                     if (sx >= -99 && sx < 1000 && sy >= -99 && sy < 1000) {
-                        p = (POLY_FT4*)cdb->unk8;
+                        p = (POLY_FT4*)cdb->prim;
                         if ((u8*)p + 160 <= cdb->areaEnd) {
-                            cdb->unk8 += 160;
+                            cdb->prim += 160;
                             setPolyFT4(p);
                             setShadeTex(p, 1);
                             p->u0 = fragment[i].anim[frame].u0;
@@ -921,18 +921,18 @@ void explodeMakeScreenRed(void)
     DR_MODE* dm;
 
     cdb = rtGetCdb();
-    p = (POLY_F4*)cdb->unk8;
+    p = (POLY_F4*)cdb->prim;
     if ((u8*)p + 144 < cdb->areaEnd) {
-        cdb->unk8 += 96;
+        cdb->prim += 96;
         setPolyF4(p);
         setRGB0(p, 255, 0, 0);
         setSemiTrans(p, 1);
         setXY4(p, 0, 0, 320, 0, 0, 240, 320, 240);
-        addPrim(cdb->small, p);
-        dm = (DR_MODE*)cdb->unk8;
-        cdb->unk8 += 48;
+        addPrim(cdb->ot, p);
+        dm = (DR_MODE*)cdb->prim;
+        cdb->prim += 48;
         SetDrawMode(dm, 0, 0, 0, NULL);
-        addPrim(cdb->small, dm);
+        addPrim(cdb->ot, dm);
     }
 }
 #else

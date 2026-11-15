@@ -46,9 +46,9 @@ s32 rtMainLoop(void)
         if (cdb == db) {
             p = &db[1];
         }
-        p->unk8 = (s32)p->area;
+        p->prim = p->area;
         cdb = p;
-        ClearOTagR((unsigned int*)p->small, 0x1000);
+        ClearOTagR(p->ot, 0x1000);
         UpdCtlPad();
         move_missiles();
         UAeffectUpdateSpecialEffects();
@@ -57,7 +57,7 @@ s32 rtMainLoop(void)
         update_bullets();
         animate_explosions();
         draw_explosions(cdb, 0);
-        hudDisplayRadar((u32*)cdb->small);
+        hudDisplayRadar((u32*)cdb->ot);
         hierProc(cdb, 0);
         PlayGame();
         if (split_screen) {
@@ -66,9 +66,9 @@ s32 rtMainLoop(void)
                 p = &sdb[1];
             }
             curSdb = p;
-            ClearOTagR((unsigned int*)p->small, 0x1000);
+            ClearOTagR(p->ot, 0x1000);
             viewProc(1);
-            curSdb->unk8 = cdb->unk8;
+            curSdb->prim = cdb->prim;
             display_bullets(curSdb, 1);
             draw_explosions(curSdb, 1);
             hierProc(curSdb, 1);
@@ -78,9 +78,9 @@ s32 rtMainLoop(void)
                 p = &rdb[1];
             }
             curRdb = p;
-            ClearOTagR((unsigned int*)p->small, 0x1000);
+            ClearOTagR(p->ot, 0x1000);
             viewProc(1);
-            curRdb->unk8 = cdb->unk8;
+            curRdb->prim = cdb->prim;
             display_bullets(curRdb, 1);
             draw_explosions(curRdb, 1);
             hierProc(curRdb, 1);
@@ -96,15 +96,15 @@ s32 rtMainLoop(void)
         t = GetCurTics();
         PutDrawEnv(&cdb->draw);
         PutDispEnv(&cdb->disp);
-        DrawOTag((unsigned int*)(cdb->small + 16380));
+        DrawOTag(cdb->ot + 4095);
         UAdashDrawInstruments(0, &cdb->draw);
         if (split_screen) {
             PutDrawEnv(&curSdb->draw);
-            DrawOTag((unsigned int*)(curSdb->small + 16380));
+            DrawOTag(curSdb->ot + 4095);
             UAdashDrawInstruments(1, &sdb[0].draw);
         } else if (D_8018BF20) {
             PutDrawEnv(&curRdb->draw);
-            DrawOTag((unsigned int*)(curRdb->small + 16380));
+            DrawOTag(curRdb->ot + 4095);
         }
         screenCheckMidGameOptions();
     }
@@ -236,7 +236,7 @@ u8* rtGetDoubleBufferArea(void)
 
 u8* rtGetSmallBufferArea(void)
 {
-    return D_801E4C50;
+    return (u8*)D_801E4C50;
 }
 
 void rtDoubleBufferInit(void)
@@ -246,13 +246,13 @@ void rtDoubleBufferInit(void)
     n = 0x16B70;
     db[0].area = gDoubleBuffers;
     db[1].area = D_801CE090;
-    db[0].small = D_801E4C50;
-    db[1].small = D_801E8C50;
+    db[0].ot = D_801E4C50;
+    db[1].ot = D_801E8C50;
     db[0].areaEnd = gDoubleBuffers + n;
     db[1].areaEnd = D_801CE090 + n;
     cdb = db;
-    sdb[0].small = D_801ECC50;
-    sdb[1].small = D_801F0C50;
+    sdb[0].ot = D_801ECC50;
+    sdb[1].ot = D_801F0C50;
     sdb[0].area = gDoubleBuffers;
     sdb[1].area = D_801CE090;
     sdb[0].areaEnd = gDoubleBuffers + n;
@@ -260,8 +260,8 @@ void rtDoubleBufferInit(void)
     curSdb = sdb;
     rdb[0].area = gDoubleBuffers;
     rdb[1].area = D_801CE090;
-    rdb[0].small = D_801ECC50;
-    rdb[1].small = D_801F0C50;
+    rdb[0].ot = D_801ECC50;
+    rdb[1].ot = D_801F0C50;
     rdb[0].areaEnd = gDoubleBuffers + n;
     rdb[1].areaEnd = D_801CE090 + n;
     curRdb = rdb;
