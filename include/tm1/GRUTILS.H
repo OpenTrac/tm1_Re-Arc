@@ -6,14 +6,6 @@
 
 // TODO: Consolidate; these are probably SDK types
 
-/* One vertex of a DMD object's vertex array (8 bytes). */
-typedef struct {
-    s16 x; /* +0 */
-    s16 y; /* +2 */
-    s16 z; /* +4 */
-    s16 pad; /* +6 */
-} GrVert;
-
 /* The UV/CLUT/TPAGE block a polygon record carries at +16 (POLY_FT4 layout). */
 typedef struct {
     u8 u0; /* +0 */
@@ -34,7 +26,7 @@ typedef struct {
 typedef struct GrObj {
     u8 kind; /* 0 = sprite object */
     u8 pad0[3];
-    GrVert* verts; /* +4  vertex array */
+    SVECTOR* verts; /* +4  vertex array */
     u8 pad1[4];
     u8* polys; /* +12 first polygon record */
     s32 count; /* +16 number of polygon records */

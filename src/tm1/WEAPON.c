@@ -39,9 +39,9 @@
 
 #define CONTRAIL_PT(k)                                                                             \
     mathMulTransVec(&m->cs->mat, &in, &out);                                                       \
-    m->trail[k].x = m->cs->pos.vx + out.vx - m->pos.vx;                                            \
-    m->trail[k].y = m->cs->pos.vy + out.vy - m->pos.vy;                                            \
-    m->trail[k].z = m->cs->pos.vz + out.vz - m->pos.vz;
+    m->trail[k].vx = m->cs->pos.vx + out.vx - m->pos.vx;                                           \
+    m->trail[k].vy = m->cs->pos.vy + out.vy - m->pos.vy;                                           \
+    m->trail[k].vz = m->cs->pos.vz + out.vz - m->pos.vz;
 
 static s32 bulletFlipFlop = 0;
 void* fire_missile_node = 0;
@@ -740,7 +740,7 @@ void InitContrails(void)
 {
     s32 i;
     s32 j;
-    TrailPt* tp;
+    SVECTOR* tp;
     VECTOR3* vp;
     s32* fp;
 
@@ -846,17 +846,17 @@ void startContrail(s32 i)
     m->csB->pos.vz = m->cs->pos.vz;
     for (j = 0; j < m->unk54 + 1; j++) {
         k = j * 3;
-        m->trail[k].x = out.vx;
-        m->trail[k].y = out.vy;
-        m->trail[k].z = out.vz;
+        m->trail[k].vx = out.vx;
+        m->trail[k].vy = out.vy;
+        m->trail[k].vz = out.vz;
         k++;
-        m->trail[k].x = out.vx;
-        m->trail[k].y = out.vy;
-        m->trail[k].z = out.vz;
+        m->trail[k].vx = out.vx;
+        m->trail[k].vy = out.vy;
+        m->trail[k].vz = out.vz;
         k++;
-        m->trail[k].x = out.vx;
-        m->trail[k].y = out.vy;
-        m->trail[k].z = out.vz;
+        m->trail[k].vx = out.vx;
+        m->trail[k].vy = out.vy;
+        m->trail[k].vz = out.vz;
     }
     m->csB->drawMode = 1;
 }

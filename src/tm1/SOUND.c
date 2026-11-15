@@ -78,19 +78,19 @@ s32 soundGetCalculatedSoundXPosition()
     return gSoundEyeSpaceLoc[0];
 }
 
-void soundMulVec(SndMatrix* m, s32* v, s32* out)
+void soundMulVec(MATRIX* m, s32* v, s32* out)
 {
     s32 t[3];
 
     t[0] = (v[0] < 3357) ? v[0] : 3357;
     t[1] = (v[1] < 3357) ? v[1] : 3357;
     t[2] = (v[2] < 3357) ? v[2] : 3357;
-    out[0] = ((t[0] * (s16)m->m[0]) / 8192) + ((t[1] * (s16)m->m[1]) / 8192)
-        + ((t[2] * (s16)m->m[2]) / 8192);
-    out[1] = ((t[0] * (s16)m->m[3]) / 8192) + ((t[1] * (s16)m->m[4]) / 8192)
-        + ((t[2] * (s16)m->m[5]) / 8192);
-    out[2] = ((t[0] * (s16)m->m[6]) / 8192) + ((t[1] * (s16)m->m[7]) / 8192)
-        + ((t[2] * (s16)m->m[8]) / 8192);
+    out[0] = ((t[0] * m->m[0][0]) / 8192) + ((t[1] * m->m[0][1]) / 8192)
+        + ((t[2] * m->m[0][2]) / 8192);
+    out[1] = ((t[0] * m->m[1][0]) / 8192) + ((t[1] * m->m[1][1]) / 8192)
+        + ((t[2] * m->m[1][2]) / 8192);
+    out[2] = ((t[0] * m->m[2][0]) / 8192) + ((t[1] * m->m[2][1]) / 8192)
+        + ((t[2] * m->m[2][2]) / 8192);
 }
 
 void soundResetSoundEngine()
@@ -110,7 +110,7 @@ void soundSetRangeAndXPositionFromWorldLoc(s32* loc)
     gSoundEyeToSoundLoc[1] = loc[1] + cs->wpos.vy;
     gSoundWorldCs = cs;
     gSoundEyeToSoundLoc[2] = loc[2] + cs->wpos.vz;
-    soundMulVec((SndMatrix*)&csGetWorldCs()->wmat, gSoundEyeToSoundLoc, gSoundEyeSpaceLoc);
+    soundMulVec(&csGetWorldCs()->wmat, gSoundEyeToSoundLoc, gSoundEyeSpaceLoc);
     gSoundRange = gSoundEyeSpaceLoc[0] * gSoundEyeSpaceLoc[0];
     gSoundRange = gSoundRange + gSoundEyeSpaceLoc[1] * gSoundEyeSpaceLoc[1];
     gSoundRange = gSoundRange + gSoundEyeSpaceLoc[2] * gSoundEyeSpaceLoc[2];

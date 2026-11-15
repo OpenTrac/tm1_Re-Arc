@@ -57,13 +57,6 @@ typedef struct ContrailPt {
     /* 0x22 */ u16 pad22;
 } ContrailPt; /* 0x24 */
 
-typedef struct TrailPt {
-    /* 0x00 */ s16 x;
-    /* 0x02 */ s16 y;
-    /* 0x04 */ s16 z;
-    /* 0x06 */ s16 pad;
-} TrailPt; /* 0x08 */
-
 typedef struct Missile {
     /* 0x000 */ u8 pad00[0x18];
     /* 0x018 */ VECTOR3 pos;
@@ -85,12 +78,12 @@ typedef struct Missile {
     /* 0x054 */ u8 unk54;
     /* 0x055 */ u8 unk55;
     /* 0x056 */ s16 unk56;
-    /* 0x058 */ TrailPt trail[21];
+    /* 0x058 */ SVECTOR trail[21];
     /* 0x100 */ Cs* csB;
     /* 0x104 */ u8 f104;
     /* 0x105 */ u8 pad105;
     /* 0x106 */ s16 f106;
-    /* 0x108 */ TrailPt* f108;
+    /* 0x108 */ SVECTOR* f108;
     /* 0x10C */ s32 f10C;
     /* 0x110 */ ContrailPt* f110;
     /* 0x114 */ s32 numPts;
