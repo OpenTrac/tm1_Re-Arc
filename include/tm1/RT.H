@@ -36,10 +36,10 @@ extern Db rdb[2]; /* 0x80194E10 */
 
 extern u8 gDoubleBuffers[]; /* 0x801B74D0, 0x16BC0 */
 extern u8 D_801CE090[]; /* 0x801CE090, 0x16BC0 -- the 2nd draw area */
-extern u_long D_801E4C50[]; /* 0x801E4C50, 0x4000  -- small area 0 */
-extern u_long D_801E8C50[]; /* 0x801E8C50, 0x4000  -- small area 1 */
-extern u_long D_801ECC50[]; /* 0x801ECC50, 0x4000  -- split/rear small 0 */
-extern u_long D_801F0C50[]; /* 0x801F0C50, 0x4000  -- split/rear small 1 */
+extern u_long D_801E4C50[]; /* 0x801E4C50, 0x4000  -- ordering table 0 */
+extern u_long D_801E8C50[]; /* 0x801E8C50, 0x4000  -- ordering table 1 */
+extern u_long D_801ECC50[]; /* 0x801ECC50, 0x4000  -- split/rear ordering table 0 */
+extern u_long D_801F0C50[]; /* 0x801F0C50, 0x4000  -- split/rear ordering table 1 */
 
 /* gp-relative small globals OWNED by this TU */
 extern s32 D_8018BF18; /* gp+20   numPendingReturns */

@@ -36,7 +36,7 @@ void csUpdMat(Cs* cs, MATRIX* out)
     SetRotMatrix(&cs->parent->wmat);
     SetTransMatrix(&cs->parent->wmat);
     MulRotMatrix0(&tm, &cs->wmat);
-    mathMulVecLong(&cs->wmat, &cs->wpos, cs->wmat.t);
+    mathMulVecLong(&cs->wmat, &cs->wpos, (VECTOR3*)cs->wmat.t);
     SetRotMatrix(&cs->mat);
     SetTransMatrix(&cs->mat);
     MulRotMatrix0(&cs->parent->mat3, &cs->mat3);
@@ -105,7 +105,7 @@ Cs* csCreate(void)
     return NULL;
 }
 
-void csSetEpNode(Cs* cs, void* node)
+void csSetEpNode(Cs* cs, DbNode* node)
 {
     cs->epNode = node;
 }

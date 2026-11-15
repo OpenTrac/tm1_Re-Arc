@@ -50,7 +50,8 @@ void explodeStoreContrailAnimation(void* data);
 void explodeStoreFlareAnimation(void* data);
 void explodeStorePlasmaAnimation(void* data);
 void explodeLoadFragTexture(s32 id, DbObject* data);
-void explodeCreateFragments(s32 count, VECTOR* pos);
+void explodeCreateFragments(s32 count, VECTOR3* pos);
+void explodeUpdateFragments(void);
 ArmorIconInfo* explodeGetArmorIcon(void);
 
 Explosion* init_explosion(VECTOR3* pos, s32 a1, s32 a2, s32 a3, void* frames, u16 flag);

@@ -14,7 +14,7 @@
 typedef struct HierEnt {
     /* 0x00 */ DbNode* node;
     /* 0x04 */ s32 matIdx;
-    /* 0x08 */ s32 pos[3];
+    /* 0x08 */ VECTOR3 pos;
     /* 0x14 */ s32 eoCnt;
 } HierEnt; /* 0x18 */
 
@@ -27,7 +27,7 @@ typedef struct MatInfo {
 
 typedef struct ObjRec {
     /* 0x00 */ DbObject* node;
-    /* 0x04 */ s32 pos[3];
+    /* 0x04 */ VECTOR3 pos;
     /* 0x10 */ s32 unk10;
     /* 0x14 */ Cs* cs;
     /* 0x18 */ s32 matIdx;
@@ -43,13 +43,13 @@ extern MATRIX lightList[];
 extern MATRIX fovNorms1[];
 extern MATRIX fovNorms2[];
 
-void hierPush(DbNode* node, s32 mat, s32* pos, s32 eo);
+void hierPush(DbNode* node, s32 mat, VECTOR3* pos, s32 eo);
 s32 hierPop(HierEnt** out);
 void hierTraverse(Cs* cs, DbNode* node);
-s32 hierIsInFov(VECTOR* ofs, s32 dist, VECTOR* pos, MATRIX* fov0, MATRIX* fov1);
+s32 hierIsInFov(VECTOR3* ofs, s32 dist, VECTOR3* pos, MATRIX* fov0, MATRIX* fov1);
 void hierLod(DbLod* n, HierEnt* e);
-void hierCtrlNode(HierEnt* unused, HierEnt* e);
-s32 hierInBox(HdBox* b, VECTOR* pos);
+void hierCtrlNode(DbNode* unused, HierEnt* e);
+s32 hierInBox(HdBox* b, VECTOR3* pos);
 void hierAnimate(DbAnim* a);
 void hierAnimateBiDirect(DbAnim* a);
 void hierSetWorldEP(s32 ep);

@@ -13,9 +13,9 @@ HdpEnt* fastHdpStack = (HdpEnt*)0x1F800000;
 static HdpEnt* hdpStack;
 static s32 hdp_stackIdx;
 
-void hdpPush(DbNode* node, s32* pos, s32 id0, s32 id1);
+void hdpPush(DbNode* node, VECTOR3* pos, s32 id0, s32 id1);
 #ifdef NON_MATCHING
-void hdpPush(DbNode* node, s32* pos, s32 id0, s32 id1)
+void hdpPush(DbNode* node, VECTOR3* pos, s32 id0, s32 id1)
 {
     HdpEnt* base;
     s32 i = hdp_stackIdx;
@@ -28,9 +28,9 @@ void hdpPush(DbNode* node, s32* pos, s32 id0, s32 id1)
         }
     } while (0);
     base[i].node = node;
-    base[i].pos[0] = pos[0];
-    base[i].pos[1] = pos[1];
-    base[i].pos[2] = pos[2];
+    base[i].pos.vx = pos->vx;
+    base[i].pos.vy = pos->vy;
+    base[i].pos.vz = pos->vz;
     base[i].id0 = id0;
     base[i].id1 = id1;
     if (hdp_stackIdx < 200) {
@@ -71,17 +71,17 @@ void hdpSetNodeIds(s16* p0, s16* p1, HdpEnt* n, s16 id0, s16 id1)
     }
 }
 
-s32 hdpIsPtInSphere(s32* p, s32 rad, s32* c)
+s32 hdpIsPtInSphere(VECTOR3* p, s32 rad, VECTOR3* c)
 {
-    s32 d[3];
+    VECTOR3 d;
     s32 dist;
 
     if (rad <= 0xB504) {
 
-        d[0] = (s32)((u32)p[0] - (u32)c[0]);
-        d[1] = (s32)((u32)p[1] - (u32)c[1]);
-        d[2] = (s32)((u32)p[2] - (u32)c[2]);
-        dist = (s32)((u32)d[0] * (u32)d[0] + (u32)d[1] * (u32)d[1] + (u32)d[2] * (u32)d[2]);
+        d.vx = (s32)((u32)p->vx - (u32)c->vx);
+        d.vy = (s32)((u32)p->vy - (u32)c->vy);
+        d.vz = (s32)((u32)p->vz - (u32)c->vz);
+        dist = (s32)((u32)d.vx * (u32)d.vx + (u32)d.vy * (u32)d.vy + (u32)d.vz * (u32)d.vz);
         if (dist < 0 || dist >= (s32)((u32)rad * (u32)rad)) {
             return 0;
         }
@@ -91,7 +91,7 @@ s32 hdpIsPtInSphere(s32* p, s32 rad, s32* c)
 }
 
 #ifdef NON_MATCHING
-void hdpTraverse(Cs* cs, s32* pt, HdCsHit* res)
+void hdpTraverse(Cs* cs, VECTOR3* pt, HdCsHit* res)
 {
     HdpEnt* e;
     s16 id0;
@@ -119,10 +119,10 @@ push:
             if (n->skip == 1) {
                 break;
             }
-            if (hdpIsPtInSphere(n->center, n->radius, e->pos) == 0) {
+            if (hdpIsPtInSphere(&n->center, n->radius, &e->pos) == 0) {
                 break;
             }
-            res->depth = hdpPntBox(&n->box, (VECTOR*)e->pos, &res->hit, 0);
+            res->depth = hdpPntBox(&n->box, &e->pos, &res->hit, 0);
             if (res->hit == 0) {
                 break;
             }
@@ -132,7 +132,7 @@ push:
         case 7: {
             DbBox* n = &e->node->box;
 
-            res->depth = hdpPntBox(&n->box, (VECTOR*)e->pos, &res->hit, n->code == -2);
+            res->depth = hdpPntBox(&n->box, &e->pos, &res->hit, n->code == -2);
             if (res->hit == 0) {
                 break;
             }
@@ -142,7 +142,7 @@ push:
         case 8: {
             DbVolume* n = &e->node->vol;
 
-            res->depth = hdpPntVolume(n, (VECTOR*)e->pos, res, n->code == -2);
+            res->depth = hdpPntVolume(n, &e->pos, res, n->code == -2);
             if (res->hit == 0) {
                 break;
             }
@@ -157,7 +157,7 @@ push:
             if (n->flags & 1) {
                 break;
             }
-            if (hdpIsPtInSphere(n->center, n->radius, e->pos) == 0) {
+            if (hdpIsPtInSphere(&n->center, n->radius, &e->pos) == 0) {
                 break;
             }
             hdpSetNodeIds(&id0, &id1, e, n->kind, n->sub);
@@ -165,7 +165,7 @@ push:
             i = 0;
             if (cnt != 0) {
                 do {
-                    hdpPush(n->child[i], e->pos, id0, id1);
+                    hdpPush(n->child[i], &e->pos, id0, id1);
                     i++;
                 } while (i < cnt);
             }
@@ -181,12 +181,12 @@ push:
             if (n->flags & 1) {
                 break;
             }
-            e->pos[0] = e->pos[0] - n->ofs[0];
-            e->pos[1] = e->pos[1] - n->ofs[1];
-            e->pos[2] = e->pos[2] - n->ofs[2];
+            e->pos.vx = e->pos.vx - n->ofs.vx;
+            e->pos.vy = e->pos.vy - n->ofs.vy;
+            e->pos.vz = e->pos.vz - n->ofs.vz;
             hdpSetNodeIds(&id0, &id1, e, n->kind, n->sub);
             for (i = 0; i < n->nChild; i++) {
-                hdpPush(n->child[i], e->pos, id0, id1);
+                hdpPush(n->child[i], &e->pos, id0, id1);
             }
             break;
         }
@@ -199,16 +199,16 @@ push:
             if (n->flags & 1) {
                 break;
             }
-            e->pos[0] = e->pos[0] - n->mat.t[0];
-            e->pos[1] = e->pos[1] - n->mat.t[1];
-            e->pos[2] = e->pos[2] - n->mat.t[2];
-            v.vx = e->pos[0];
-            v.vy = e->pos[1];
-            v.vz = e->pos[2];
-            mathMulVec(&n->mat, &v, e->pos);
+            e->pos.vx = e->pos.vx - n->mat.t[0];
+            e->pos.vy = e->pos.vy - n->mat.t[1];
+            e->pos.vz = e->pos.vz - n->mat.t[2];
+            v.vx = e->pos.vx;
+            v.vy = e->pos.vy;
+            v.vz = e->pos.vz;
+            mathMulVec(&n->mat, &v, &e->pos);
             hdpSetNodeIds(&id0, &id1, e, n->kind, n->sub);
             for (i = 0; i < n->nChild; i++) {
-                hdpPush(n->child[i], e->pos, id0, id1);
+                hdpPush(n->child[i], &e->pos, id0, id1);
             }
             break;
         }
@@ -219,7 +219,7 @@ push:
             t0 = id0;
             t1 = id1;
             node = n->child[n->sel];
-            pos = e->pos;
+            pos = &e->pos;
             goto push;
         }
         case 3: {
@@ -229,7 +229,7 @@ push:
             t0 = id0;
             t1 = id1;
             node = n->child[n->cur];
-            pos = e->pos;
+            pos = &e->pos;
             goto push;
         }
         case 11: {
@@ -251,34 +251,34 @@ INCLUDE_ASM("asm/nonmatchings/tm1/HDP", hdpTraverse);
 
 void hdpLod(DbLod* n, HdpEnt* e)
 {
-    s32 d[3];
+    VECTOR3 d;
     u32 dist;
     s32 i;
     s32 go;
 
-    d[0] = n->center[0] - e->pos[0];
-    d[1] = n->center[1] - e->pos[1];
-    d[2] = n->center[2] - e->pos[2];
-    d[0] = d[0] >> 3;
-    d[1] = d[1] >> 3;
-    d[2] = d[2] >> 3;
-    dist = (d[0] * d[0]) + (d[1] * d[1]) + (d[2] * d[2]);
+    d.vx = n->center.vx - e->pos.vx;
+    d.vy = n->center.vy - e->pos.vy;
+    d.vz = n->center.vz - e->pos.vz;
+    d.vx = d.vx >> 3;
+    d.vy = d.vy >> 3;
+    d.vz = d.vz >> 3;
+    dist = (d.vx * d.vx) + (d.vy * d.vy) + (d.vz * d.vz);
     go = 1;
     for (i = 0; i < n->nRec; i++) {
         if (go == 0) {
             break;
         }
         if (dist >= n->rec[i]->near && dist < n->rec[i]->far) {
-            hdpPush(n->rec[i]->child, e->pos, e->id0, e->id1);
+            hdpPush(n->rec[i]->child, &e->pos, e->id0, e->id1);
             go = 0;
         }
     }
 }
 
-s32 hdpPntBox(HdBox* b, VECTOR* pos, s32* hit, s32 mode)
+s32 hdpPntBox(HdBox* b, VECTOR3* pos, s32* hit, s32 mode)
 {
-    VECTOR p;
-    VECTOR d;
+    VECTOR3 p;
+    VECTOR3 d;
 
     mathMulVec(&b->mat, pos, &p);
     d.vx = b->lo.vx + p.vx;
@@ -298,9 +298,9 @@ s32 hdpPntBox(HdBox* b, VECTOR* pos, s32* hit, s32 mode)
     return *hit == 1;
 }
 
-s32 hdpPntVolume(DbVolume* n, VECTOR* pos, HdCsHit* res, s32 mode)
+s32 hdpPntVolume(DbVolume* n, VECTOR3* pos, HdCsHit* res, s32 mode)
 {
-    VECTOR p;
+    VECTOR3 p;
 
     mathMulVec(&n->mat0, pos, &p);
     if (n->d0.vx + p.vx > 0 && n->d0.vy + p.vy > 0 && n->d0.vz + p.vz > 0) {
@@ -334,7 +334,7 @@ void hdpCtrlNode(HdpEnt* e, s16 id0, s16 id1)
     i = 0;
     ok = 1;
     while (i < n->nBox) {
-        if (hdpInCtrlBox(n->box[i], (VECTOR*)e->pos) != 0) {
+        if (hdpInCtrlBox(n->box[i], &e->pos) != 0) {
             ok = 0;
         }
         i++;
@@ -344,11 +344,11 @@ void hdpCtrlNode(HdpEnt* e, s16 id0, s16 id1)
     }
     if (ok != 0) {
         if (n->childOut != 0) {
-            hdpPush(n->childOut, e->pos, id0, id1);
+            hdpPush(n->childOut, &e->pos, id0, id1);
         }
     } else {
         if (n->childIn != 0) {
-            hdpPush(n->childIn, e->pos, id0, id1);
+            hdpPush(n->childIn, &e->pos, id0, id1);
         }
     }
 }
@@ -357,7 +357,7 @@ INCLUDE_ASM("asm/nonmatchings/tm1/HDP", hdpCtrlNode);
 #endif
 
 #ifdef NON_MATCHING
-s32 hdpInCtrlBox(HdBox* b, VECTOR* pos)
+s32 hdpInCtrlBox(HdBox* b, VECTOR3* pos)
 {
     VECTOR p;
     VECTOR d;
@@ -405,7 +405,7 @@ HdCsHit* HdPntTest(s32 skip0, s32 skip1, VECTOR3* pt, s32* hitId)
     *hitId = 0;
     cs = csGetWorldCs();
     if (cs->epNode != 0) {
-        hdpTraverse(cs, &pt->vx, &tmpResult);
+        hdpTraverse(cs, pt, &tmpResult);
         if (tmpResult.hit == 1) {
             *hitId = cs->unkC0;
         }
@@ -414,7 +414,7 @@ HdCsHit* HdPntTest(s32 skip0, s32 skip1, VECTOR3* pt, s32* hitId)
         for (cs = csGetCsList(); cs != NULL && *hitId == 0; cs = cs->next) {
             if (cs->drawMode != 0 && cs->unkC0 != skip0 && cs->unkC0 != skip1 && cs->unk0C != 0
                 && cs->unkC0 > 0 && cs->unkC0 < 80
-                && hdpIsPtInSphere(&cs->pos.vx, ((DbGroup*)cs->epNode)->radius, &pt->vx) != 0) {
+                && hdpIsPtInSphere(&cs->pos, cs->epNode->grp.radius, pt) != 0) {
                 *hitId = cs->unkC0;
             }
         }

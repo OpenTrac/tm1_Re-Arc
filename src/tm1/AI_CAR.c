@@ -131,12 +131,12 @@ void AICarUpdateClosestPlayer(AICar* car)
 
 void AICarUpdatePlayerRange(AICar* car)
 {
-    VECTOR pos;
+    VECTOR3 pos;
     u16 dead0;
     u16 dead1;
     PlayerCar* info;
 
-    GetPlayerPosition(car->unk0E, (VECTOR3*)&pos);
+    GetPlayerPosition(car->unk0E, &pos);
     pos.vx -= car->motion.pos.vx;
     pos.vy -= car->motion.pos.vy;
     car->unk34 = SquareRoot0((pos.vx * pos.vx) + (pos.vy * pos.vy));
@@ -208,8 +208,8 @@ void AICarUpdatePlayerRange(AICar* car)
 
 void AICarUpdateCurrPtRange(AICar* car)
 {
-    VECTOR v;
-    VECTOR out;
+    VECTOR3 v;
+    VECTOR3 out;
     VECTOR delta;
     u16 distance;
 
@@ -296,7 +296,7 @@ void AICarInitTransition(AICar* car)
         car->stats.unk22 = 0;
     }
     if (triggerPtGroups.count >= 2 && car->flags[0x0A] == 0 && car->unk34 >= 3201) {
-        d = abs(triggerPtGroups.pos[car->unk176].y - car->motion.pos.vz);
+        d = abs(triggerPtGroups.pos[car->unk176].vz - car->motion.pos.vz);
         if ((car->stats.unk6C * 2) < d) {
             car->stats.unk03 = 1;
             if (shellGetCurrentLevel() == LEVEL6_ROOFTOPS) {
@@ -668,12 +668,12 @@ void UpdateTurnStart(AICar* car)
 
 void AICarInitSwerve(AICar* car)
 {
-    VECTOR d;
+    VECTOR3 d;
     s32 v;
     s32 amt;
 
     car->unk204 = car->bearing;
-    CalcDistFromRoadCenter(car, (s32*)&d.vx, 1);
+    CalcDistFromRoadCenter(car, &d, 1);
     car->unk161 = 1;
     if (car->unk204 == 0) {
         car->unk188 = d.vx - car->unk186;
@@ -723,10 +723,10 @@ void AICarInitSwerve(AICar* car)
 
 void AICarUpdateSwerve(AICar* car)
 {
-    VECTOR d;
+    VECTOR3 d;
     s32 v;
 
-    CalcDistFromRoadCenter(car, (s32*)&d.vx, 1);
+    CalcDistFromRoadCenter(car, &d, 1);
     if (car->unk163 == 0) {
         if (car->unk204 == 0) {
             if (car->unk162 != 0) {
@@ -1056,8 +1056,8 @@ INCLUDE_ASM("asm/nonmatchings/tm1/AI_CAR", BringBackAICarInCollision);
 void AICarHeliUpdate(AICar* car)
 {
     PlayerCar* info;
-    VECTOR v;
-    VECTOR out;
+    VECTOR3 v;
+    VECTOR3 out;
     VECTOR w;
     s32 speed;
     s32 t;

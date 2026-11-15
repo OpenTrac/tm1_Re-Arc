@@ -3,12 +3,14 @@
 
 #include "common.h"
 
+#include "tm1/MATH.H"
+
 // TODO: Once we understand the trigger point system more, add
 // well-defined constants for the array sizes in these structs.
 
 typedef struct TriggerPt {
-    /*0x00*/ s32 x;
-    /*0x04*/ s32 z;
+    /*0x00*/ s32 vx;
+    /*0x04*/ s32 vy;
     /*0x08*/ s16 f08;
     /*0x0A*/ s16 link[4];
     /*0x12*/ s16 dist[4];
@@ -16,18 +18,12 @@ typedef struct TriggerPt {
     /*0x1B*/ s8 type;
 } TriggerPt;
 
-typedef struct GroupPos {
-    /*0x00*/ s32 x;
-    /*0x04*/ s32 z;
-    /*0x08*/ s32 y;
-} GroupPos;
-
 typedef struct TriggerPtGroups {
     /*0x000*/ s16 count;
     /*0x002*/ s16 a[14][14];
     /*0x18A*/ s16 b[14][14];
     /*0x312*/ u16 minSpeed[14][14];
-    /*0x49C*/ GroupPos pos[14];
+    /*0x49C*/ VECTOR3 pos[14];
     /*0x544*/ s32 w[14];
     /*0x57C*/ s32 d[14];
 } TriggerPtGroups;

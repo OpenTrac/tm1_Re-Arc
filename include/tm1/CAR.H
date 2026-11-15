@@ -141,7 +141,7 @@ typedef struct CarStats {
     /*0x00A*/ u8 cheatB;
     /*0x00B*/ u8 cheatBArmed;
     /*0x00C*/ s16 cheatTimer;
-    /*0x00E*/ u16 colorId;
+    /*0x00E*/ u16 nVisibleChild;
     /*0x010*/ s16 updateRate;
     /*0x012*/ s16 blasts;
     /*0x014*/ s16 unk14;

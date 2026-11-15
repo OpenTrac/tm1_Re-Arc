@@ -3,7 +3,9 @@
 
 #include "common.h"
 
-void BoundVector(s32* v);
+#include "tm1/MATH.H"
+
+void BoundVector(VECTOR3* v);
 void BoundSVector(u16* v);
 void BoundAngle(s32* a);
 void BoundSAngle(u16* a);

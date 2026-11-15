@@ -10,13 +10,6 @@ typedef struct HitLight {
     /* 0x04 */ Cs* node;
 } HitLight; /* 0x08 */
 
-/* The {u1, v1, tpage} word of a textured quad primitive. */
-typedef struct UVWord {
-    /* 0x00 */ u8 u;
-    /* 0x01 */ u8 v;
-    /* 0x02 */ u16 page;
-} UVWord; /* 0x04 */
-
 void UAeffectInit(void);
 void UAeffectUpdateMonsterTruckWheels(s32 speed);
 void UAeffectUpdateTVs(void);

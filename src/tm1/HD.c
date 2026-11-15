@@ -10,7 +10,7 @@
 #include "tm1/HDP.H"
 
 HdEnt* fastHdStack = (HdEnt*)0x1F800000;
-s32* hdCsOtherPos = NULL;
+VECTOR3* hdCsOtherPos = NULL;
 MATRIX* hdCsOtherMat = NULL;
 Cs* hdCsSelf = NULL;
 
@@ -21,7 +21,7 @@ static s32 matCnt;
 static MATRIX* matPtrs[70];
 static s32 worldToTp[9][3];
 
-void hdPush(DbNode* node, s32* v, s32 matIdx, s32 id0, s16 id1)
+void hdPush(DbNode* node, VECTOR3* v, s32 matIdx, s32 id0, s16 id1)
 {
     HdEnt* e;
     HdEnt* base;
@@ -39,9 +39,9 @@ void hdPush(DbNode* node, s32* v, s32 matIdx, s32 id0, s16 id1)
     }
     e = (HdEnt*)(idx * (s32)sizeof(HdEnt) + (s32)base);
     e->node = node;
-    e->v[0] = v[0];
-    e->v[1] = v[1];
-    e->v[2] = v[2];
+    e->v.vx = v->vx;
+    e->v.vy = v->vy;
+    e->v.vz = v->vz;
     do {
         e->matIdx = matIdx;
         e->id0 = id0;
@@ -82,7 +82,7 @@ void hdSetNodeIds(s16* out0, s16* out1, HdEnt* e, s16 id0, s16 id1)
     }
 }
 
-s32 hdIsPtInSphere(VECTOR* pt, s32 radius, VECTOR* centre, s32 slack)
+s32 hdIsPtInSphere(VECTOR3* pt, s32 radius, VECTOR3* centre, s32 slack)
 {
     u32 d[3];
     u32 dist;
@@ -101,13 +101,13 @@ s32 hdIsPtInSphere(VECTOR* pt, s32 radius, VECTOR* centre, s32 slack)
 }
 
 #ifdef NON_MATCHING
-void hdTraverse(Cs* cs, s32* pt, HdCsHit* res, s32 slack)
+void hdTraverse(Cs* cs, VECTOR3* pt, HdCsHit* res, s32 slack)
 {
     HdEnt* e;
     s16 id0;
     s16 id1;
     DbNode* node;
-    s32* pos;
+    VECTOR3* pos;
     s32 t0;
     s32 t1;
     s32 matIdx;
@@ -130,10 +130,10 @@ push:
             if (n->skip == 1) {
                 break;
             }
-            if (hdIsPtInSphere((VECTOR*)n->center, n->radius, (VECTOR*)e->v, slack) == 0) {
+            if (hdIsPtInSphere(&n->center, n->radius, &e->v, slack) == 0) {
                 break;
             }
-            res->depth = hdPntBox(&n->box, (VECTOR*)e->v, res, e->matIdx);
+            res->depth = hdPntBox(&n->box, &e->v, res, e->matIdx);
             if (res->hit == 0) {
                 break;
             }
@@ -144,9 +144,9 @@ push:
             DbBox* n = &e->node->box;
 
             if (n->code == -2) {
-                r = hdpPntBox(&n->box, (VECTOR*)e->v, &res->hit, 1);
+                r = hdpPntBox(&n->box, &e->v, &res->hit, 1);
             } else {
-                r = hdPntBox(&n->box, (VECTOR*)e->v, res, e->matIdx);
+                r = hdPntBox(&n->box, &e->v, res, e->matIdx);
             }
             res->depth = r;
             if (res->hit == 0) {
@@ -159,9 +159,9 @@ push:
             DbVolume* n = &e->node->vol;
 
             if (n->code == -2) {
-                r = hdpPntVolume(n, (VECTOR*)e->v, res, 1);
+                r = hdpPntVolume(n, &e->v, res, 1);
             } else {
-                r = hdPntVolume(n, (VECTOR*)e->v, res, e->matIdx);
+                r = hdPntVolume(n, &e->v, res, e->matIdx);
             }
             res->depth = r;
             if (res->hit == 0) {
@@ -179,7 +179,7 @@ push:
                 break;
             }
             if (!(n->flags & 4)) {
-                if (hdIsPtInSphere((VECTOR*)n->center, n->radius, (VECTOR*)e->v, slack) == 0) {
+                if (hdIsPtInSphere(&n->center, n->radius, &e->v, slack) == 0) {
                     break;
                 }
             }
@@ -188,7 +188,7 @@ push:
             hdSetNodeIds(&id0, &id1, e, n->kind, n->sub);
             if (cnt != 0) {
                 while (1) {
-                    hdPush(n->child[i], e->v, e->matIdx, id0, id1);
+                    hdPush(n->child[i], &e->v, e->matIdx, id0, id1);
                     i++;
                     if (i >= cnt) {
                         break;
@@ -207,12 +207,12 @@ push:
             if (n->flags & 1) {
                 break;
             }
-            e->v[0] = e->v[0] - n->ofs[0];
-            e->v[1] = e->v[1] - n->ofs[1];
-            e->v[2] = e->v[2] - n->ofs[2];
+            e->v.vx = e->v.vx - n->ofs.vx;
+            e->v.vy = e->v.vy - n->ofs.vy;
+            e->v.vz = e->v.vz - n->ofs.vz;
             hdSetNodeIds(&id0, &id1, e, n->kind, n->sub);
             for (i = 0; i < n->nChild; i++) {
-                hdPush(n->child[i], e->v, e->matIdx, id0, id1);
+                hdPush(n->child[i], &e->v, e->matIdx, id0, id1);
             }
             break;
         }
@@ -225,18 +225,18 @@ push:
             if (n->flags & 1) {
                 break;
             }
-            e->v[0] = e->v[0] - n->mat.t[0];
-            e->v[1] = e->v[1] - n->mat.t[1];
-            e->v[2] = e->v[2] - n->mat.t[2];
-            v.vx = e->v[0];
-            v.vy = e->v[1];
-            v.vz = e->v[2];
-            mathMulVec(&n->mat, &v, e->v);
+            e->v.vx = e->v.vx - n->mat.t[0];
+            e->v.vy = e->v.vy - n->mat.t[1];
+            e->v.vz = e->v.vz - n->mat.t[2];
+            v.vx = e->v.vx;
+            v.vy = e->v.vy;
+            v.vz = e->v.vz;
+            mathMulVec(&n->mat, &v, &e->v);
             matPtrs[e->matIdx] = &n->mat;
             e->matIdx = e->matIdx + 1;
             hdSetNodeIds(&id0, &id1, e, n->kind, n->sub);
             for (i = 0; i < n->nChild; i++) {
-                hdPush(n->child[i], e->v, e->matIdx, id0, id1);
+                hdPush(n->child[i], &e->v, e->matIdx, id0, id1);
             }
             break;
         }
@@ -248,7 +248,7 @@ push:
             t1 = id1;
             node = n->child[n->sel];
             matIdx = e->matIdx;
-            pos = e->v;
+            pos = &e->v;
             goto push;
         }
         case 3: {
@@ -259,7 +259,7 @@ push:
             t1 = id1;
             node = n->child[n->cur];
             matIdx = e->matIdx;
-            pos = e->v;
+            pos = &e->v;
             goto push;
         }
         case 11: {
@@ -283,26 +283,26 @@ INCLUDE_ASM("asm/nonmatchings/tm1/HD", hdTraverse);
 #ifdef NON_MATCHING
 void hdLod(DbLod* node, HdEnt* e)
 {
-    s32 d[3];
+    VECTOR3 d;
     u32 dist;
     s32 i;
     s32 more;
 
-    d[0] = node->center[0] - e->v[0];
-    d[1] = node->center[1] - e->v[1];
-    d[2] = node->center[2] - e->v[2];
-    d[0] = d[0] >> 3;
-    d[1] = d[1] >> 3;
-    d[2] = d[2] >> 3;
+    d.vx = node->center.vx - e->v.vx;
+    d.vy = node->center.vy - e->v.vy;
+    d.vz = node->center.vz - e->v.vz;
+    d.vx = d.vx >> 3;
+    d.vy = d.vy >> 3;
+    d.vz = d.vz >> 3;
     more = 1;
     i = 0;
-    dist = d[0] * d[0] + d[1] * d[1] + d[2] * d[2];
+    dist = d.vx * d.vx + d.vy * d.vy + d.vz * d.vz;
     for (i = 0; i < node->nRec; i++) {
         if (more == 0) {
             break;
         }
         if (dist >= node->rec[i]->near && dist < node->rec[i]->far) {
-            hdPush(node->rec[i]->child, e->v, e->matIdx, e->id0, e->id1);
+            hdPush(node->rec[i]->child, &e->v, e->matIdx, e->id0, e->id1);
             more = 0;
         }
     }
@@ -312,7 +312,7 @@ INCLUDE_ASM("asm/nonmatchings/tm1/HD", hdLod);
 #endif
 
 #ifdef NON_MATCHING
-s32 hdPntBox(HdBox* b, VECTOR* pos, HdCsHit* res, s32 matIdx)
+s32 hdPntBox(HdBox* b, VECTOR3* pos, HdCsHit* res, s32 matIdx)
 {
     VECTOR out;
     s32 d0[6];
@@ -385,9 +385,9 @@ s32 hdPntBox(HdBox* b, VECTOR* pos, HdCsHit* res, s32 matIdx)
     }
     k = res->histIdx;
     mathMulTransVecShort(hdCsOtherMat, &hdCsSelf->hist[k], &w);
-    w.vx = w.vx + hdCsOtherPos[0];
-    w.vy = w.vy + hdCsOtherPos[1];
-    w.vz = w.vz + hdCsOtherPos[2];
+    w.vx = w.vx + hdCsOtherPos->vx;
+    w.vy = w.vy + hdCsOtherPos->vy;
+    w.vz = w.vz + hdCsOtherPos->vz;
     q.vx = w.vx - worldToTp[k][0];
     q.vy = w.vy - worldToTp[k][1];
     j = 0;
@@ -470,7 +470,7 @@ INCLUDE_ASM("asm/nonmatchings/tm1/HD", hdPntBox);
 #endif
 
 #ifdef NON_MATCHING
-s32 hdPntVolume(DbVolume* n, VECTOR* pos, HdCsHit* res, s32 matIdx)
+s32 hdPntVolume(DbVolume* n, VECTOR3* pos, HdCsHit* res, s32 matIdx)
 {
     VECTOR o0;
     VECTOR o1;
@@ -572,9 +572,9 @@ s32 hdPntVolume(DbVolume* n, VECTOR* pos, HdCsHit* res, s32 matIdx)
     }
     k = res->histIdx;
     mathMulTransVecShort(hdCsOtherMat, &hdCsSelf->hist[k], &w);
-    w.vx = w.vx + hdCsOtherPos[0];
-    w.vy = w.vy + hdCsOtherPos[1];
-    w.vz = w.vz + hdCsOtherPos[2];
+    w.vx = w.vx + hdCsOtherPos->vx;
+    w.vy = w.vy + hdCsOtherPos->vy;
+    w.vz = w.vz + hdCsOtherPos->vz;
     q.vx = w.vx - worldToTp[k][0];
     q.vy = w.vy - worldToTp[k][1];
     j = 0;
@@ -670,7 +670,7 @@ void hdCtrlNode(HdEnt* e, s16 id0, s16 id1)
     i = 0;
     in = 1;
     while (i < node->nBox) {
-        if (hdInCtrlBox(node->box[i], e->v) != 0) {
+        if (hdInCtrlBox(node->box[i], &e->v) != 0) {
             in = 0;
         }
         i++;
@@ -680,11 +680,11 @@ void hdCtrlNode(HdEnt* e, s16 id0, s16 id1)
     }
     if (in != 0) {
         if (node->childOut != 0) {
-            hdPush(node->childOut, e->v, e->matIdx, id0, id1);
+            hdPush(node->childOut, &e->v, e->matIdx, id0, id1);
         }
     } else {
         if (node->childIn != 0) {
-            hdPush(node->childIn, e->v, e->matIdx, id0, id1);
+            hdPush(node->childIn, &e->v, e->matIdx, id0, id1);
         }
     }
 }
@@ -693,21 +693,21 @@ INCLUDE_ASM("asm/nonmatchings/tm1/HD", hdCtrlNode);
 #endif
 
 #ifdef NON_MATCHING
-s32 hdInCtrlBox(HdBox* box, s32* pt)
+s32 hdInCtrlBox(HdBox* box, VECTOR3* pt)
 {
     VECTOR r;
-    s32 q[3];
+    VECTOR3 q;
     s32 res;
 
     mathMulVec(&box->mat, pt, &r);
     res = 0;
-    q[2] = box->lo.vz + r.vz;
-    if (q[2] >= 0) {
-        q[1] = box->lo.vy + r.vy;
-        if (q[1] >= 0) {
-            q[0] = box->lo.vx + r.vx;
-            if (q[0] >= 0 && (box->hi.vx - q[0]) >= 0 && (box->hi.vy - q[1]) >= 0) {
-                res = (box->hi.vz - q[2]) >= 0;
+    q.vz = box->lo.vz + r.vz;
+    if (q.vz >= 0) {
+        q.vy = box->lo.vy + r.vy;
+        if (q.vy >= 0) {
+            q.vx = box->lo.vx + r.vx;
+            if (q.vx >= 0 && (box->hi.vx - q.vx) >= 0 && (box->hi.vy - q.vy) >= 0) {
+                res = (box->hi.vz - q.vz) >= 0;
             }
         }
     }
@@ -729,10 +729,10 @@ void hdSetHitTag(HdCsHit* hit, s16 id0, s16 id1, HdEnt* e)
 }
 
 #ifdef NON_MATCHING
-void HdCsTest(Cs* cs, HdCsHit* hit, s32 doWorld, MATRIX* otherMat, s32* otherPos)
+void HdCsTest(Cs* cs, HdCsHit* hit, s32 doWorld, MATRIX* otherMat, VECTOR3* otherPos)
 {
     VECTOR delta;
-    VECTOR local;
+    VECTOR3 local;
     VECTOR tmp;
     Cs* p;
     s32 rad;
@@ -749,7 +749,7 @@ void HdCsTest(Cs* cs, HdCsHit* hit, s32 doWorld, MATRIX* otherMat, s32* otherPos
     hdCsOtherMat = otherMat;
     hdCsSelf = cs;
     hdCsOtherPos = otherPos;
-    info = cs->epNode;
+    info = &cs->epNode->grp;
     if (info == 0 || info->op != 1) {
         rad = 100;
     } else {
@@ -760,7 +760,7 @@ void HdCsTest(Cs* cs, HdCsHit* hit, s32 doWorld, MATRIX* otherMat, s32* otherPos
     if (p->epNode != NULL && doWorld != 0) {
         matCnt = 0;
         hit->obj = p;
-        hdTraverse(p, &cs->pos.vx, hit, rad);
+        hdTraverse(p, &cs->pos, hit, rad);
         if (hit->depth == -2) {
             hit->depth = 0;
         }
@@ -778,7 +778,7 @@ void HdCsTest(Cs* cs, HdCsHit* hit, s32 doWorld, MATRIX* otherMat, s32* otherPos
             matCnt = 1;
             delta.vz = cs->pos.vz - p->pos.vz;
             mathMulVec(&p->mat, &delta, &local);
-            hdTraverse(p, (s32*)&local, hit, rad);
+            hdTraverse(p, &local, hit, rad);
             if (hit->hit == 1) {
                 hit->obj = p;
             }

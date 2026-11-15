@@ -741,7 +741,7 @@ s32 findFreeFragment(void)
     return -1;
 }
 
-void explodeCreateFragments(s32 count, VECTOR* pos)
+void explodeCreateFragments(s32 count, VECTOR3* pos)
 {
     s32 i;
     s32 idx;
@@ -823,7 +823,7 @@ void explodeDisplayFragments(Db* cdb, s32 which)
     s32 vfov;
     VECTOR3* eye;
     MATRIX* mat;
-    u32* ot;
+    u_long* ot;
     s32 z;
     s32 sx;
     s32 sy;
@@ -834,10 +834,10 @@ void explodeDisplayFragments(Db* cdb, s32 which)
     s32 y1;
     s32 d;
     POLY_FT4* p;
-    s32 v[3];
-    s32 r[3];
+    VECTOR3 v;
+    VECTOR3 r;
 
-    ot = (u32*)cdb->ot;
+    ot = cdb->ot;
     viewGetCenter(which, &cx, &cy);
     hfov = viewGetCurrentHorzFOVH(which);
     vfov = viewGetCurrentVertFOVH(which);
@@ -846,18 +846,18 @@ void explodeDisplayFragments(Db* cdb, s32 which)
     for (i = 0; i < 20; i++) {
         if (fragment[i].lifetime > 0) {
             frame = fragment[i].frame;
-            v[0] = fragment[i].pos.vx + eye->vx;
-            v[1] = fragment[i].pos.vy + eye->vy;
-            v[2] = fragment[i].pos.vz + eye->vz;
-            mathMulVec(mat, v, r);
-            z = r[2];
+            v.vx = fragment[i].pos.vx + eye->vx;
+            v.vy = fragment[i].pos.vy + eye->vy;
+            v.vz = fragment[i].pos.vz + eye->vz;
+            mathMulVec(mat, &v, &r);
+            z = r.vz;
             if (z >= -32) {
                 if (z < 32001) {
                     if (z < 8) {
                         z = 8;
                     }
-                    sx = r[0] * hfov / z;
-                    sy = r[1] * vfov / z;
+                    sx = r.vx * hfov / z;
+                    sy = r.vy * vfov / z;
                     size = hfov * 10 / z;
                     z = z >> 3;
                     sx = cx + sx;

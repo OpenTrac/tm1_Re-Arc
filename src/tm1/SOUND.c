@@ -48,8 +48,8 @@ static s32 cdInterruptLoc;
 extern s16 D_8016FEFC[];
 
 // extern CdlLOC toc[100];
-extern s32 gSoundEyeSpaceLoc[3];
-extern s32 gSoundEyeToSoundLoc[3];
+extern VECTOR3 gSoundEyeSpaceLoc;
+extern VECTOR3 gSoundEyeToSoundLoc;
 extern u8 soundVoiceTable[24];
 extern SingleSound gSingleSounds[139];
 extern Tone gTonePool[35];
@@ -75,22 +75,22 @@ s32 soundGetCalculatedSoundRange()
 
 s32 soundGetCalculatedSoundXPosition()
 {
-    return gSoundEyeSpaceLoc[0];
+    return gSoundEyeSpaceLoc.vx;
 }
 
-void soundMulVec(MATRIX* m, s32* v, s32* out)
+void soundMulVec(MATRIX* m, VECTOR3* v, VECTOR3* out)
 {
-    s32 t[3];
+    VECTOR3 t;
 
-    t[0] = (v[0] < 3357) ? v[0] : 3357;
-    t[1] = (v[1] < 3357) ? v[1] : 3357;
-    t[2] = (v[2] < 3357) ? v[2] : 3357;
-    out[0] = ((t[0] * m->m[0][0]) / 8192) + ((t[1] * m->m[0][1]) / 8192)
-        + ((t[2] * m->m[0][2]) / 8192);
-    out[1] = ((t[0] * m->m[1][0]) / 8192) + ((t[1] * m->m[1][1]) / 8192)
-        + ((t[2] * m->m[1][2]) / 8192);
-    out[2] = ((t[0] * m->m[2][0]) / 8192) + ((t[1] * m->m[2][1]) / 8192)
-        + ((t[2] * m->m[2][2]) / 8192);
+    t.vx = (v->vx < 3357) ? v->vx : 3357;
+    t.vy = (v->vy < 3357) ? v->vy : 3357;
+    t.vz = (v->vz < 3357) ? v->vz : 3357;
+    out->vx = ((t.vx * m->m[0][0]) / 8192) + ((t.vy * m->m[0][1]) / 8192)
+        + ((t.vz * m->m[0][2]) / 8192);
+    out->vy = ((t.vx * m->m[1][0]) / 8192) + ((t.vy * m->m[1][1]) / 8192)
+        + ((t.vz * m->m[1][2]) / 8192);
+    out->vz = ((t.vx * m->m[2][0]) / 8192) + ((t.vy * m->m[2][1]) / 8192)
+        + ((t.vz * m->m[2][2]) / 8192);
 }
 
 void soundResetSoundEngine()
@@ -99,21 +99,21 @@ void soundResetSoundEngine()
 }
 
 #ifdef NON_MATCHING
-void soundSetRangeAndXPositionFromWorldLoc(s32* loc)
+void soundSetRangeAndXPositionFromWorldLoc(VECTOR3* loc)
 {
     Cs* cs;
     s32 range;
     s32 r;
 
     cs = csGetWorldCs();
-    gSoundEyeToSoundLoc[0] = loc[0] + cs->wpos.vx;
-    gSoundEyeToSoundLoc[1] = loc[1] + cs->wpos.vy;
+    gSoundEyeToSoundLoc.vx = loc->vx + cs->wpos.vx;
+    gSoundEyeToSoundLoc.vy = loc->vy + cs->wpos.vy;
     gSoundWorldCs = cs;
-    gSoundEyeToSoundLoc[2] = loc[2] + cs->wpos.vz;
-    soundMulVec(&csGetWorldCs()->wmat, gSoundEyeToSoundLoc, gSoundEyeSpaceLoc);
-    gSoundRange = gSoundEyeSpaceLoc[0] * gSoundEyeSpaceLoc[0];
-    gSoundRange = gSoundRange + gSoundEyeSpaceLoc[1] * gSoundEyeSpaceLoc[1];
-    gSoundRange = gSoundRange + gSoundEyeSpaceLoc[2] * gSoundEyeSpaceLoc[2];
+    gSoundEyeToSoundLoc.vz = loc->vz + cs->wpos.vz;
+    soundMulVec(&csGetWorldCs()->wmat, &gSoundEyeToSoundLoc, &gSoundEyeSpaceLoc);
+    gSoundRange = gSoundEyeSpaceLoc.vx * gSoundEyeSpaceLoc.vx;
+    gSoundRange = gSoundRange + gSoundEyeSpaceLoc.vy * gSoundEyeSpaceLoc.vy;
+    gSoundRange = gSoundRange + gSoundEyeSpaceLoc.vz * gSoundEyeSpaceLoc.vz;
     range = gSoundRange;
     if (range < 0) {
         range = 0;

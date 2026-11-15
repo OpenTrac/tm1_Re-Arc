@@ -29,7 +29,7 @@ char dbOlder[] = "older";
 char dbNewer[] = "newer";
 
 static DbNode* gHierNodes[250];
-static s32 location[250][3];
+static VECTOR3 location[250];
 
 #ifdef NON_MATCHING
 void dbInit(u32 tmsVersion)
@@ -77,7 +77,7 @@ void dbInit(u32 tmsVersion)
 INCLUDE_ASM("asm/nonmatchings/tm1/DB", dbInit);
 #endif
 
-Cs* dbInitCsForAModel(void* node)
+Cs* dbInitCsForAModel(DbNode* node)
 {
     Cs* cs;
 
@@ -90,25 +90,25 @@ Cs* dbInitCsForAModel(void* node)
 #ifdef NON_MATCHING
 void dbScanForInteractiveStuff(DbNode* group)
 {
-    s32 parentLoc[3];
-    s32 preRot[3];
+    VECTOR3 parentLoc;
+    VECTOR3 preRot;
     s32 parent;
     s32 sp;
     s32 kind;
-    s32* loc;
+    VECTOR3* loc;
     DbNode* node;
 
     parent = 0;
     sp = 1;
-    location[0][0] = 0;
-    location[0][1] = 0;
-    location[0][2] = 0;
+    location[0].vx = 0;
+    location[0].vy = 0;
+    location[0].vz = 0;
     gHierNodes[0] = group;
     do {
         sp = sp - 1;
         node = gHierNodes[sp];
         if (node != NULL) {
-            loc = location[sp];
+            loc = &location[sp];
             switch (node->h.op) {
             case 0:
                 kind = node->h.kind;
@@ -118,9 +118,9 @@ void dbScanForInteractiveStuff(DbNode* group)
                 kind = node->h.kind;
                 n = node->grp.nChild;
                 for (i = 0; i < n; i++) {
-                    location[sp][0] = loc[0];
-                    location[sp][1] = loc[1];
-                    location[sp][2] = loc[2];
+                    location[sp].vx = loc->vx;
+                    location[sp].vy = loc->vy;
+                    location[sp].vz = loc->vz;
                     gHierNodes[sp] = node->grp.child[i];
                     sp++;
                 }
@@ -131,9 +131,9 @@ void dbScanForInteractiveStuff(DbNode* group)
                 kind = node->h.kind;
                 n = node->lod.nRec;
                 for (i = 0; i < n; i++) {
-                    location[sp][0] = loc[0];
-                    location[sp][1] = loc[1];
-                    location[sp][2] = loc[2];
+                    location[sp].vx = loc->vx;
+                    location[sp].vy = loc->vy;
+                    location[sp].vz = loc->vz;
                     gHierNodes[sp] = node->lod.rec[i]->child;
                     sp++;
                 }
@@ -147,9 +147,9 @@ void dbScanForInteractiveStuff(DbNode* group)
                 }
                 n = node->anim.nChild;
                 for (i = 0; i < n; i++) {
-                    location[sp][0] = loc[0];
-                    location[sp][1] = loc[1];
-                    location[sp][2] = loc[2];
+                    location[sp].vx = loc->vx;
+                    location[sp].vy = loc->vy;
+                    location[sp].vz = loc->vz;
                     gHierNodes[sp] = node->anim.child[i];
                     sp++;
                 }
@@ -157,18 +157,18 @@ void dbScanForInteractiveStuff(DbNode* group)
             }
             case 4: {
                 s32 i, n;
-                loc[0] = loc[0] + node->trans.ofs[0];
-                loc[1] = loc[1] + node->trans.ofs[1];
-                loc[2] = loc[2] + node->trans.ofs[2];
-                parentLoc[0] = loc[0];
-                parentLoc[1] = loc[1];
-                parentLoc[2] = loc[2];
+                loc->vx = loc->vx + node->trans.ofs.vx;
+                loc->vy = loc->vy + node->trans.ofs.vy;
+                loc->vz = loc->vz + node->trans.ofs.vz;
+                parentLoc.vx = loc->vx;
+                parentLoc.vy = loc->vy;
+                parentLoc.vz = loc->vz;
                 kind = node->h.kind;
                 n = node->trans.nChild;
                 for (i = 0; i < n; i++) {
-                    location[sp][0] = loc[0];
-                    location[sp][1] = loc[1];
-                    location[sp][2] = loc[2];
+                    location[sp].vx = loc->vx;
+                    location[sp].vy = loc->vy;
+                    location[sp].vz = loc->vz;
                     gHierNodes[sp] = node->trans.child[i];
                     sp++;
                 }
@@ -177,21 +177,21 @@ void dbScanForInteractiveStuff(DbNode* group)
             case 5: {
                 s32 i, n;
                 kind = node->h.kind;
-                parentLoc[0] = loc[0];
-                parentLoc[1] = loc[1];
-                parentLoc[2] = loc[2];
-                loc[0] = loc[0] + node->rot.mat.t[0];
-                loc[1] = loc[1] + node->rot.mat.t[1];
-                loc[2] = loc[2] + node->rot.mat.t[2];
-                preRot[0] = loc[0];
-                preRot[1] = loc[1];
-                preRot[2] = loc[2];
-                mathMulVec(&node->rot.mat, preRot, loc);
+                parentLoc.vx = loc->vx;
+                parentLoc.vy = loc->vy;
+                parentLoc.vz = loc->vz;
+                loc->vx = loc->vx + node->rot.mat.t[0];
+                loc->vy = loc->vy + node->rot.mat.t[1];
+                loc->vz = loc->vz + node->rot.mat.t[2];
+                preRot.vx = loc->vx;
+                preRot.vy = loc->vy;
+                preRot.vz = loc->vz;
+                mathMulVec(&node->rot.mat, &preRot, loc);
                 n = node->rot.nChild;
                 for (i = 0; i < n; i++) {
-                    location[sp][0] = loc[0];
-                    location[sp][1] = loc[1];
-                    location[sp][2] = loc[2];
+                    location[sp].vx = loc->vx;
+                    location[sp].vy = loc->vy;
+                    location[sp].vz = loc->vz;
                     gHierNodes[sp] = node->rot.child[i];
                     sp++;
                 }
@@ -206,23 +206,23 @@ void dbScanForInteractiveStuff(DbNode* group)
                 s32 i;
                 kind = node->h.kind;
                 for (i = 0; i < node->sw.nChild; i++) {
-                    location[sp][0] = loc[0];
-                    location[sp][1] = loc[1];
-                    location[sp][2] = loc[2];
+                    location[sp].vx = loc->vx;
+                    location[sp].vy = loc->vy;
+                    location[sp].vz = loc->vz;
                     gHierNodes[sp] = node->sw.child[i];
                     sp++;
                 }
                 break;
             }
             case 11:
-                location[sp][0] = loc[0];
-                location[sp][1] = loc[1];
-                location[sp][2] = loc[2];
+                location[sp].vx = loc->vx;
+                location[sp].vy = loc->vy;
+                location[sp].vz = loc->vz;
                 gHierNodes[sp] = node->ctrl.childOut;
                 sp++;
-                location[sp][0] = loc[0];
-                location[sp][1] = loc[1];
-                location[sp][2] = loc[2];
+                location[sp].vx = loc->vx;
+                location[sp].vy = loc->vy;
+                location[sp].vz = loc->vz;
                 gHierNodes[sp] = node->ctrl.childIn;
                 sp++;
                 kind = node->h.kind;
@@ -233,7 +233,7 @@ void dbScanForInteractiveStuff(DbNode* group)
                 printf("Bad hierarchy opcode %d \n", node->h.op);
                 break;
             }
-            dbProcessInteractives(kind, node, loc, parent, parentLoc);
+            dbProcessInteractives(kind, node, loc, parent, &parentLoc);
         }
     } while (sp > 0);
 }
@@ -242,7 +242,7 @@ INCLUDE_ASM("asm/nonmatchings/tm1/DB", dbScanForInteractiveStuff);
 #endif
 
 #ifdef NON_MATCHING
-void dbProcessInteractives(s32 type, DbNode* node, s32* loc, s32 parent, s32* parentLoc)
+void dbProcessInteractives(s32 type, DbNode* node, VECTOR3* loc, s32 parent, VECTOR3* parentLoc)
 {
     switch (type) {
     case UA_UNK_3: {
@@ -361,7 +361,7 @@ void dbProcessInteractives(s32 type, DbNode* node, s32* loc, s32 parent, s32* pa
     case UA_UNK_1010:
     case UA_UNK_1017:
         uaswInitDbSwitch(node, type);
-        init_target(type, node->sw.sub, (VECTOR3*)loc);
+        init_target(type, node->sw.sub, loc);
         break;
     case UA_UNK_715:
     case UA_UNK_716:
@@ -374,7 +374,7 @@ void dbProcessInteractives(s32 type, DbNode* node, s32* loc, s32 parent, s32* pa
     case UA_UNK_1008:
     case UA_UNK_1015:
         uaswInitDbEditNumChildren(node, type);
-        init_target(type, node->grp.sub, (VECTOR3*)loc);
+        init_target(type, node->grp.sub, loc);
         break;
     case UA_BAZ_COP:
     case UA_HOVER_COP:
@@ -398,7 +398,7 @@ void dbProcessInteractives(s32 type, DbNode* node, s32* loc, s32 parent, s32* pa
     case UA_UNK_753:
     case UA_UNK_754:
     case UA_UNK_755:
-        setup_static_cop(&node->sw, (VECTOR3*)loc);
+        setup_static_cop(&node->sw, loc);
         break;
     case UA_HEALTH_STAND:
         set_health_stand(node->sw.sub, loc);

@@ -65,7 +65,7 @@ void clear_targets(void);
 void init_target(s32 type, s32 instance, VECTOR3* pos);
 Target* get_targets(void);
 s32 target_takehit(s32 type, s32 instance, s32 damage);
-void turnOnHoverCopSounds(s32* loc, u8 firing, u8 launching);
+void turnOnHoverCopSounds(VECTOR3* loc, u8 firing, u8 launching);
 void move_mercs(void);
 void merc_takehit(s32 which, s32 who);
 void init_merc(s32 which, DbNode* ep);

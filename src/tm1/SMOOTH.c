@@ -1,28 +1,30 @@
 #include "common.h"
 
+#include "tm1/SMOOTH.H"
+
 // TODO: Determine what's going on with some of these functions.
 // They appear to be thunked, but also jump into each other.
 
 #ifdef NON_MATCHING
-void BoundVector(s32* v)
+void BoundVector(VECTOR3* v)
 {
-    while (v[0] >= 2048) {
-        v[0] = v[0] - 4096;
+    while (v->vx >= 2048) {
+        v->vx = v->vx - 4096;
     }
-    while (v[0] < -2048) {
-        v[0] = v[0] + 4096;
+    while (v->vx < -2048) {
+        v->vx = v->vx + 4096;
     }
-    while (v[1] >= 2048) {
-        v[1] = v[1] - 4096;
+    while (v->vy >= 2048) {
+        v->vy = v->vy - 4096;
     }
-    while (v[1] < -2048) {
-        v[1] = v[1] + 4096;
+    while (v->vy < -2048) {
+        v->vy = v->vy + 4096;
     }
-    while (v[2] >= 2048) {
-        v[2] = v[2] - 4096;
+    while (v->vz >= 2048) {
+        v->vz = v->vz - 4096;
     }
-    while (v[2] < -2048) {
-        v[2] = v[2] + 4096;
+    while (v->vz < -2048) {
+        v->vz = v->vz + 4096;
     }
 }
 #else

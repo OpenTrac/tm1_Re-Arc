@@ -66,13 +66,13 @@ s16 GetNumBridges(void);
 s16 MakeFakePotHole(void);
 void UpdateNumPotHoles(void);
 TriggerPtStartPts* GetTriggerPtStartPts(void);
-void CalcDistFromRoadCenter(AICar* car, s32* out, u8 which);
+void CalcDistFromRoadCenter(AICar* car, VECTOR3* out, u8 which);
 void CheckMonsterSmash(Car* car, u8 isPlayer);
 void InitTriggerPoint(AICar* car);
 void UpdateCurrentTriggerPt(AICar* car);
 void CalcTurnStart(AICar* car, u8 which);
 void GetNextTriggerPoint(AICar* car, s16 pt);
 s16 GetClosestTriggerPointFromCurrPt(AICar* car, TriggerPt* tp, s16* dist);
-s16 GetLookAheadPos(AICar* car, s32* out);
+s16 GetLookAheadPos(AICar* car, VECTOR3* out);
 
 #endif // __TM1_CARUPD_H__

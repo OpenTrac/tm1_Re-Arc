@@ -571,8 +571,8 @@ void CarRotUpdate(Car* car, u8 isPlayer)
     m->rot2.vy += m->rot2Delta.vy;
     m->rot2.vz += m->rot2Delta.vz;
     BoundSAngle(&m->unk00);
-    BoundVector(&m->rot.vx);
-    BoundVector(&m->rot2.vx);
+    BoundVector(&m->rot);
+    BoundVector(&m->rot2);
     rot.vx = m->rot2.vx;
     rot.vy = m->rot2.vy;
     rot.vz = m->rot2.vz;
@@ -585,8 +585,8 @@ void CarRotUpdate(Car* car, u8 isPlayer)
 
 void CarTransUpdate(Car* car, u8 isPlayer)
 {
-    VECTOR v;
-    VECTOR out;
+    VECTOR3 v;
+    VECTOR3 out;
     CarMotion* m;
 
     if (isPlayer) {
@@ -1084,7 +1084,7 @@ void CheckHitDetection(Car* car, u8 isPlayer)
     cs->mat.t[1] = m->mat2.t[1];
     cs->mat.t[2] = m->mat2.t[2];
     hit.hit = 0;
-    HdCsTest(cs, &hit, 1, &m->lastMat, &m->lastPos.vx);
+    HdCsTest(cs, &hit, 1, &m->lastMat, &m->lastPos);
     if (hit.hit) {
         if (!isPlayer && flags[29] && st->unk22 >= 13)
             hit.hit = 0;
@@ -1228,8 +1228,8 @@ void CalcHitDynamics(Car* car, HdCsHit* hit, u8 isPlayer)
     s32 den;
     s32 scaledDamage;
     SVECTOR rot;
-    VECTOR delta;
-    VECTOR out;
+    VECTOR3 delta;
+    VECTOR3 out;
     VECTOR3 spark;
     MATRIX mat;
     s32 ang;
@@ -2136,8 +2136,8 @@ void SetCollisCount(CarCollision* c)
 
 void CarViewUpdate(PlayerCar* car)
 {
-    VECTOR v;
-    VECTOR out;
+    VECTOR3 v;
+    VECTOR3 out;
     Cs* cs;
     s32 tilt;
     s32 dx;
@@ -2496,7 +2496,7 @@ void carTakeHit(s16 id, s32 amount, VECTOR3* a, u8 flag)
                 n = rand();
                 d = amount / 3;
                 k = n % ((d < 2 ? 2 : d) < 8 ? (d < 2 ? 2 : d) : 8);
-                explodeCreateFragments(k, (VECTOR*)&cs->pos);
+                explodeCreateFragments(k, &cs->pos);
                 if (st->unk4C || !isPlayer) {
                     if (isPlayer) {
                         dif = uaGetDifficulty();
@@ -2939,9 +2939,9 @@ void InitMonsterSmash(Car* carA, u8 isPlayerA, Car* carB, u8 isPlayerB, s16 unus
 void SetCarVRMode(PlayerCar* car, u32 mode)
 {
     SVECTOR rot;
-    VECTOR pos;
-    VECTOR base;
-    VECTOR off;
+    VECTOR3 pos;
+    VECTOR3 base;
+    VECTOR3 off;
     u8 moved;
 
     if (mode < VR_MODE_FIXED) {
@@ -2955,7 +2955,7 @@ void SetCarVRMode(PlayerCar* car, u32 mode)
             pos.vx = 0;
             pos.vy = 0;
             pos.vz = 0;
-            UASetCameraPosition(car->playerIdx, (VECTOR3*)&pos, &rot);
+            UASetCameraPosition(car->playerIdx, &pos, &rot);
             moved = 1;
         } else {
             moved = 0;
@@ -3027,7 +3027,7 @@ void SetCarVRMode(PlayerCar* car, u32 mode)
         base.vx = car->motion.pos.vx + off.vx;
         base.vy = car->motion.pos.vy + off.vy;
         base.vz = car->motion.pos.vz + off.vz;
-        UASetCameraPosition(car->playerIdx, (VECTOR3*)&base, &car->vrRot[3]);
+        UASetCameraPosition(car->playerIdx, &base, &car->vrRot[3]);
         break;
     case 4:
         if (car->stats.unk3C) {
