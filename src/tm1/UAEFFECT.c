@@ -220,7 +220,7 @@ void UAeffectUpdateTVs(void)
 }
 
 #ifdef NON_MATCHING
-void UAeffectInitTV(DbObject* node)
+void UAeffectInitTV(DbNode* node)
 {
     DbPoly* poly;
     u8* base;
@@ -229,13 +229,13 @@ void UAeffectInitTV(DbObject* node)
     if (node == 0) {
         return;
     }
-    if (node->op != DB_OP_OBJECT) {
+    if (node->h.op != DB_OP_OBJECT) {
         return;
     }
     if (gNumTVs == 4) {
         return;
     }
-    poly = node->polys;
+    poly = node->obj.polys;
     base = (u8*)(poly + 1);
     uv = (DbPolyUV*)(base + poly->uvOffset * 4);
     uv->u0 = 0x1c;
@@ -248,7 +248,7 @@ void UAeffectInitTV(DbObject* node)
     uv->v3 = 0x9d;
     gTVpolyUVs[gNumTVs] = (UVWord*)&uv->u1;
     gNumTVs = gNumTVs + 1;
-    node->sub = gNumTVs;
+    node->obj.sub = gNumTVs;
     if (gNumTVs == 1) {
         gTVsTPage[0] = GetTPage(2, 0, 64, 0);
         gTVsTPage[1] = GetTPage(2, 0, 384, 0);
@@ -258,19 +258,19 @@ void UAeffectInitTV(DbObject* node)
 INCLUDE_ASM("asm/nonmatchings/tm1/UAEFFECT", UAeffectInitTV);
 #endif
 
-void UAeffectInitMonsterTruckWheel(DbRot* node)
+void UAeffectInitMonsterTruckWheel(DbNode* node)
 {
     s32 id;
 
     if (node == 0) {
         return;
     }
-    if (node->op != DB_OP_ROT) {
+    if (node->h.op != DB_OP_ROT) {
         return;
     }
-    id = node->sub;
+    id = node->rot.sub;
     if (id >= 1 && id <= 4) {
-        gTruckWheel[id - 1] = node;
+        gTruckWheel[id - 1] = &node->rot;
     }
 }
 
@@ -395,7 +395,7 @@ void UAeffectClearFreezeLight(Cs* node)
     node->env = lightGetEnv(0);
 }
 
-void UAeffectInitHealthStandLightning(DbObject* node)
+void UAeffectInitHealthStandLightning(DbNode* node)
 {
     DbPoly* p;
     s32 i;
@@ -403,13 +403,13 @@ void UAeffectInitHealthStandLightning(DbObject* node)
     if (node == 0) {
         return;
     }
-    if (node->op != DB_OP_OBJECT) {
+    if (node->h.op != DB_OP_OBJECT) {
         return;
     }
-    if (node->nPoly != 4) {
+    if (node->obj.nPoly != 4) {
         return;
     }
-    p = node->polys;
+    p = node->obj.polys;
     if (p == 0) {
         gLightningPart[3] = 0;
         gLightningPart[2] = 0;

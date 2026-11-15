@@ -13,8 +13,8 @@ typedef struct HitLight {
 void UAeffectInit(void);
 void UAeffectUpdateMonsterTruckWheels(s32 speed);
 void UAeffectUpdateTVs(void);
-void UAeffectInitTV(DbObject* node);
-void UAeffectInitMonsterTruckWheel(DbRot* node);
+void UAeffectInitTV(DbNode* node);
+void UAeffectInitMonsterTruckWheel(DbNode* node);
 void UAeffectUpdateSpecialEffects(void);
 void UAeffectUpdateCarSpeed(s32 carId, s32 speed);
 void UAeffectActHitLights(Cs* node, s32 count, u8* unused_rgb);
@@ -23,7 +23,7 @@ void UAeffectBarricade(s32 a0, s32 a1, s32 state);
 void effectResetEffects(void);
 void UAeffectSetFreezeLight(Cs* node);
 void UAeffectClearFreezeLight(Cs* node);
-void UAeffectInitHealthStandLightning(DbObject* node);
+void UAeffectInitHealthStandLightning(DbNode* node);
 void UAeffectUpdateHealthStandLightning(void);
 
 #endif /* __TM1_UAEFFECT_H__ */

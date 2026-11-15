@@ -385,7 +385,7 @@ INCLUDE_ASM("asm/nonmatchings/tm1/UA_DASH", UAdashDrawInstruments);
 #endif
 
 #ifdef NON_MATCHING
-void UAdashInitDashboardIcons(DbGroup* node)
+void UAdashInitDashboardIcons(DbNode* node)
 {
     GrSprite buf[12];
     s16 bias;
@@ -400,13 +400,13 @@ void UAdashInitDashboardIcons(DbGroup* node)
 
     bias = 0;
     which = 1;
-    if (node != NULL && (node->op & 0xFF) == DB_OP_GROUP && node->nChild >= 5) {
+    if (node != NULL && (node->h.op & 0xFF) == DB_OP_GROUP && node->grp.nChild >= 5) {
         if (rtIsSplitScreenOn() != 0) {
             bias = -120;
             which = 2;
         }
         for (which = which - 1; which != -1; which = which - 1) {
-            n = grutilsParse2DSprite(&node->child[0]->obj, buf, 12);
+            n = grutilsParse2DSprite(node->grp.child[0], buf, 12);
             gDash[which].wepCnt = n;
             for (i = 0; i < gDash[which].wepCnt; i++) {
                 m = &gDash[which].wepMode[i];
@@ -429,7 +429,7 @@ void UAdashInitDashboardIcons(DbGroup* node)
                 SetDrawMode(m, 0, 0, g->tpage, 0);
             }
 
-            grutilsParse2DSprite(&node->child[6]->obj, buf, 1);
+            grutilsParse2DSprite(node->grp.child[6], buf, 1);
             for (i = 0; i < 3; i++) {
                 s = &gDash[which].lives[i];
                 setlen(s, 4);
@@ -449,7 +449,7 @@ void UAdashInitDashboardIcons(DbGroup* node)
                 SetDrawMode(&gDash[which].livesMode, 0, 0, buf[0].tpage, 0);
             }
 
-            grutilsParse2DSprite(&node->child[7]->obj, buf, 1);
+            grutilsParse2DSprite(node->grp.child[7], buf, 1);
             for (i = 0; i < 6; i++) {
                 s = &gDash[which].bullets[i];
                 setlen(s, 4);
@@ -469,10 +469,10 @@ void UAdashInitDashboardIcons(DbGroup* node)
                 SetDrawMode(&gDash[which].bulMode, 0, 0, buf[0].tpage, 0);
             }
 
-            grutilsParse2DSprite(&node->child[1]->obj, buf, 1);
+            grutilsParse2DSprite(node->grp.child[1], buf, 1);
             SetDrawMode(&gDash[which].numMode, 0, 0, buf[0].tpage, 0);
 
-            n = grutilsParse2DSprite(&node->child[2]->obj, buf, 5) - 1;
+            n = grutilsParse2DSprite(node->grp.child[2], buf, 5) - 1;
             gDash[which].lifeCnt = n;
             for (i = 0; i < gDash[which].lifeCnt; i++) {
                 s = &gDash[which].lifeSpr[i];
@@ -527,7 +527,7 @@ void UAdashInitDashboardIcons(DbGroup* node)
                 SetSemiTrans(s, 0);
             }
 
-            grutilsParse2DSprite(&node->child[3]->obj, gDash[which].dig, 10);
+            grutilsParse2DSprite(node->grp.child[3], gDash[which].dig, 10);
             SetDrawMode(&gDash[which].selMode, 0, 0, gDash[which].dig[0].tpage, 0);
             SetDrawMode(&gDash[which].speedMode, 0, 0, gDash[which].dig[0].tpage, 0);
             for (i = 0; i < 3; i++) {
@@ -577,7 +577,7 @@ void UAdashInitDashboardIcons(DbGroup* node)
             s->x0 = 0xB3;
             s->y0 = y;
 
-            grutilsParse2DSprite(&node->child[4]->obj, gDash[which].dig2, 10);
+            grutilsParse2DSprite(node->grp.child[4], gDash[which].dig2, 10);
             SetDrawMode(&gDash[which].machMode, 0, 0, gDash[which].dig2[0].tpage, 0);
             for (i = 0; i < 2; i++) {
                 s = &gDash[which].machDig[i];
@@ -678,7 +678,7 @@ void uadashInitCockpit(u_long* tim)
 
     buf.pix[0] = gTopBlitBuffer;
     buf.pix[1] = (u_long*)rtGetDoubleBufferArea();
-    n = grutilsParse2DScreenSprite((DbObject*)tim, buf.spr, 7);
+    n = grutilsParse2DScreenSprite((DbNode*)tim, buf.spr, 7);
     for (i = 0; i < 2; i++) {
         gDash[0].data[i] = buf.pix[i];
         s = &buf.spr[i * (n - 1)];
@@ -924,16 +924,16 @@ INCLUDE_ASM("asm/nonmatchings/tm1/UA_DASH", UAdashSetDashboardDrawFlag);
 #endif
 
 #ifdef NON_MATCHING
-void uadashInitSteeringWheel(DbObject* obj)
+void uadashInitSteeringWheel(DbNode* node)
 {
     SVECTOR* vt;
     DbPoly* f;
     u8* base;
     DbPolyUV* uv;
 
-    if (obj != NULL && obj->op == DB_OP_OBJECT) {
-        vt = obj->verts;
-        f = obj->polys;
+    if (node != NULL && node->h.op == DB_OP_OBJECT) {
+        vt = node->obj.verts;
+        f = node->obj.polys;
         setPolyFT4(&gDash[0].wheel);
         base = (u8*)(f + 1);
         uv = (DbPolyUV*)(base + f->uvOffset * 4);

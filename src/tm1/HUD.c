@@ -322,20 +322,20 @@ void hudRadarToggle(void)
     radarOn = 1 - radarOn;
 }
 
-void hudStoreArrowIcon(s32 id, DbObject* obj)
+void hudStoreArrowIcon(s32 id, DbNode* node)
 {
     switch (id) {
     case UA_ARROW_UP:
-        grutilsParse2DSprite(obj, &ArrowUpInfo, 1);
+        grutilsParse2DSprite(node, &ArrowUpInfo, 1);
         break;
     case UA_ARROW_DOWN:
-        grutilsParse2DSprite(obj, &ArrowDownInfo, 1);
+        grutilsParse2DSprite(node, &ArrowDownInfo, 1);
         break;
     case UA_ARROW_LEFT:
-        grutilsParse2DSprite(obj, &ArrowLeftInfo, 1);
+        grutilsParse2DSprite(node, &ArrowLeftInfo, 1);
         break;
     case UA_ARROW_RIGHT:
-        grutilsParse2DSprite(obj, &ArrowRightInfo, 1);
+        grutilsParse2DSprite(node, &ArrowRightInfo, 1);
         break;
     }
 }

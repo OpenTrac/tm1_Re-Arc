@@ -342,7 +342,7 @@ void dbProcessInteractives(s32 type, DbNode* node, VECTOR3* loc, s32 parent, VEC
     case UA_ARROW_RIGHT:
     case UA_ARROW_DOWN:
     case UA_ARROW_LEFT:
-        hudStoreArrowIcon(type, &node->obj);
+        hudStoreArrowIcon(type, node);
         break;
     case UA_UNK_600:
     case UA_UNK_601:
@@ -398,7 +398,7 @@ void dbProcessInteractives(s32 type, DbNode* node, VECTOR3* loc, s32 parent, VEC
     case UA_UNK_753:
     case UA_UNK_754:
     case UA_UNK_755:
-        setup_static_cop(&node->sw, loc);
+        setup_static_cop(node, loc);
         break;
     case UA_HEALTH_STAND:
         set_health_stand(node->sw.sub, loc);
@@ -418,22 +418,22 @@ void dbProcessInteractives(s32 type, DbNode* node, VECTOR3* loc, s32 parent, VEC
     case UA_BOMB:
     case UA_OIL:
     case UA_SPIKE:
-        carAddWeapTex(&node->obj, type);
+        carAddWeapTex(node, type);
         break;
     case UA_DASHBOARD:
         UAdashInitDashboard((u_long*)node);
         break;
     case UA_DASHBOARD_ICONS:
-        UAdashInitDashboardIcons(&node->grp);
+        UAdashInitDashboardIcons(node);
         break;
     case UA_MONSTER_TRUCK_WHEEL:
-        UAeffectInitMonsterTruckWheel(&node->rot);
+        UAeffectInitMonsterTruckWheel(node);
         break;
     case UA_UNK_301:
     case UA_UNK_302:
     case UA_UNK_308:
     case UA_UNK_309:
-        bulMakeSpecialBullet(type, &node->obj);
+        bulMakeSpecialBullet(type, node);
         break;
     case UA_UNK_400:
     case UA_PICKUP_FIRE_MISSILE:
@@ -458,7 +458,7 @@ void dbProcessInteractives(s32 type, DbNode* node, VECTOR3* loc, s32 parent, VEC
         setPickup(loc, type, node->trans.sub);
         break;
     case UA_TV:
-        UAeffectInitTV(&node->obj);
+        UAeffectInitTV(node);
         break;
     case UA_FLAME_ANIMATION:
         explodeStoreFlameAnimation(node);
@@ -485,7 +485,7 @@ void dbProcessInteractives(s32 type, DbNode* node, VECTOR3* loc, s32 parent, VEC
     case UA_FRAGMENT_B:
     case UA_FRAGMENT_C:
     case UA_FRAGMENT_D:
-        explodeLoadFragTexture(type, &node->obj);
+        explodeLoadFragTexture(type, node);
         break;
     case UA_ICE_CREAM_TRUCK_HEADLIGHTS:
     case UA_TAXI_CAB_HEADLIGHTS:
@@ -508,13 +508,13 @@ void dbProcessInteractives(s32 type, DbNode* node, VECTOR3* loc, s32 parent, VEC
         uaswInitDbSwitch(node, type);
         break;
     case UA_HEALTH_STAND_LIGHTNING:
-        UAeffectInitHealthStandLightning(&node->obj);
+        UAeffectInitHealthStandLightning(node);
         break;
     case UA_STEERING_WHEEL:
-        uadashInitSteeringWheel(&node->obj);
+        uadashInitSteeringWheel(node);
         break;
     case UA_CAR_OCCUPANTS:
-        screenInitCarOccupants(&node->obj);
+        screenInitCarOccupants(node);
         break;
     case UA_REAR_VIEW_MIRROR:
         uadashInitRearViewMirror();

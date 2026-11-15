@@ -79,7 +79,7 @@ void pedestrian_takehit(s32 id, s32 damage);
 void ped_takehit(s32 num, s32 damage);
 s32 check_ped_hits(VECTOR3* pos, s32 damage);
 void init_static_cops(void);
-void setup_static_cop(DbSwitch* node, VECTOR3* pos);
+void setup_static_cop(DbNode* node, VECTOR3* pos);
 void static_cop_fire(s32 num, VECTOR3* tgt);
 void move_static_cops(void);
 void static_cop_takehit(s32 num);
