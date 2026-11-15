@@ -178,7 +178,7 @@ void hierTraverse(Cs* cs, void* node)
                 v.vx = e->pos[0];
                 v.vy = e->pos[1];
                 v.vz = e->pos[2];
-                mathMulVec(&rot->mat, &v, (VECTOR*)e->pos);
+                mathMulVec(&rot->mat, &v, e->pos);
                 if (matIdx < 70) {
                     matIdx = matIdx + 1;
                     TransposeMatrix(&rot->mat, &m);

@@ -231,7 +231,7 @@ push:
             v.vx = e->v[0];
             v.vy = e->v[1];
             v.vz = e->v[2];
-            mathMulVec(&n->mat, &v, (VECTOR*)e->v);
+            mathMulVec(&n->mat, &v, e->v);
             matPtrs[e->matIdx] = &n->mat;
             e->matIdx = e->matIdx + 1;
             hdSetNodeIds(&id0, &id1, e, n->tag, n->tag2);
@@ -699,7 +699,7 @@ s32 hdInCtrlBox(HdBox* box, s32* pt)
     s32 q[3];
     s32 res;
 
-    mathMulVec(&box->mat, (VECTOR*)pt, &r);
+    mathMulVec(&box->mat, pt, &r);
     res = 0;
     q[2] = box->lo.vz + r.vz;
     if (q[2] >= 0) {
@@ -793,7 +793,7 @@ void HdCsTest(Cs* cs, HdCsHit* hit, s32 doWorld, MATRIX* otherMat, s32* otherPos
                 tmp.vx = hit->normal[0];
                 tmp.vy = hit->normal[1];
                 tmp.vz = hit->normal[2];
-                mathMulTransVec(*m, &tmp, (VECTOR*)&hit->normal[0]);
+                mathMulTransVec(*m, &tmp, &hit->normal[0]);
                 i--;
                 m--;
             } while (i >= 0);

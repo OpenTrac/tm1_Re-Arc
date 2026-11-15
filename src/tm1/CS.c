@@ -31,12 +31,12 @@ void csUpdMat(Cs* cs, MATRIX* out)
     v.vx = cs->parent->wpos.vx + cs->pos.vx;
     v.vy = cs->parent->wpos.vy + cs->pos.vy;
     v.vz = cs->parent->wpos.vz + cs->pos.vz;
-    mathMulVec(&cs->mat, (VECTOR*)&v, (VECTOR*)&cs->wpos);
+    mathMulVec(&cs->mat, &v, &cs->wpos);
     TransposeMatrix(&cs->mat, &tm);
     SetRotMatrix(&cs->parent->wmat);
     SetTransMatrix(&cs->parent->wmat);
     MulRotMatrix0(&tm, &cs->wmat);
-    mathMulVecLong(&cs->wmat, (VECTOR*)&cs->wpos, (VECTOR*)cs->wmat.t);
+    mathMulVecLong(&cs->wmat, &cs->wpos, cs->wmat.t);
     SetRotMatrix(&cs->mat);
     SetTransMatrix(&cs->mat);
     MulRotMatrix0(&cs->parent->mat3, &cs->mat3);

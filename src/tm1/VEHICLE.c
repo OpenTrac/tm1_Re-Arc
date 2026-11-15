@@ -171,7 +171,7 @@ void VehicleTransUpdate(Vehicle* veh)
     step.vx = veh->vel.vx / 16;
     step.vy = veh->vel.vy / 16;
     step.vz = veh->vel.vz / 16;
-    mathMulTransVec(&veh->mat, (VECTOR*)&step, (VECTOR*)&world);
+    mathMulTransVec(&veh->mat, &step, &world);
     veh->pos.vx += world.vx;
     veh->pos.vy += world.vy;
     veh->pos.vz += world.vz;

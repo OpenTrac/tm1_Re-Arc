@@ -2,7 +2,7 @@
 
 #include "tm1/MATH.H"
 
-void mathMulVec(volatile MATRIX* lhs, VECTOR* rhs, volatile VECTOR* out)
+void mathMulVec(MATRIX* lhs, VECTOR3* rhs, VECTOR3* out)
 {
     out->vx = ((rhs->vx * lhs->m[0][0]) + (rhs->vy * lhs->m[0][1]) + (rhs->vz * lhs->m[0][2]))
         / FXP_ONE;
@@ -12,7 +12,7 @@ void mathMulVec(volatile MATRIX* lhs, VECTOR* rhs, volatile VECTOR* out)
         / FXP_ONE;
 }
 
-void mathMulTransVec(volatile MATRIX* lhs, VECTOR* rhs, volatile VECTOR* out)
+void mathMulTransVec(MATRIX* lhs, VECTOR3* rhs, VECTOR3* out)
 {
     out->vx = ((rhs->vx * lhs->m[0][0]) + (rhs->vy * lhs->m[1][0]) + (rhs->vz * lhs->m[2][0]))
         / FXP_ONE;
@@ -23,7 +23,7 @@ void mathMulTransVec(volatile MATRIX* lhs, VECTOR* rhs, volatile VECTOR* out)
 }
 
 // Identical to `mathMulVec`.
-void mathMulVecLong(volatile MATRIX* lhs, VECTOR* rhs, volatile VECTOR* out)
+void mathMulVecLong(MATRIX* lhs, VECTOR3* rhs, VECTOR3* out)
 {
     out->vx = ((rhs->vx * lhs->m[0][0]) + (rhs->vy * lhs->m[0][1]) + (rhs->vz * lhs->m[0][2]))
         / FXP_ONE;
@@ -33,7 +33,7 @@ void mathMulVecLong(volatile MATRIX* lhs, VECTOR* rhs, volatile VECTOR* out)
         / FXP_ONE;
 }
 
-void mathMulTransVecShort(volatile MATRIX* lhs, SVECTOR* rhs, volatile VECTOR* out)
+void mathMulTransVecShort(MATRIX* lhs, SVECTOR* rhs, VECTOR3* out)
 {
     out->vx = ((rhs->vx * lhs->m[0][0]) + (rhs->vy * lhs->m[1][0]) + (rhs->vz * lhs->m[2][0]))
         / FXP_ONE;
@@ -43,7 +43,7 @@ void mathMulTransVecShort(volatile MATRIX* lhs, SVECTOR* rhs, volatile VECTOR* o
         / FXP_ONE;
 }
 
-void mathNormalizeVec(volatile VECTOR* in, volatile VECTOR* out)
+void mathNormalizeVec(VECTOR3* in, VECTOR3* out)
 {
     s32 norm = SquareRoot0((in->vx * in->vx) + (in->vy * in->vy) + (in->vz * in->vz));
     if (norm > 0) {

@@ -205,7 +205,7 @@ push:
             v.vx = e->pos[0];
             v.vy = e->pos[1];
             v.vz = e->pos[2];
-            mathMulVec(&n->mat, &v, (VECTOR*)e->pos);
+            mathMulVec(&n->mat, &v, e->pos);
             hdpSetNodeIds(&id0, &id1, e, n->tag, n->tag2);
             for (i = 0; i < n->cnt; i++) {
                 hdpPush(n->child[i], e->pos, id0, id1);

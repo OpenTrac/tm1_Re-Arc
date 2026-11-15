@@ -37,10 +37,10 @@ typedef struct {
 // `val` is a power of 2.
 #define RANDINT_POW2(val) MOD_POW2(rand(), val)
 
-void mathMulVec(volatile MATRIX* lhs, VECTOR* rhs, volatile VECTOR* out);
-void mathMulTransVec(volatile MATRIX* lhs, VECTOR* rhs, volatile VECTOR* out);
-void mathMulVecLong(volatile MATRIX* lhs, VECTOR* rhs, volatile VECTOR* out);
-void mathMulTransVecShort(volatile MATRIX* lhs, SVECTOR* rhs, volatile VECTOR* out);
-void mathNormalizeVec(volatile VECTOR* in, volatile VECTOR* out);
+void mathMulVec(MATRIX* lhs, VECTOR3* rhs, VECTOR3* out);
+void mathMulTransVec(MATRIX* lhs, VECTOR3* rhs, VECTOR3* out);
+void mathMulVecLong(MATRIX* lhs, VECTOR3* rhs, VECTOR3* out);
+void mathMulTransVecShort(MATRIX* lhs, SVECTOR* rhs, VECTOR3* out);
+void mathNormalizeVec(VECTOR3* in, VECTOR3* out);
 
 #endif // __TM1_MATH_H__

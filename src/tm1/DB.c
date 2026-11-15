@@ -186,7 +186,7 @@ void dbScanForInteractiveStuff(DbNode* group)
                 preRot[0] = loc[0];
                 preRot[1] = loc[1];
                 preRot[2] = loc[2];
-                mathMulVec(&node->v5.mat, (VECTOR*)preRot, (VECTOR*)loc);
+                mathMulVec(&node->v5.mat, preRot, loc);
                 n = node->v5.nChild;
                 for (i = 0; i < n; i++) {
                     location[sp][0] = loc[0];
