@@ -772,8 +772,8 @@ void InitContrails(void)
         mlist[i].obj.polys = &mlist[i].pts[0].poly;
         mlist[i].obj.nPoly = 18;
         mlist[i].obj.skip = 1;
-        mlist[i].obj.op = DB_OP_OBJECT;
-        mlist[i].obj.kind = 0;
+        mlist[i].obj.h.op = DB_OP_OBJECT;
+        mlist[i].obj.h.kind = 0;
         mlist[i].obj.verts = tp;
         mlist[i].obj.normals = 0;
         fp = &mlist[i].obj.flags;

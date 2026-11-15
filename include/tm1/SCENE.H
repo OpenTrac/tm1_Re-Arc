@@ -91,9 +91,7 @@ typedef struct DbNodeHdr {
 #define DB_OBJ_SUBDIVIDE 0x40000 /* subdivide near polygons (see HIER_SUB) */
 
 typedef struct DbObject {
-    /* 0x00 */ u8 op;
-    /* 0x01 */ u8 pad01;
-    /* 0x02 */ u16 kind;
+    /* 0x00 */ DbNodeHdr h;
     /* 0x04 */ SVECTOR* verts;
     /* 0x08 */ SVECTOR* normals;
     /* 0x0C */ DbPoly* polys;
@@ -112,9 +110,7 @@ typedef struct DbObject {
 #define DB_NODE_NO_BOUNDS_TEST 0x4
 
 typedef struct DbGroup {
-    /* 0x00 */ u8 op;
-    /* 0x01 */ u8 pad01;
-    /* 0x02 */ u16 kind;
+    /* 0x00 */ DbNodeHdr h;
     /* 0x04 */ VECTOR3 center;
     /* 0x10 */ s32 radius;
     /* 0x14 */ u8 nChild;
@@ -130,18 +126,14 @@ typedef struct DbLodRec {
 } DbLodRec;
 
 typedef struct DbLod {
-    /* 0x00 */ u8 op;
-    /* 0x01 */ u8 pad01;
-    /* 0x02 */ u16 kind;
+    /* 0x00 */ DbNodeHdr h;
     /* 0x04 */ VECTOR3 center;
     /* 0x10 */ s32 nRec;
     /* 0x14 */ DbLodRec* rec[1];
 } DbLod;
 
 typedef struct DbAnim {
-    /* 0x00 */ u8 op;
-    /* 0x01 */ u8 pad01;
-    /* 0x02 */ u16 kind;
+    /* 0x00 */ DbNodeHdr h;
     /* 0x04 */ u16 sub;
     /* 0x06 */ u16 rate;
     /* 0x08 */ u8 lo;
@@ -155,9 +147,7 @@ typedef struct DbAnim {
 } DbAnim;
 
 typedef struct DbTrans {
-    /* 0x00 */ u8 op;
-    /* 0x01 */ u8 pad01;
-    /* 0x02 */ u16 kind;
+    /* 0x00 */ DbNodeHdr h;
     /* 0x04 */ VECTOR3 ofs;
     /* 0x10 */ u16 sub;
     /* 0x12 */ u8 nChild;
@@ -166,9 +156,7 @@ typedef struct DbTrans {
 } DbTrans;
 
 typedef struct DbRot {
-    /* 0x00 */ u8 op;
-    /* 0x01 */ u8 pad01;
-    /* 0x02 */ u16 kind;
+    /* 0x00 */ DbNodeHdr h;
     /* 0x04 */ MATRIX mat;
     /* 0x24 */ u16 sub;
     /* 0x26 */ u8 nChild;
@@ -177,17 +165,13 @@ typedef struct DbRot {
 } DbRot;
 
 typedef struct DbBox {
-    /* 0x00 */ u8 op;
-    /* 0x01 */ u8 pad01;
-    /* 0x02 */ u16 kind;
+    /* 0x00 */ DbNodeHdr h;
     /* 0x04 */ s32 code;
     /* 0x08 */ HdBox box;
 } DbBox;
 
 typedef struct DbVolume {
-    /* 0x00 */ u8 op;
-    /* 0x01 */ u8 pad01;
-    /* 0x02 */ u16 kind;
+    /* 0x00 */ DbNodeHdr h;
     /* 0x04 */ u8 nplane;
     /* 0x05 */ s8 code;
     /* 0x06 */ u16 sub;
@@ -198,9 +182,7 @@ typedef struct DbVolume {
 } DbVolume;
 
 typedef struct DbSwitch {
-    /* 0x00 */ u8 op;
-    /* 0x01 */ u8 pad01;
-    /* 0x02 */ u16 kind;
+    /* 0x00 */ DbNodeHdr h;
     /* 0x04 */ u16 sub;
     /* 0x06 */ u8 nChild;
     /* 0x07 */ u8 sel;
@@ -208,9 +190,7 @@ typedef struct DbSwitch {
 } DbSwitch;
 
 typedef struct DbCtrl {
-    /* 0x00 */ u8 op;
-    /* 0x01 */ u8 pad01;
-    /* 0x02 */ u16 kind;
+    /* 0x00 */ DbNodeHdr h;
     /* 0x04 */ s32 flags;
     /* 0x08 */ u16 sub;
     /* 0x0A */ u8 nBox;
@@ -220,6 +200,24 @@ typedef struct DbCtrl {
     /* 0x14 */ HdBox* box[1];
 } DbCtrl;
 
+/**
+ * Implementation note: At first glance, this could be implemented more cleanly
+ * by defining `DbNode` as a structure with a shared `DbNodeHdr`:
+ *
+ * ```c
+ * struct DbNode {
+ *   DbNodeHdr h;
+ *   union {
+ *     // the various subtypes, but with their `DbNodeHdr` removed
+ *   } d;
+ * };
+ * ```
+ *
+ * However, there are various places in the code which explicitly check the
+ * opcode type, then create a temp variable converting a `DbNode` pointer
+ * directly to that opcode's struct.
+ * Thus, it's more likely that the header field is actually duplicated.
+ */
 union DbNode {
     DbNodeHdr h;
     DbObject obj;

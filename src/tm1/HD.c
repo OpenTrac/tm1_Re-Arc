@@ -137,7 +137,7 @@ push:
             if (res->hit == 0) {
                 break;
             }
-            hdSetHitTag(res, n->kind, n->sub, e);
+            hdSetHitTag(res, n->h.kind, n->sub, e);
             break;
         }
         case DB_OP_BOX: {
@@ -152,7 +152,7 @@ push:
             if (res->hit == 0) {
                 break;
             }
-            hdSetHitTag(res, n->kind, n->code, e);
+            hdSetHitTag(res, n->h.kind, n->code, e);
             break;
         }
         case DB_OP_VOLUME: {
@@ -167,7 +167,7 @@ push:
             if (res->hit == 0) {
                 break;
             }
-            hdSetHitTag(res, n->kind, n->sub, e);
+            hdSetHitTag(res, n->h.kind, n->sub, e);
             break;
         }
         case DB_OP_GROUP: {
@@ -185,7 +185,7 @@ push:
             }
             cnt = n->nChild;
             i = 0;
-            hdSetNodeIds(&id0, &id1, e, n->kind, n->sub);
+            hdSetNodeIds(&id0, &id1, e, n->h.kind, n->sub);
             if (cnt != 0) {
                 while (1) {
                     hdPush(n->child[i], &e->v, e->matIdx, id0, id1);
@@ -210,7 +210,7 @@ push:
             e->v.vx = e->v.vx - n->ofs.vx;
             e->v.vy = e->v.vy - n->ofs.vy;
             e->v.vz = e->v.vz - n->ofs.vz;
-            hdSetNodeIds(&id0, &id1, e, n->kind, n->sub);
+            hdSetNodeIds(&id0, &id1, e, n->h.kind, n->sub);
             for (i = 0; i < n->nChild; i++) {
                 hdPush(n->child[i], &e->v, e->matIdx, id0, id1);
             }
@@ -234,7 +234,7 @@ push:
             mathMulVec(&n->mat, &v, &e->v);
             matPtrs[e->matIdx] = &n->mat;
             e->matIdx = e->matIdx + 1;
-            hdSetNodeIds(&id0, &id1, e, n->kind, n->sub);
+            hdSetNodeIds(&id0, &id1, e, n->h.kind, n->sub);
             for (i = 0; i < n->nChild; i++) {
                 hdPush(n->child[i], &e->v, e->matIdx, id0, id1);
             }
@@ -243,7 +243,7 @@ push:
         case DB_OP_SWITCH: {
             DbSwitch* n = &e->node->sw;
 
-            hdSetNodeIds(&id0, &id1, e, n->kind, n->sub);
+            hdSetNodeIds(&id0, &id1, e, n->h.kind, n->sub);
             t0 = id0;
             t1 = id1;
             node = n->child[n->sel];
@@ -254,7 +254,7 @@ push:
         case DB_OP_ANIM: {
             DbAnim* n = &e->node->anim;
 
-            hdSetNodeIds(&id0, &id1, e, n->kind, n->sub);
+            hdSetNodeIds(&id0, &id1, e, n->h.kind, n->sub);
             t0 = id0;
             t1 = id1;
             node = n->child[n->cur];
@@ -268,7 +268,7 @@ push:
             if (n->flags & DB_NODE_NO_COLLIDE) {
                 break;
             }
-            hdSetNodeIds(&id0, &id1, e, n->kind, n->sub);
+            hdSetNodeIds(&id0, &id1, e, n->h.kind, n->sub);
             hdCtrlNode(e, id0, id1);
             break;
         }
@@ -750,7 +750,7 @@ void HdCsTest(Cs* cs, HdCsHit* hit, s32 doWorld, MATRIX* otherMat, VECTOR3* othe
     hdCsSelf = cs;
     hdCsOtherPos = otherPos;
     info = &cs->epNode->grp;
-    if (info == 0 || info->op != DB_OP_GROUP) {
+    if (info == 0 || info->h.op != DB_OP_GROUP) {
         rad = 100;
     } else {
         rad = info->radius;

@@ -588,7 +588,7 @@ void init_merc(s32 which, DbNode* ep)
     } else {
         sw = &n->trans.child[0]->sw;
     }
-    if (sw->op != DB_OP_SWITCH) {
+    if (sw->h.op != DB_OP_SWITCH) {
         printf("Unable to find switch for hovercop %ld\n", which);
         return;
     }
@@ -729,7 +729,7 @@ void init_pedestrian(s32 id, DbNode* ep)
             } else {
                 n = &node->trans.child[0]->sw;
             }
-            if (n->op == DB_OP_SWITCH) {
+            if (n->h.op == DB_OP_SWITCH) {
                 pedestrian[ped_made].id = id;
                 csSetEpNode(pedestrian[ped_made].obj, ep);
                 csAddToCsList(pedestrian[ped_made].obj);
@@ -1015,7 +1015,7 @@ void setup_static_cop(DbNode* node, VECTOR3* pos)
     }
     scop[i].hits = 0;
     scop[i].node = &node->sw;
-    scop[i].state = node->sw.kind;
+    scop[i].state = node->h.kind;
     d = &scop[i].pos;
     d->vx = pos->vx;
     d->vy = pos->vy;
