@@ -273,7 +273,7 @@ typedef struct CarWeap {
     /*0x2C*/ CarFrontProfile* foreProfile;
     /*0x30*/ CarRearProfile* aftProfile;
     /*0x34*/ u16 totalAmmo;
-    /*0x36*/ u16 gunHeat;
+    /*0x36*/ s16 gunHeat;
     /*0x38*/ u8 gunOverheat;
     /*0x39*/ u8 pad39;
     /*0x3A*/ s16 timer;

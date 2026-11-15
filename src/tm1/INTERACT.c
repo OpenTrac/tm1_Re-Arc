@@ -401,9 +401,9 @@ void UpdateGuns(Car* car, u8 isPlayer)
         uasoundFireCarMachineGuns(snd, range, soundGetCalculatedSoundXPosition());
     } else {
         uasoundStopCarMachineGuns(snd);
-        if ((s16)pad->gunHeat > 0) {
-            pad->gunHeat = MAX(0, (s16)pad->gunHeat - 1);
-            if ((s16)pad->gunHeat < 100) {
+        if (pad->gunHeat > 0) {
+            pad->gunHeat = MAX(0, pad->gunHeat - 1);
+            if (pad->gunHeat < 100) {
                 pad->gunOverheat = 0;
             }
         }
@@ -454,7 +454,7 @@ void UpdateGuns(Car* car, u8 isPlayer)
             pad->gunDelay = 5;
         } else {
             pad->gunHeat = pad->gunHeat + 6;
-            if ((s16)pad->gunHeat >= 199) {
+            if (pad->gunHeat >= 199) {
                 pad->gunOverheat = 1;
             }
         }
