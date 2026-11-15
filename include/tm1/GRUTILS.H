@@ -25,9 +25,9 @@ typedef struct {
 } GrScreenSprite;
 
 u16 Load4BitClut(u32* data, int x, int y);
-u32 grutilsParse2DScreenSprite(DbObject* obj, GrScreenSprite* out, u32 max);
-u32 grutilsParse3DSprite(DbObject* obj, GrSprite* out, u32 max);
-s32 grutilsParse2DSprite(DbObject* obj, GrSprite* out, u32 max);
+u32 grutilsParse2DScreenSprite(DbNode* node, GrScreenSprite* out, u32 max);
+u32 grutilsParse3DSprite(DbNode* node, GrSprite* out, u32 max);
+s32 grutilsParse2DSprite(DbNode* node, GrSprite* out, u32 max);
 void grutilsDrawNumberUsingSprites(s32 num, SPRT* prim, GrSprite* digits, u32* ot);
 
 #endif

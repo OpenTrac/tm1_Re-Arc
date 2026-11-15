@@ -68,7 +68,7 @@ void bulSetPlasmaGraphics(GrSprite* info);
 void bulSetFireballGraphics(GrSprite* info);
 void bulSetContrailGraphics(GrSprite* info);
 void bulAddCs(DbNode* node, s32 id);
-void bulMakeSpecialBullet(s32 id, DbObject* obj);
+void bulMakeSpecialBullet(s32 id, DbNode* node);
 s32 CAR_HD(VECTOR3* pt, s32 owner, s32 flag);
 void init_bullets(void);
 void destroy_all_bullets(void);

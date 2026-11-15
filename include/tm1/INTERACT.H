@@ -21,7 +21,7 @@ void carInitTasers(void);
 s32 fire_taser(Car* car, s32 isPlayer);
 void draw_tasers(Db* db, s32 view);
 void LaunchDrops(Car* car, u8 isPlayer);
-void carAddWeapTex(DbObject* obj, s32 id);
+void carAddWeapTex(DbNode* node, s32 id);
 void carInitDropWeaps(void);
 s32 FindFreeDropWeap(void);
 u8 carDropWeapon(u32 kind, s32 idx, VECTOR3* pos, s32 power);

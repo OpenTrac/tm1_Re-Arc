@@ -40,16 +40,17 @@ typedef struct Fragment {
     /*0x20*/ GrSprite* anim;
 } Fragment;
 
-void explodeStoreFlameAnimation(void* data);
-void explodeStoreExplosionAnimation(void* data);
-void explodeStoreGburstAnimation(void* data);
-void explodeStoreSmokeAnimation(void* data);
-void explodeStoreBurnAnimation(void* data);
-void explodeStoreSparkAnimation(void* data);
-void explodeStoreContrailAnimation(void* data);
-void explodeStoreFlareAnimation(void* data);
-void explodeStorePlasmaAnimation(void* data);
-void explodeLoadFragTexture(s32 id, DbObject* data);
+void explodeStoreFlameAnimation(DbNode* node);
+void explodeStoreExplosionAnimation(DbNode* node);
+void explodeStoreGburstAnimation(DbNode* node);
+void explodeStoreSmokeAnimation(DbNode* node);
+void explodeStoreBurnAnimation(DbNode* node);
+void explodeStoreSparkAnimation(DbNode* node);
+void explodeStoreContrailAnimation(DbNode* node);
+void explodeStoreFlareAnimation(DbNode* node);
+void explodeStorePlasmaAnimation(DbNode* node);
+void explodeStoreArmorIcon(DbNode* node);
+void explodeLoadFragTexture(s32 id, DbNode* node);
 void explodeCreateFragments(s32 count, VECTOR3* pos);
 void explodeUpdateFragments(void);
 ArmorIconInfo* explodeGetArmorIcon(void);

@@ -999,23 +999,23 @@ void init_static_cops(void)
 }
 
 #ifdef NON_MATCHING
-void setup_static_cop(DbSwitch* node, VECTOR3* pos)
+void setup_static_cop(DbNode* node, VECTOR3* pos)
 {
     s32 i;
     VECTOR3* d;
 
-    if (node->op != DB_OP_SWITCH) {
+    if (node->h.op != DB_OP_SWITCH) {
         printf("Error! Static Cop Not At SwNode!\n");
         return;
     }
-    i = node->sub - 1;
+    i = node->sw.sub - 1;
     if (i < 0 || i >= 25) {
         printf("Error! Static Cop Exceeds Number Space\n");
         return;
     }
     scop[i].hits = 0;
-    scop[i].node = node;
-    scop[i].state = node->kind;
+    scop[i].node = &node->sw;
+    scop[i].state = node->sw.kind;
     d = &scop[i].pos;
     d->vx = pos->vx;
     d->vy = pos->vy;

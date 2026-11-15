@@ -1101,20 +1101,20 @@ void LaunchDrops(Car* car, u8 isPlayer)
     }
 }
 
-void carAddWeapTex(DbObject* obj, s32 id)
+void carAddWeapTex(DbNode* node, s32 id)
 {
     switch (id) {
     case UA_BOMB:
-        grutilsParse3DSprite(obj, &bombSprite, 1);
+        grutilsParse3DSprite(node, &bombSprite, 1);
         break;
     case UA_OIL:
-        grutilsParse3DSprite(obj, &oilSprite, 1);
+        grutilsParse3DSprite(node, &oilSprite, 1);
         break;
     case UA_SPIKE:
-        grutilsParse3DSprite(obj, &spikeSprite, 1);
+        grutilsParse3DSprite(node, &spikeSprite, 1);
         break;
     case UA_CATAPULT:
-        grutilsParse3DSprite(obj, &catapultSprite, 1);
+        grutilsParse3DSprite(node, &catapultSprite, 1);
         break;
     }
 }

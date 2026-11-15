@@ -11,6 +11,6 @@ void hudInitRadar(void);
 void hudAddRadarSig(s32 id, VECTOR3* pos, s32 ang);
 void hudradarActivate(void);
 void hudRadarToggle(void);
-void hudStoreArrowIcon(s32 id, DbObject* obj);
+void hudStoreArrowIcon(s32 id, DbNode* node);
 
 #endif /* __TM1_HUD_H__ */

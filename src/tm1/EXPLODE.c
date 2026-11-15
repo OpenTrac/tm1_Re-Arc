@@ -586,88 +586,88 @@ void display_stars(u_long* ot, s32 view)
 INCLUDE_ASM("asm/nonmatchings/tm1/EXPLODE", display_stars);
 #endif
 
-void explodeStoreFlameAnimation(void* data)
+void explodeStoreFlameAnimation(DbNode* node)
 {
     GrSprite* anim = FlameInfo;
     u16* p;
     s32 i;
 
-    grutilsParse3DSprite(data, anim, 10);
+    grutilsParse3DSprite(node, anim, 10);
     for (i = 0, p = &anim[0].tpage; i < 10; i++) {
         *p = (*p & 0x1F) + 32;
         p += 4;
     }
 }
 
-void explodeStoreExplosionAnimation(void* data)
+void explodeStoreExplosionAnimation(DbNode* node)
 {
     GrSprite* anim = AburstInfo;
     u16* p;
     s32 i;
 
-    grutilsParse3DSprite(data, anim, 16);
+    grutilsParse3DSprite(node, anim, 16);
     for (i = 0, p = &anim[0].tpage; i < 16; i++) {
         *p = (*p & 0x1F) + 32;
         p += 4;
     }
 }
 
-void explodeStoreGburstAnimation(void* data)
+void explodeStoreGburstAnimation(DbNode* node)
 {
     GrSprite* anim = GburstInfo;
     u16* p;
     s32 i;
 
-    grutilsParse3DSprite(data, anim, 12);
+    grutilsParse3DSprite(node, anim, 12);
     for (i = 0, p = &anim[0].tpage; i < 12; i++) {
         *p = (*p & 0x1F) + 32;
         p += 4;
     }
 }
 
-void explodeStoreSmokeAnimation(void* data)
+void explodeStoreSmokeAnimation(DbNode* node)
 {
     GrSprite* anim;
     u16* p;
     s32 i;
 
-    grutilsParse3DSprite(data, SmokeInfo, 16);
+    grutilsParse3DSprite(node, SmokeInfo, 16);
     anim = SteamInfo;
-    grutilsParse3DSprite(data, anim, 16);
+    grutilsParse3DSprite(node, anim, 16);
     for (i = 0, p = &anim[0].tpage; i < 16; i++) {
         *p = (*p & 0x1F) + 32;
         p += 4;
     }
 }
 
-void explodeStoreBurnAnimation(void* data)
+void explodeStoreBurnAnimation(DbNode* node)
 {
     GrSprite* anim = BurnInfo;
 
-    grutilsParse3DSprite(data, anim, 8);
+    grutilsParse3DSprite(node, anim, 8);
     bulSetFireballGraphics(anim);
 }
 
-void explodeStoreSparkAnimation(void* data)
+void explodeStoreSparkAnimation(DbNode* node)
 {
     GrSprite* anim = SparkInfo;
     u16* p;
     s32 i;
 
-    grutilsParse3DSprite(data, anim, 4);
+    grutilsParse3DSprite(node, anim, 4);
     for (i = 0, p = &anim[0].tpage; i < 4; i++) {
         *p = (*p & 0x1F) + 32;
         p += 4;
     }
 }
 
-void explodeStoreContrailAnimation(void* data)
+void explodeStoreContrailAnimation(DbNode* node)
 {
     GrSprite* anim = ContrailInfo;
     u16* p;
     s32 i;
 
-    grutilsParse3DSprite(data, anim, 8);
+    grutilsParse3DSprite(node, anim, 8);
     bulSetContrailGraphics(anim);
     for (i = 0, p = &anim[0].tpage; i < 8; i++) {
         *p = (*p & 0x1F) + 32;
@@ -675,21 +675,21 @@ void explodeStoreContrailAnimation(void* data)
     }
 }
 
-void explodeStoreFlareAnimation(void* data)
+void explodeStoreFlareAnimation(DbNode* node)
 {
     GrSprite* anim = FlareInfo;
 
-    grutilsParse3DSprite(data, anim, 4);
+    grutilsParse3DSprite(node, anim, 4);
     bulSetEyeWeaponGraphics(anim);
 }
 
-void explodeStorePlasmaAnimation(void* data)
+void explodeStorePlasmaAnimation(DbNode* node)
 {
     GrSprite* anim = PlasmaInfo;
     u16* p;
     s32 i;
 
-    grutilsParse3DSprite(data, anim, 4);
+    grutilsParse3DSprite(node, anim, 4);
     bulSetPlasmaGraphics(anim);
     for (i = 0, p = &anim[0].tpage; i < 4; i++) {
         *p = (*p & 0x1F) + 32;
@@ -697,26 +697,26 @@ void explodeStorePlasmaAnimation(void* data)
     }
 }
 
-void explodeStoreArmorIcon(void* data)
+void explodeStoreArmorIcon(DbNode* node)
 {
     // TODO: Confirm if `ArmorInfo` is actually a `GrSprite`.
-    grutilsParse3DSprite(data, (GrSprite*)&ArmorInfo, 1);
+    grutilsParse3DSprite(node, (GrSprite*)&ArmorInfo, 1);
     ArmorInfo.unk0 += 6;
     ArmorInfo.unk1 += 2;
 }
 
-void explodeLoadFragTexture(s32 id, DbObject* data)
+void explodeLoadFragTexture(s32 id, DbNode* node)
 {
-    if (data->op != DB_OP_OBJECT) {
+    if (node->h.op != DB_OP_OBJECT) {
         printf("\nError Parsing Fragment Sprite %d\n", id);
     } else if (id == UA_FRAGMENT_A) {
-        grutilsParse3DSprite(data, fragmenta, 4);
+        grutilsParse3DSprite(node, fragmenta, 4);
     } else if (id == UA_FRAGMENT_B) {
-        grutilsParse3DSprite(data, fragmentb, 4);
+        grutilsParse3DSprite(node, fragmentb, 4);
     } else if (id == UA_FRAGMENT_C) {
-        grutilsParse3DSprite(data, fragmentc, 4);
+        grutilsParse3DSprite(node, fragmentc, 4);
     } else if (id == UA_FRAGMENT_D) {
-        grutilsParse3DSprite(data, fragmentd, 4);
+        grutilsParse3DSprite(node, fragmentd, 4);
     }
 }
 

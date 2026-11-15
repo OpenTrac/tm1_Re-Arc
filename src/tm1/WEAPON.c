@@ -109,21 +109,21 @@ void bulAddCs(DbNode* node, s32 id)
     }
 }
 
-void bulMakeSpecialBullet(s32 id, DbObject* obj)
+void bulMakeSpecialBullet(s32 id, DbNode* node)
 {
     switch (id) {
     case UA_UNK_301:
-        grutilsParse3DSprite(obj, &BulletSprites[0], 4);
+        grutilsParse3DSprite(node, &BulletSprites[0], 4);
         break;
     case UA_UNK_302:
-        grutilsParse3DSprite(obj, &BulletSprites[4], 4);
+        grutilsParse3DSprite(node, &BulletSprites[4], 4);
         break;
     case UA_UNK_309:
-        grutilsParse3DSprite(obj, &BulletSprites[8], 2);
-        grutilsParse3DSprite(obj, &BulletSprites[10], 2);
+        grutilsParse3DSprite(node, &BulletSprites[8], 2);
+        grutilsParse3DSprite(node, &BulletSprites[10], 2);
         break;
     case UA_UNK_308:
-        grutilsParse3DSprite(obj, &BulletSprites[12], 4);
+        grutilsParse3DSprite(node, &BulletSprites[12], 4);
         break;
     }
 }

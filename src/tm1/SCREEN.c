@@ -737,7 +737,7 @@ done:
     return ret;
 }
 
-static DbObject* gFaceObject;
+static DbNode* gFaceObject;
 static s16 InLeft;
 static s32 gHeading;
 static s16 screen_whichOT;
@@ -884,7 +884,7 @@ void screenDisplayChoicesFromBottom(
     }
 }
 
-void screenInitCarOccupants(DbObject* model)
+void screenInitCarOccupants(DbNode* node)
 {
     DbPoly* prim;
     SVECTOR* verts;
@@ -894,13 +894,13 @@ void screenInitCarOccupants(DbObject* model)
     POLY_FT4* top;
     s32 i;
 
-    if (model != 0 && model->op == DB_OP_OBJECT) {
+    if (node != 0 && node->h.op == DB_OP_OBJECT) {
         if (gFaceObject == 0) {
-            gFaceObject = model;
+            gFaceObject = node;
         }
         top = (POLY_FT4*)uadashGetTopBlitAddr();
-        prim = model->polys;
-        verts = model->verts;
+        prim = node->obj.polys;
+        verts = node->obj.verts;
         Face = top;
         for (i = 0; i < 12; i++) {
             setlen(&Face[i], 9);

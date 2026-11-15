@@ -15,7 +15,7 @@ u16 Load4BitClut(u32* data, int x, int y)
     return GetClut(x, y);
 }
 
-u32 grutilsParse2DScreenSprite(DbObject* obj, GrScreenSprite* out, u32 max)
+u32 grutilsParse2DScreenSprite(DbNode* node, GrScreenSprite* out, u32 max)
 {
     SVECTOR* verts;
     DbPoly* poly;
@@ -23,13 +23,13 @@ u32 grutilsParse2DScreenSprite(DbObject* obj, GrScreenSprite* out, u32 max)
     DbPolyUV* tex;
     int i;
 
-    if (obj == 0 || obj->op != DB_OP_OBJECT) {
+    if (node == 0 || node->h.op != DB_OP_OBJECT) {
         return 0;
     }
-    verts = obj->verts;
-    poly = obj->polys;
-    if (max >= (u32)obj->nPoly) {
-        max = obj->nPoly;
+    verts = node->obj.verts;
+    poly = node->obj.polys;
+    if (max >= (u32)node->obj.nPoly) {
+        max = node->obj.nPoly;
     }
     for (i = 0; i < (int)max; i++) {
         base = (u8*)(poly + 1);
@@ -47,19 +47,19 @@ u32 grutilsParse2DScreenSprite(DbObject* obj, GrScreenSprite* out, u32 max)
     return max;
 }
 
-u32 grutilsParse3DSprite(DbObject* obj, GrSprite* out, u32 max)
+u32 grutilsParse3DSprite(DbNode* node, GrSprite* out, u32 max)
 {
     DbPoly* poly;
     u8* base;
     DbPolyUV* tex;
     int i;
 
-    if (obj == 0 || obj->op != DB_OP_OBJECT) {
+    if (node == 0 || node->h.op != DB_OP_OBJECT) {
         return 0;
     }
-    poly = obj->polys;
-    if (max >= (u32)obj->nPoly) {
-        max = obj->nPoly;
+    poly = node->obj.polys;
+    if (max >= (u32)node->obj.nPoly) {
+        max = node->obj.nPoly;
     }
     for (i = 0; i < (int)max; i++) {
         base = (u8*)(poly + 1);
@@ -75,12 +75,12 @@ u32 grutilsParse3DSprite(DbObject* obj, GrSprite* out, u32 max)
     return max;
 }
 
-s32 grutilsParse2DSprite(DbObject* obj, GrSprite* out, u32 max)
+s32 grutilsParse2DSprite(DbNode* node, GrSprite* out, u32 max)
 {
     s32 n;
     int i;
 
-    n = grutilsParse3DSprite(obj, out, max);
+    n = grutilsParse3DSprite(node, out, max);
     for (i = 0; i < n; i++) {
         out->w += 1;
         out->h += 1;
