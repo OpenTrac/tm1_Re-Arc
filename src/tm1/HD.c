@@ -187,7 +187,7 @@ push:
             i = 0;
             hdSetNodeIds(&id0, &id1, e, n->tag, n->tag2);
             if (cnt != 0) {
-                for (;;) {
+                while (1) {
                     hdPush(n->child[i], e->v, e->matIdx, id0, id1);
                     i++;
                     if (i >= cnt) {

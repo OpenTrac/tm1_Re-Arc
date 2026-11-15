@@ -150,7 +150,7 @@ s32 screenDisplayTitle(void)
         UpdCtlPad();
     }
     frames = 0;
-    for (;;) {
+    while (1) {
         VSync(0);
         frames++;
         UpdCtlPad();
@@ -247,7 +247,7 @@ s32 screenBattleOptions(s32 twoPlayer)
         UpdCtlPad();
     }
     frames = 0;
-    for (;;) {
+    while (1) {
         VSync(0);
         frames++;
         UpdCtlPad();
@@ -400,7 +400,7 @@ s32 screenAudioOptions(s32 noLoad, s32 hasTracks)
     screenDisplayChoicesFromBottom(0, 5, prev, choice, names, names2, 200, 20);
     fontPrintCenteredXY(*(choice == 2 ? &fonts[1] : &fonts[0]), 159, 175, title);
     frames = 0;
-    for (;;) {
+    while (1) {
         VSync(0);
         frames++;
         UpdCtlPad();
@@ -556,7 +556,7 @@ s32 screenOptions(s32 twoPlayer)
         UpdCtlPad();
     }
     frames = 0;
-    for (;;) {
+    while (1) {
         VSync(0);
         frames++;
         UpdCtlPad();
@@ -679,7 +679,7 @@ s32 screenMainOptions(void)
         UpdCtlPad();
     }
     frames = 0;
-    for (;;) {
+    while (1) {
         VSync(0);
         frames++;
         UpdCtlPad();
@@ -1729,7 +1729,7 @@ char* screenChooseControls(s32 mode, s32 pad, s32 unused)
     blink = 0xF0F0;
     sprintf(playerName, "Player %d", pad + 1);
 
-    for (;;) {
+    while (1) {
         VSync(0);
         ++idleFrames;
         UpdCtlPad();
@@ -2160,7 +2160,7 @@ void screenCheckMidGameOptions(void)
     while (ctlpadAnyKey(pad)) {
         UpdCtlPad();
     }
-    for (;;) {
+    while (1) {
         VSync(0);
         prev = choice;
         UpdCtlPad();
@@ -2776,7 +2776,7 @@ fill:
         UpdCtlPad();
         screenBlinkCursor(5);
     }
-    for (;;) {
+    while (1) {
         VSync(0);
         screenBlinkCursor(5);
         UpdCtlPad();
@@ -2886,7 +2886,7 @@ s32 screenWrongPassword(s32 unused_state)
         UpdCtlPad();
     }
     frames = 0;
-    for (;;) {
+    while (1) {
         VSync(0);
         frames++;
         UpdCtlPad();
