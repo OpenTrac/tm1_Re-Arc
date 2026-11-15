@@ -44,14 +44,14 @@
     m->trail[k].vz = m->cs->pos.vz + out.vz - m->pos.vz;
 
 static s32 bulletFlipFlop = 0;
-void* fire_missile_node = 0;
-void* homing_missile_node = 0;
-void* swarm_missile_node = 0;
-void* ghost_missile_node = 0;
-void* deathspear_node = 0;
-void* lava_bomb_node = 0;
-void* RAMS_HEAD_MISSILE = 0;
-void* TOWER_SPIKE_MISSILE = 0;
+DbNode* fire_missile_node = 0;
+DbNode* homing_missile_node = 0;
+DbNode* swarm_missile_node = 0;
+DbNode* ghost_missile_node = 0;
+DbNode* deathspear_node = 0;
+DbNode* lava_bomb_node = 0;
+DbNode* RAMS_HEAD_MISSILE = 0;
+DbNode* TOWER_SPIKE_MISSILE = 0;
 static s32 fxSheetCount = 0;
 
 static Cs* jays_ownship;
@@ -85,7 +85,7 @@ void bulSetContrailGraphics(GrSprite* info)
     contrailInfo = info;
 }
 
-void bulAddCs(void* node, s32 id)
+void bulAddCs(DbNode* node, s32 id)
 {
     switch (id) {
     case UA_UNK_201:
@@ -375,7 +375,7 @@ void move_bullets(void)
                         do_flames(&q);
                     }
                     b->life = 0;
-                    soundSetRangeAndXPositionFromWorldLoc(&p.vx);
+                    soundSetRangeAndXPositionFromWorldLoc(&p);
                     range = soundGetCalculatedSoundRange();
                     uasoundExplodeMachineGunBullet(range, soundGetCalculatedSoundXPosition(), 25);
                     hitok = bulDispatchDamage(
@@ -741,7 +741,7 @@ void InitContrails(void)
     s32 i;
     s32 j;
     SVECTOR* tp;
-    s32* vp;
+    VECTOR3* vp;
     u32* fp;
 
     for (i = 0; i < 10; i++) {
@@ -779,13 +779,13 @@ void InitContrails(void)
         fp = &mlist[i].obj.flags;
         *fp = 0x2000;
         mlist[i].obj.sub = 0;
-        vp = mlist[i].obj.center;
-        vp[0] = 0;
-        vp[1] = 0;
-        vp[2] = 0;
+        vp = &mlist[i].obj.center;
+        vp->vx = 0;
+        vp->vy = 0;
+        vp->vz = 0;
         mlist[i].obj.radius = 0x7FFF;
         mlist[i].csB = csCreate();
-        mlist[i].csB->epNode = &mlist[i].obj;
+        mlist[i].csB->epNode = (DbNode*)&mlist[i].obj;
         mlist[i].csB->drawMode = 0;
         mlist[i].csB->pos.vx = 0;
         mlist[i].csB->pos.vy = 0;
@@ -1044,7 +1044,7 @@ s16 create_FIRE_missile(s32 owner, VECTOR3* target, VECTOR3* rot, VECTOR3* pos, 
         mlist[i].unk3C = 10;
         setContrailColor(i, 0x80, 0x80, 0x80);
         mlist[i].unk48 = 0;
-        soundSetRangeAndXPositionFromWorldLoc(&pos->vx);
+        soundSetRangeAndXPositionFromWorldLoc(pos);
         uasoundStopCarWeapon(WEAPON_FIRE_MISSILE);
         uasoundPlayCarWeaponLaunchOrInflight(
             0, soundGetCalculatedSoundRange(), soundGetCalculatedSoundXPosition());
@@ -1078,7 +1078,7 @@ s16 create_FREEZE_missile(s32 owner, VECTOR3* rot, VECTOR3* pos, s32 damage)
     if (i >= 0) {
         setContrailColor(i, 0x20, 0x20, 0x9F);
         mlist[i].unk48 = 1;
-        soundSetRangeAndXPositionFromWorldLoc(&pos->vx);
+        soundSetRangeAndXPositionFromWorldLoc(pos);
         uasoundStopCarWeapon(WEAPON_FREEZE_MISSILE);
         uasoundPlayCarWeaponLaunchOrInflight(
             1, soundGetCalculatedSoundRange(), soundGetCalculatedSoundXPosition());
@@ -1093,7 +1093,7 @@ s16 create_POWER_missile(s32 owner, VECTOR3* rot, VECTOR3* pos, s32 damage)
     if (i >= 0) {
         setContrailColor(i, 0xFA, 0, 0);
         mlist[i].unk48 = 3;
-        soundSetRangeAndXPositionFromWorldLoc(&pos->vx);
+        soundSetRangeAndXPositionFromWorldLoc(pos);
         uasoundStopCarWeapon(WEAPON_POWER_MISSILE);
         uasoundPlayCarWeaponLaunchOrInflight(
             3, soundGetCalculatedSoundRange(), soundGetCalculatedSoundXPosition());
@@ -1115,7 +1115,7 @@ s16 create_REAR_missile(s32 owner, VECTOR3* target, VECTOR3* rot, VECTOR3* pos, 
         mlist[i].unk3C = 10;
         setContrailColor(i, 0x80, 0x80, 0x80);
         mlist[i].unk48 = 5;
-        soundSetRangeAndXPositionFromWorldLoc(&pos->vx);
+        soundSetRangeAndXPositionFromWorldLoc(pos);
         uasoundStopCarWeapon(WEAPON_REAR_MISSILE);
         uasoundPlayCarWeaponLaunchOrInflight(
             5, soundGetCalculatedSoundRange(), soundGetCalculatedSoundXPosition());
@@ -1133,7 +1133,7 @@ s16 create_SINGING_missile(s32 owner, VECTOR3* rot, VECTOR3* pos, s32 damage)
     if (i >= 0) {
         setContrailColor(i, 0x10, 0x80, 0x10);
         mlist[i].unk48 = 4;
-        soundSetRangeAndXPositionFromWorldLoc(&pos->vx);
+        soundSetRangeAndXPositionFromWorldLoc(pos);
         uasoundStopCarWeapon(WEAPON_SINGING_MISSILE);
         uasoundPlayCarWeaponLaunchOrInflight(
             4, soundGetCalculatedSoundRange(), soundGetCalculatedSoundXPosition());
@@ -1161,7 +1161,7 @@ s16 create_GHOST_missile(s32 owner, VECTOR3* target, VECTOR3* rot, VECTOR3* pos,
         mlist[i].unk2C = 3;
         mlist[i].life = 80;
         mlist[i].unk48 = 4;
-        soundSetRangeAndXPositionFromWorldLoc(&pos->vx);
+        soundSetRangeAndXPositionFromWorldLoc(pos);
         uasoundStopCarWeapon(WEAPON_SINGING_MISSILE);
         uasoundPlayCarWeaponLaunchOrInflight(
             4, soundGetCalculatedSoundRange(), soundGetCalculatedSoundXPosition());
@@ -1228,7 +1228,7 @@ s16 create_HOMING_missile(s32 owner, VECTOR3* target, VECTOR3* rot, VECTOR3* pos
         } else {
             cs->drawMode = 0;
         }
-        soundSetRangeAndXPositionFromWorldLoc(&pos->vx);
+        soundSetRangeAndXPositionFromWorldLoc(pos);
         m->unk48 = 2;
         uasoundStopCarWeapon(WEAPON_HOMING_MISSILE);
         uasoundPlayCarWeaponLaunchOrInflight(
@@ -1382,7 +1382,7 @@ void move_missile(Missile* m)
     u8 idx;
     s32 i;
     VECTOR fwd;
-    VECTOR d;
+    VECTOR3 d;
     VECTOR3 prev;
     VECTOR3 pt;
 
@@ -1411,7 +1411,7 @@ void move_missile(Missile* m)
         m->cs->pos.vy += d.vy;
         m->cs->pos.vz += d.vz;
         m->life = m->life - 1;
-        soundSetRangeAndXPositionFromWorldLoc(&m->cs->pos.vx);
+        soundSetRangeAndXPositionFromWorldLoc(&m->cs->pos);
         if (m->unk56 >= 16) {
             m->cs->pos.vz -= 16;
             m->unk56 -= 16;
@@ -1471,8 +1471,7 @@ void move_missile(Missile* m)
                 kill_missile(idx, 1);
                 exploded = 1;
                 i = -1;
-                bulDispatchDamage(
-                    m->unk44, hit->tag0, hit->tag1, m->damage, (VECTOR3*)&d, m->unk50);
+                bulDispatchDamage(m->unk44, hit->tag0, hit->tag1, m->damage, &d, m->unk50);
             }
         }
         if (m->unk2C != 3 && m->cs->pos.vz < 0) {
@@ -1489,7 +1488,7 @@ void move_missile(Missile* m)
                 m->cs->pos.vz = 0;
             }
             exploded = 0;
-            do_mini_explosion((VECTOR3*)&m->cs->pos);
+            do_mini_explosion(&m->cs->pos);
             kill_missile(idx, 0);
         }
     }
@@ -1497,7 +1496,7 @@ void move_missile(Missile* m)
         drop_contrail(m, idx);
     }
     if (exploded) {
-        soundSetRangeAndXPositionFromWorldLoc(&m->cs->pos.vx);
+        soundSetRangeAndXPositionFromWorldLoc(&m->cs->pos);
         uasoundPlayCarWeaponExplode(
             m->unk48, soundGetCalculatedSoundRange(), soundGetCalculatedSoundXPosition(), 99);
     }
@@ -1542,14 +1541,14 @@ void bulBoltZap(VECTOR* p1, VECTOR* p2)
     LINE_G2* line;
     VECTOR v;
     VECTOR3 pts[16];
-    s32 scr[16][3];
+    VECTOR3 scr[16];
     VECTOR delta;
     s32 cx;
     s32 cy;
-    u32* ot;
+    u_long* ot;
 
     cdb = rtGetCdb();
-    ot = (u32*)cdb->ot;
+    ot = cdb->ot;
     viewGetCenter(0, &cx, &cy);
     hfov = viewGetCurrentHorzFOVH(0);
     vfov = viewGetCurrentVertFOVH(0);
@@ -1580,16 +1579,16 @@ void bulBoltZap(VECTOR* p1, VECTOR* p2)
         v.vx = pts[i].vx + eye->vx;
         v.vy = pts[i].vy + eye->vy;
         v.vz = pts[i].vz + eye->vz;
-        mathMulVec(mat, &v, scr[i]);
-        if (scr[i][2] > 0) {
-            scr[i][0] = cx + scr[i][0] * hfov / scr[i][2];
-            scr[i][1] = cy + scr[i][1] * vfov / scr[i][2];
-            scr[i][2] = scr[i][2] / 4;
-            if (scr[i][0] < -4000 || scr[i][0] > 4000) {
-                scr[i][2] = 0;
+        mathMulVec(mat, &v, &scr[i]);
+        if (scr[i].vz > 0) {
+            scr[i].vx = cx + scr[i].vx * hfov / scr[i].vz;
+            scr[i].vy = cy + scr[i].vy * vfov / scr[i].vz;
+            scr[i].vz = scr[i].vz / 4;
+            if (scr[i].vx < -4000 || scr[i].vx > 4000) {
+                scr[i].vz = 0;
             }
-            if (scr[i][1] < -4000 || scr[i][1] > 4000) {
-                scr[i][2] = 0;
+            if (scr[i].vy < -4000 || scr[i].vy > 4000) {
+                scr[i].vz = 0;
             }
         }
     }
@@ -1599,18 +1598,18 @@ void bulBoltZap(VECTOR* p1, VECTOR* p2)
     }
 
     for (i = 0; i < 15; i++) {
-        if (scr[i][2] > 0 && scr[i + 1][2] > 0 && scr[i][2] < 4091 && scr[i + 1][2] < 4091) {
+        if (scr[i].vz > 0 && scr[i + 1].vz > 0 && scr[i].vz < 4091 && scr[i + 1].vz < 4091) {
             line = (LINE_G2*)cdb->prim;
             if ((u8*)line < cdb->areaEnd) {
                 setLineG2(line);
                 cdb->prim += 80;
                 setRGB0(line, -6 - i * 12, -6 - i * 12, 255);
                 setRGB1(line, -6 - (i + 1) * 12, -6 - (i + 1) * 12, 255);
-                line->x0 = scr[i][0];
-                line->y0 = scr[i][1];
-                line->x1 = scr[i + 1][0];
-                line->y1 = scr[i + 1][1];
-                AddPrim(ot + scr[i + 1][2], line);
+                line->x0 = scr[i].vx;
+                line->y0 = scr[i].vy;
+                line->x1 = scr[i + 1].vx;
+                line->y1 = scr[i + 1].vy;
+                AddPrim(ot + scr[i + 1].vz, line);
             }
         }
     }

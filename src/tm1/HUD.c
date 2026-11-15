@@ -47,7 +47,7 @@ INCLUDE_ASM("asm/nonmatchings/tm1/HUD", hudResetRadar);
 #endif
 
 #ifdef NON_MATCHING
-void hudDisplayRadar(u32* ot)
+void hudDisplayRadar(u_long* ot)
 {
     Db* cdb;
     SPRT* p;
@@ -187,7 +187,7 @@ INCLUDE_ASM("asm/nonmatchings/tm1/HUD", hudInitRadar);
 #endif
 
 #ifdef NON_MATCHING
-void hudAddRadarSig(s32 id, s32* pos, s32 ang)
+void hudAddRadarSig(s32 id, VECTOR3* pos, s32 ang)
 {
     s32 x;
     s32 z;
@@ -205,8 +205,8 @@ void hudAddRadarSig(s32 id, s32* pos, s32 ang)
     if (id == UA_HEALTH_STAND && radar.buffer != 0) {
         return;
     }
-    x = pos[0];
-    z = pos[1];
+    x = pos->vx;
+    z = pos->vy;
     cosine = rcos(ang);
     sine = rsin(ang);
     sx = (s32)((u32)x * (u32)cosine - (u32)z * (u32)sine) / radar.scale;

@@ -472,8 +472,8 @@ void viewProc(s32 which)
     MATRIX m1;
     MATRIX m2;
     MATRIX m3;
-    s32 out[3];
-    s32 negTrans[3];
+    VECTOR3 out;
+    VECTOR3 negTrans;
     Cs* node;
     Cs* cs;
     s32* fe;
@@ -500,13 +500,13 @@ void viewProc(s32 which)
     SetRotMatrix(&m0);
     SetTransMatrix(&m0);
     MulRotMatrix0(&node->parent->mat, &cs->wmat);
-    negTrans[0] = -node->pos.vx;
-    negTrans[1] = -node->pos.vy;
-    negTrans[2] = -node->pos.vz;
-    mathMulTransVec(&node->parent->mat, negTrans, out);
-    cs->wpos.vx = out[0] - node->parent->pos.vx;
-    cs->wpos.vy = out[1] - node->parent->pos.vy;
-    cs->wpos.vz = out[2] - node->parent->pos.vz;
+    negTrans.vx = -node->pos.vx;
+    negTrans.vy = -node->pos.vy;
+    negTrans.vz = -node->pos.vz;
+    mathMulTransVec(&node->parent->mat, &negTrans, &out);
+    cs->wpos.vx = out.vx - node->parent->pos.vx;
+    cs->wpos.vy = out.vy - node->parent->pos.vy;
+    cs->wpos.vz = out.vz - node->parent->pos.vz;
     mathMulVecLong(&cs->wmat, &cs->wpos, cs->wmat.t);
     wordCp((s32*)&worldSpaceTrans[which], (s32*)&cs->wpos, 3);
     wordCp((s32*)&worldSpaceMat[which], (s32*)&cs->wmat, 8);
@@ -581,33 +581,33 @@ Cs* viewGetSky(s32 which)
     return sky[which];
 }
 
-void viewSetSkyPosition(s32* pos, s32 which)
+void viewSetSkyPosition(VECTOR* pos, s32 which)
 {
     if (sky[which] != 0) {
-        sky[which]->pos.vx = pos[0];
-        sky[which]->pos.vy = pos[1];
-        sky[which]->pos.vz = pos[2];
+        sky[which]->pos.vx = pos->vx;
+        sky[which]->pos.vy = pos->vy;
+        sky[which]->pos.vz = pos->vz;
     }
 }
 
-void viewGetDeltaRot(void* dst, s32 which)
+void viewGetDeltaRot(SVECTOR* dst, s32 which)
 {
     memcpy(dst, &view[which]->rot, 8);
 }
 
-void viewGetDeltaTrans(void* dst, s32 which)
+void viewGetDeltaTrans(VECTOR3* dst, s32 which)
 {
     memcpy(dst, &view[which]->pos, 12);
 }
 
-void viewSetDeltaRot(void* src, s32 which)
+void viewSetDeltaRot(SVECTOR* src, s32 which)
 {
     if (view[which] != 0) {
         memcpy(&view[which]->rot, src, 8);
     }
 }
 
-void viewSetDeltaTrans(void* src, s32 which)
+void viewSetDeltaTrans(VECTOR3* src, s32 which)
 {
     if (view[which] != 0) {
         memcpy(&view[which]->pos, src, 12);

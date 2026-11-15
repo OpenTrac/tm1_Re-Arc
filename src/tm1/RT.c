@@ -57,7 +57,7 @@ s32 rtMainLoop(void)
         update_bullets();
         animate_explosions();
         draw_explosions(cdb, 0);
-        hudDisplayRadar((u32*)cdb->ot);
+        hudDisplayRadar(cdb->ot);
         hierProc(cdb, 0);
         PlayGame();
         if (split_screen) {

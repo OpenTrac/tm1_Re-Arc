@@ -44,8 +44,8 @@ s16 GetClosestTriggerPt(Car* car, u8 isPlayer)
         if (tPoints[i].type != group && group < 11) {
             continue;
         }
-        dx = m->pos.vx - tPoints[i].x;
-        dz = m->pos.vy - tPoints[i].z;
+        dx = m->pos.vx - tPoints[i].vx;
+        dz = m->pos.vy - tPoints[i].vy;
         distance = abs(dx) + abs(dz);
         if (distance < bestDist) {
             best = i;
@@ -69,8 +69,8 @@ void CalcTireCoordinates(Car* car, u8 isPlayer)
     s32 value;
     s32 tireOffset;
     s32 previousGroup;
-    VECTOR vin;
-    VECTOR vout;
+    VECTOR3 vin;
+    VECTOR3 vout;
 
     if (isPlayer) {
         m = &PLAYER_CAR(car)->motion;
@@ -132,8 +132,8 @@ void CalcTireCoordinates(Car* car, u8 isPlayer)
 
     if (tires[0].unk10 != g0) {
         previousGroup = tires[0].unk10;
-        value = triggerPtGroups.pos[g0].y;
-        previousHeight = triggerPtGroups.pos[previousGroup].y;
+        value = triggerPtGroups.pos[g0].vz;
+        previousHeight = triggerPtGroups.pos[previousGroup].vz;
         tireOffset = tires[0].unk40 - value;
         value -= previousHeight;
         if (value > 0) {
@@ -151,7 +151,7 @@ void CalcTireCoordinates(Car* car, u8 isPlayer)
                 }
                 tires[0].unk26 = 0;
                 tires[0].unk16 = tireOffset;
-                tires[0].unk24 = triggerPtGroups.pos[g0].y;
+                tires[0].unk24 = triggerPtGroups.pos[g0].vz;
             }
         } else if (value < 0) {
             tires[0].unk10 = g0;
@@ -159,7 +159,7 @@ void CalcTireCoordinates(Car* car, u8 isPlayer)
             tires[0].unk14 = 0;
             tires[0].unk26 = 0;
             tires[0].unk16 = tireOffset;
-            tires[0].unk24 = triggerPtGroups.pos[g0].y;
+            tires[0].unk24 = triggerPtGroups.pos[g0].vz;
             tires[0].unk3 = 1;
         } else {
             tires[0].unk10 = g0;
@@ -167,8 +167,8 @@ void CalcTireCoordinates(Car* car, u8 isPlayer)
     }
     if (tires[1].unk10 != g1) {
         previousGroup = tires[1].unk10;
-        value = triggerPtGroups.pos[g1].y;
-        previousHeight = triggerPtGroups.pos[previousGroup].y;
+        value = triggerPtGroups.pos[g1].vz;
+        previousHeight = triggerPtGroups.pos[previousGroup].vz;
         tireOffset = tires[1].unk40 - value;
         value -= previousHeight;
         if (value > 0) {
@@ -186,7 +186,7 @@ void CalcTireCoordinates(Car* car, u8 isPlayer)
                 }
                 tires[1].unk26 = 0;
                 tires[1].unk16 = tireOffset;
-                tires[1].unk24 = triggerPtGroups.pos[g1].y;
+                tires[1].unk24 = triggerPtGroups.pos[g1].vz;
             }
         } else if (value < 0) {
             tires[1].unk10 = g1;
@@ -194,7 +194,7 @@ void CalcTireCoordinates(Car* car, u8 isPlayer)
             tires[1].unk14 = 0;
             tires[1].unk26 = 0;
             tires[1].unk16 = tireOffset;
-            tires[1].unk24 = triggerPtGroups.pos[g1].y;
+            tires[1].unk24 = triggerPtGroups.pos[g1].vz;
             tires[1].unk3 = 1;
         } else {
             tires[1].unk10 = g1;
@@ -202,8 +202,8 @@ void CalcTireCoordinates(Car* car, u8 isPlayer)
     }
     if (tires[2].unk10 != g2) {
         previousGroup = tires[2].unk10;
-        value = triggerPtGroups.pos[g2].y;
-        previousHeight = triggerPtGroups.pos[previousGroup].y;
+        value = triggerPtGroups.pos[g2].vz;
+        previousHeight = triggerPtGroups.pos[previousGroup].vz;
         tireOffset = tires[2].unk40 - value;
         value -= previousHeight;
         if (value > 0) {
@@ -221,7 +221,7 @@ void CalcTireCoordinates(Car* car, u8 isPlayer)
                 }
                 tires[2].unk26 = 0;
                 tires[2].unk16 = tireOffset;
-                tires[2].unk24 = triggerPtGroups.pos[g2].y;
+                tires[2].unk24 = triggerPtGroups.pos[g2].vz;
             }
         } else if (value < 0) {
             tires[2].unk10 = g2;
@@ -229,7 +229,7 @@ void CalcTireCoordinates(Car* car, u8 isPlayer)
             tires[2].unk14 = 0;
             tires[2].unk26 = 0;
             tires[2].unk16 = tireOffset;
-            tires[2].unk24 = triggerPtGroups.pos[g2].y;
+            tires[2].unk24 = triggerPtGroups.pos[g2].vz;
             tires[2].unk3 = 1;
         } else {
             tires[2].unk10 = g2;
@@ -237,8 +237,8 @@ void CalcTireCoordinates(Car* car, u8 isPlayer)
     }
     if (tires[3].unk10 != g3) {
         previousGroup = tires[3].unk10;
-        value = triggerPtGroups.pos[g3].y;
-        previousHeight = triggerPtGroups.pos[previousGroup].y;
+        value = triggerPtGroups.pos[g3].vz;
+        previousHeight = triggerPtGroups.pos[previousGroup].vz;
         tireOffset = tires[3].unk40 - value;
         value -= previousHeight;
         if (value > 0) {
@@ -256,7 +256,7 @@ void CalcTireCoordinates(Car* car, u8 isPlayer)
                     }
                     tires[3].unk26 = 0;
                     tires[3].unk16 = tireOffset;
-                    tires[3].unk24 = triggerPtGroups.pos[g3].y;
+                    tires[3].unk24 = triggerPtGroups.pos[g3].vz;
                 }
             }
         } else if (value < 0) {
@@ -265,7 +265,7 @@ void CalcTireCoordinates(Car* car, u8 isPlayer)
             tires[3].unk14 = 0;
             tires[3].unk26 = 0;
             tires[3].unk16 = tireOffset;
-            tires[3].unk24 = triggerPtGroups.pos[g3].y;
+            tires[3].unk24 = triggerPtGroups.pos[g3].vz;
             tires[3].unk3 = 1;
         } else {
             tires[3].unk10 = g3;
@@ -290,19 +290,19 @@ s16 GetGroupTestPointIsIn(s32 x, s32 z, s32 y)
         n = triggerPtGroups.count;
         group = n;
         for (i = 0; i < n; i++) {
-            if (x < triggerPtGroups.pos[i].x) {
+            if (x < triggerPtGroups.pos[i].vx) {
                 continue;
             }
-            if (triggerPtGroups.pos[i].x + triggerPtGroups.w[i] < x) {
+            if (triggerPtGroups.pos[i].vx + triggerPtGroups.w[i] < x) {
                 continue;
             }
-            if (z < triggerPtGroups.pos[i].z) {
+            if (z < triggerPtGroups.pos[i].vy) {
                 continue;
             }
-            if (triggerPtGroups.pos[i].z + triggerPtGroups.d[i] < z) {
+            if (triggerPtGroups.pos[i].vy + triggerPtGroups.d[i] < z) {
                 continue;
             }
-            if (triggerPtGroups.pos[i].y < y + 80) {
+            if (triggerPtGroups.pos[i].vz < y + 80) {
                 group = i;
                 break;
             }
@@ -1309,16 +1309,16 @@ void PutAICarBackOnRoof(AICar* car)
     } else {
         tp = 0x1F;
     }
-    dx = car->motion.pos.vx - tPoints[tp].x;
-    dz = car->motion.pos.vy - tPoints[tp].z;
+    dx = car->motion.pos.vx - tPoints[tp].vx;
+    dz = car->motion.pos.vy - tPoints[tp].vy;
     if (abs(dx) < 240 && abs(dz) < 240) {
         car->stats.triggerPt = tp;
         InitTriggerPoint(car);
         car->stats.unk38 = 1;
         car->unk16F = 0;
     } else {
-        car->motion.pos.vx = SmoothValue(car->motion.pos.vx, tPoints[tp].x, 0x62);
-        car->motion.pos.vy = SmoothValue(car->motion.pos.vy, tPoints[tp].z, 0x62);
+        car->motion.pos.vx = SmoothValue(car->motion.pos.vx, tPoints[tp].vx, 0x62);
+        car->motion.pos.vy = SmoothValue(car->motion.pos.vy, tPoints[tp].vy, 0x62);
         car->stats.unk38 = 0;
         car->motion.vel.vy = 0;
         car->motion.rotDelta.vz = 0;
@@ -1361,7 +1361,7 @@ void UpdateRollingCar(Car* car, u8 isPlayer)
     }
     if (flags[11] == 0) {
         if (rand() & 1) {
-            explodeCreateFragments(1, (VECTOR*)&m->pos);
+            explodeCreateFragments(1, &m->pos);
         }
         if ((rand() & 1) == 0) {
             do_smoke(&m->pos);
@@ -1506,10 +1506,10 @@ void InitTireGroup(CarTire* tires, s16 group)
     tires[1].unk10 = group;
     tires[2].unk10 = group;
     tires[3].unk10 = group;
-    tires[0].unk40 = triggerPtGroups.pos[group].y;
-    tires[1].unk40 = triggerPtGroups.pos[group].y;
-    tires[2].unk40 = triggerPtGroups.pos[group].y;
-    tires[3].unk40 = triggerPtGroups.pos[group].y;
+    tires[0].unk40 = triggerPtGroups.pos[group].vz;
+    tires[1].unk40 = triggerPtGroups.pos[group].vz;
+    tires[2].unk40 = triggerPtGroups.pos[group].vz;
+    tires[3].unk40 = triggerPtGroups.pos[group].vz;
     tires[0].unk22 = tires[0].unk40;
     tires[1].unk22 = tires[1].unk40;
     tires[2].unk22 = tires[2].unk40;
@@ -1587,7 +1587,7 @@ TriggerPtStartPts* GetTriggerPtStartPts(void)
     return &triggerPtStartPts;
 }
 
-void CalcDistFromRoadCenter(AICar* car, s32* out, u8 which)
+void CalcDistFromRoadCenter(AICar* car, VECTOR3* out, u8 which)
 {
     s32 a;
     s32 b;
@@ -1624,14 +1624,14 @@ void CalcDistFromRoadCenter(AICar* car, s32* out, u8 which)
     }
     if ((u8)a) {
         if (h2 != 0) {
-            out[0] = (car->motion.pos.vx - p1) - (h1 * (car->motion.pos.vy - p2)) / h2;
+            out->vx = (car->motion.pos.vx - p1) - (h1 * (car->motion.pos.vy - p2)) / h2;
         } else {
-            out[0] = 0;
+            out->vx = 0;
         }
         if (h1 != 0) {
-            out[1] = (car->motion.pos.vy - p2) - (h2 * (car->motion.pos.vx - p1)) / h1;
-            d0 = out[0];
-            d1 = out[1];
+            out->vy = (car->motion.pos.vy - p2) - (h2 * (car->motion.pos.vx - p1)) / h1;
+            d0 = out->vx;
+            d1 = out->vy;
             if (d0 < 0) {
                 d0 = -d0;
             }
@@ -1639,19 +1639,19 @@ void CalcDistFromRoadCenter(AICar* car, s32* out, u8 which)
                 d1 = -d1;
             }
             if (d1 < d0) {
-                out[0] = 0;
+                out->vx = 0;
             } else {
-                out[1] = 0;
+                out->vy = 0;
             }
         } else {
-            out[1] = 0;
+            out->vy = 0;
         }
     } else if ((u8)b) {
-        out[0] = car->motion.pos.vx - q1;
-        out[1] = 0;
+        out->vx = car->motion.pos.vx - q1;
+        out->vy = 0;
     } else {
-        out[0] = 0;
-        out[1] = car->motion.pos.vy - q2;
+        out->vx = 0;
+        out->vy = car->motion.pos.vy - q2;
     }
 }
 
@@ -1767,7 +1767,7 @@ void CheckMonsterSmash(Car* car, u8 isPlayer)
         if (pos.vz <= 0) {
             pos.vz = 1;
         }
-        explodeCreateFragments(rand() & 3, (VECTOR*)&pos);
+        explodeCreateFragments(rand() & 3, &pos);
         switch (rand() & 0xF) {
         case 0:
             do_smoke(&pos);
@@ -1828,9 +1828,9 @@ void InitTriggerPoint(AICar* car)
     AICarInitTransition(car);
     CalcTurnStart(car, 0);
     UpdateCurrentTriggerPt(car);
-    car->motion.pos.vx = tPoints[car->stats.triggerPt].x;
-    car->motion.pos.vy = tPoints[car->stats.triggerPt].z;
-    car->motion.pos.vz = triggerPtGroups.pos[tPoints[car->stats.triggerPt].type].y;
+    car->motion.pos.vx = tPoints[car->stats.triggerPt].vx;
+    car->motion.pos.vy = tPoints[car->stats.triggerPt].vy;
+    car->motion.pos.vz = triggerPtGroups.pos[tPoints[car->stats.triggerPt].type].vz;
     car->motion.vel.vy = 0;
     car->flags[1] = 0;
     car->motion.rot.vz = car->unk1BC;
@@ -1859,8 +1859,8 @@ void UpdateCurrentTriggerPt(AICar* car)
     }
     CalcTurnStart(car, 0);
     car->unk200 = car->unk1B0;
-    car->unk18E = tPoints[car->unk172].x - tPoints[car->unk170].x;
-    car->unk190 = tPoints[car->unk172].z - tPoints[car->unk170].z;
+    car->unk18E = tPoints[car->unk172].vx - tPoints[car->unk170].vx;
+    car->unk190 = tPoints[car->unk172].vy - tPoints[car->unk170].vy;
     dx = car->unk18E;
     if (dx < 0) {
         dx = -dx;
@@ -1877,12 +1877,12 @@ void UpdateCurrentTriggerPt(AICar* car)
     }
     car->unk164 = both;
     if (car->unk164) {
-        car->unk1D4 = tPoints[car->unk170].x + car->unk18E / 2;
-        car->unk1D8 = tPoints[car->unk170].z + car->unk190 / 2;
+        car->unk1D4 = tPoints[car->unk170].vx + car->unk18E / 2;
+        car->unk1D8 = tPoints[car->unk170].vy + car->unk190 / 2;
     } else if (car->unk165) {
-        car->unk1D4 = tPoints[car->unk170].x;
+        car->unk1D4 = tPoints[car->unk170].vx;
     } else {
-        car->unk1D8 = tPoints[car->unk170].z;
+        car->unk1D8 = tPoints[car->unk170].vy;
     }
     AICarInitSwerve(car);
     car->unk160 = 0;
@@ -1972,8 +1972,8 @@ void CalcTurnStart(AICar* car, u8 which)
         car->stats.unkB4
             = car->stats.unk94 * 19 * GetFieldsLastFrame() / 100 * 32 * car->stats.unkFC / 100;
     }
-    car->unk192 = tPoints[car->unk174].x - tPoints[car->unk172].x;
-    car->unk194 = tPoints[car->unk174].z - tPoints[car->unk172].z;
+    car->unk192 = tPoints[car->unk174].vx - tPoints[car->unk172].vx;
+    car->unk194 = tPoints[car->unk174].vy - tPoints[car->unk172].vy;
     dx = car->unk192;
     if (dx < 0) {
         dx = -dx;
@@ -1990,12 +1990,12 @@ void CalcTurnStart(AICar* car, u8 which)
     }
     car->unk167 = both;
     if (car->unk167) {
-        car->unk1DC = tPoints[car->unk172].x + car->unk192 / 2;
-        car->unk1E0 = tPoints[car->unk172].z + car->unk194 / 2;
+        car->unk1DC = tPoints[car->unk172].vx + car->unk192 / 2;
+        car->unk1E0 = tPoints[car->unk172].vy + car->unk194 / 2;
     } else if (car->unk168) {
-        car->unk1DC = tPoints[car->unk172].x;
+        car->unk1DC = tPoints[car->unk172].vx;
     } else {
-        car->unk1E0 = tPoints[car->unk172].z;
+        car->unk1E0 = tPoints[car->unk172].vy;
     }
     car->unk1B4 = car->unk1B0;
 }
@@ -2029,8 +2029,8 @@ void GetNextTriggerPoint(AICar* car, s16 pt)
             car->unk18C = distance;
         }
     }
-    delta.vx = tPoints[car->unk174].x - tPoints[car->unk172].x;
-    delta.vy = tPoints[car->unk174].z - tPoints[car->unk172].z;
+    delta.vx = tPoints[car->unk174].vx - tPoints[car->unk172].vx;
+    delta.vy = tPoints[car->unk174].vy - tPoints[car->unk172].vy;
     car->unk1FC = SquareRoot0(delta.vx * delta.vx + delta.vy * delta.vy);
     if (delta.vy == 0) {
         delta.vy = 1;
@@ -2038,14 +2038,14 @@ void GetNextTriggerPoint(AICar* car, s16 pt)
     car->unk1C0 = ratan2(delta.vx, delta.vy);
     BoundAngle(&car->unk1C0);
     if (car->unk16B != 0) {
-        car->unk1A8 = tPoints[car->unk174].x + car->unk184;
-        car->unk1AC = tPoints[car->unk174].z + car->unk184;
+        car->unk1A8 = tPoints[car->unk174].vx + car->unk184;
+        car->unk1AC = tPoints[car->unk174].vy + car->unk184;
     } else if (car->unk16A != 0) {
-        car->unk1A8 = tPoints[car->unk174].x - car->unk184;
-        car->unk1AC = tPoints[car->unk174].z - car->unk184;
+        car->unk1A8 = tPoints[car->unk174].vx - car->unk184;
+        car->unk1AC = tPoints[car->unk174].vy - car->unk184;
     } else {
-        car->unk1A8 = tPoints[car->unk174].x;
-        car->unk1AC = tPoints[car->unk174].z;
+        car->unk1A8 = tPoints[car->unk174].vx;
+        car->unk1AC = tPoints[car->unk174].vy;
     }
     car->unk1C4 = car->unk1C0 - car->unk1BC;
     BoundAngle(&car->unk1C4);
@@ -2069,9 +2069,9 @@ s16 GetClosestTriggerPointFromCurrPt(AICar* car, TriggerPt* tp, s16* out)
     s16 i;
     s32 best;
     s32 d;
-    s32 lap[3];
+    VECTOR3 lap;
 
-    la = GetLookAheadPos(car, lap);
+    la = GetLookAheadPos(car, &lap);
     bestPt = tp->link[0];
     *out = tp->dist[0];
     best = 0x7FFFFFFF;
@@ -2083,8 +2083,8 @@ s16 GetClosestTriggerPointFromCurrPt(AICar* car, TriggerPt* tp, s16* out)
         if (car->unk01 == 0 && la >= 0 && tPoints[pt].type != la) {
             continue;
         }
-        d = SquareRoot0((lap[0] - tPoints[pt].x) * (lap[0] - tPoints[pt].x)
-            + (lap[1] - tPoints[pt].z) * (lap[1] - tPoints[pt].z));
+        d = SquareRoot0((lap.vx - tPoints[pt].vx) * (lap.vx - tPoints[pt].vx)
+            + (lap.vy - tPoints[pt].vy) * (lap.vy - tPoints[pt].vy));
         dist = tp->dist[i];
         if (car->unk01 == 1) {
             if (d > best && (pt != car->unk170 || car->unk17C < 3)) {
@@ -2108,7 +2108,7 @@ s16 GetClosestTriggerPointFromCurrPt(AICar* car, TriggerPt* tp, s16* out)
     return bestPt;
 }
 
-s16 GetLookAheadPos(AICar* car, s32* out)
+s16 GetLookAheadPos(AICar* car, VECTOR3* out)
 {
     PlayerCar* player;
     s16 grp;
@@ -2123,8 +2123,8 @@ s16 GetLookAheadPos(AICar* car, s32* out)
     s16 i;
     s32 a;
     s32 b;
-    VECTOR vin;
-    VECTOR vout;
+    VECTOR3 vin;
+    VECTOR3 vout;
 
     player = GetPlayerInfo(car->unk0E);
     current = car->unk172;
@@ -2158,9 +2158,9 @@ s16 GetLookAheadPos(AICar* car, s32* out)
             tp = *(s16*)&player->flags[0x1E];
             ret = -1;
         }
-        out[0] = tPoints[tp].x;
-        out[1] = tPoints[tp].z;
-        out[2] = tPoints[tp].f08;
+        out->vx = tPoints[tp].vx;
+        out->vy = tPoints[tp].vy;
+        out->vz = tPoints[tp].f08;
     } else {
         vin.vx = 0;
         vin.vy = car->unk34 / 2;
@@ -2180,10 +2180,10 @@ s16 GetLookAheadPos(AICar* car, s32* out)
             }
         }
         mathMulTransVec(&player->motion.mat2, &vin, &vout);
-        out[0] = player->motion.pos.vx + vout.vx;
-        out[1] = player->motion.pos.vy + vout.vy;
+        out->vx = player->motion.pos.vx + vout.vx;
+        out->vy = player->motion.pos.vy + vout.vy;
         ret = -1;
-        out[2] = player->motion.pos.vz + vout.vz;
+        out->vz = player->motion.pos.vz + vout.vz;
     }
     return ret;
 }

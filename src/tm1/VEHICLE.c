@@ -156,7 +156,7 @@ void VehicleRotUpdate(Vehicle* veh)
     veh->ang.vx += veh->angVel.vx / 64;
     veh->ang.vy += veh->angVel.vy / 64;
     veh->ang.vz += veh->angVel.vz / 64;
-    BoundVector(&veh->ang.vx);
+    BoundVector(&veh->ang);
     ang.vx = veh->ang.vx;
     ang.vy = veh->ang.vy;
     ang.vz = veh->ang.vz;

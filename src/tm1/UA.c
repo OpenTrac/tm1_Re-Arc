@@ -303,7 +303,7 @@ void uaInitDB(u32 level)
     i = 0;
     if (numPlayers > 0) {
         do {
-            playerInfo[i].stats.colorId = 1;
+            playerInfo[i].stats.nVisibleChild = 1;
             InitPlayerCar(i, playerCar[i], 1);
             t = i + 1;
             do {
@@ -354,9 +354,9 @@ void uaInitDB(u32 level)
         do {
             cs = GetAICs3D(aiCarInfo[i].playerIdx);
             if (cs != NULL) {
-                aiCarInfo[i].stats.colorId = ((DbGroup*)cs->epNode)->nChild;
+                aiCarInfo[i].stats.nVisibleChild = cs->epNode->grp.nChild;
             } else {
-                aiCarInfo[i].stats.colorId = 1;
+                aiCarInfo[i].stats.nVisibleChild = 1;
             }
             t = i + 1;
             do {
@@ -1328,7 +1328,7 @@ void SetAICarCsInfo(s16 slot, s16 idx, s32 car, u8 found)
 void PlayGame(void)
 {
     s32 d[4];
-    s32 sky[4];
+    VECTOR sky;
     s16 i;
     s16 t;
     s32 n;
@@ -1357,14 +1357,14 @@ void PlayGame(void)
             UpdateCamera(i);
         }
         if (gVar350) {
-            sky[0] = aiCarInfo[aiCamFollow].motion.pos.vx;
-            sky[1] = aiCarInfo[aiCamFollow].motion.pos.vy;
+            sky.vx = aiCarInfo[aiCamFollow].motion.pos.vx;
+            sky.vy = aiCarInfo[aiCamFollow].motion.pos.vy;
         } else if (playerCamFollow == i || twoPlayerMode) {
-            sky[0] = playerInfo[i].motion.pos.vx;
-            sky[1] = playerInfo[i].motion.pos.vy;
+            sky.vx = playerInfo[i].motion.pos.vx;
+            sky.vy = playerInfo[i].motion.pos.vy;
         }
-        sky[2] = 0;
-        viewSetSkyPosition(sky, i);
+        sky.vz = 0;
+        viewSetSkyPosition(&sky, i);
     }
     playerEndTics = GetCurTics();
     aiBegTics = GetCurTics();
@@ -1888,8 +1888,8 @@ INCLUDE_ASM("asm/nonmatchings/tm1/UA", CheckVRMode);
 
 void InitHelicoptorPosition(void)
 {
-    VECTOR v;
-    VECTOR out;
+    VECTOR3 v;
+    VECTOR3 out;
     s32 x;
     s32 y;
     s32 z;
@@ -2155,8 +2155,8 @@ s32 uaIsCarMatID(s16 matId, s8* isPlayer, u16* index)
 void UASetCameraPosition(s16 which, VECTOR3* pos, SVECTOR* rot)
 {
     SVECTOR sv;
-    VECTOR v;
-    VECTOR out;
+    VECTOR3 v;
+    VECTOR3 out;
     MATRIX mtx;
     s32 dx;
     s32 dy;
@@ -2569,7 +2569,7 @@ void uaDontDrawCar(s16 idx, u8 isPlayer)
     } else {
         cs = aiCarCs[idx];
     }
-    ((DbGroup*)cs->epNode)->nChild = 0;
+    cs->epNode->grp.nChild = 0;
 }
 
 void uaDrawCar(s16 idx, u8 isPlayer)
@@ -2579,13 +2579,13 @@ void uaDrawCar(s16 idx, u8 isPlayer)
 
     if (isPlayer) {
         cs = playerCs[idx];
-        v = playerInfo[idx].stats.colorId;
+        v = playerInfo[idx].stats.nVisibleChild;
     } else {
         cs = aiCarCs[idx];
-        v = aiCarInfo[idx].stats.colorId;
+        v = aiCarInfo[idx].stats.nVisibleChild;
     }
     if (v != 0) {
-        ((DbGroup*)cs->epNode)->nChild = v;
+        cs->epNode->grp.nChild = v;
     }
 }
 
@@ -2655,7 +2655,7 @@ void UASetSoundFlags(s16 idx, Car* car, u8 isPlayer)
         collision = &AI_CAR(car)->collision;
         name = GetAICarInfo((s16)AI_CAR(car)->playerIdx)->uaIndex;
     }
-    soundSetRangeAndXPositionFromWorldLoc(&motion->pos.vx);
+    soundSetRangeAndXPositionFromWorldLoc(&motion->pos);
     if (twoPlayerMode) {
         range = 0;
         xpos = 0;

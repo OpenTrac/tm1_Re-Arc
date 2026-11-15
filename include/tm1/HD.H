@@ -9,7 +9,7 @@
 
 typedef struct HdEnt {
     /* 0x00 */ DbNode* node;
-    /* 0x04 */ s32 v[3];
+    /* 0x04 */ VECTOR3 v;
     /* 0x10 */ s32 matIdx;
     /* 0x14 */ u16 id0;
     /* 0x16 */ u16 id1;
@@ -27,18 +27,18 @@ typedef struct HdCsHit {
     /* 0x20 */ Cs* obj;
 } HdCsHit; /* 0x24 */
 
-void hdPush(DbNode* node, s32* v, s32 matIdx, s32 id0, s16 id1);
+void hdPush(DbNode* node, VECTOR3* v, s32 matIdx, s32 id0, s16 id1);
 s32 hdPop(HdEnt** out);
 void hdSetNodeIds(s16* out0, s16* out1, HdEnt* e, s16 id0, s16 id1);
-s32 hdIsPtInSphere(VECTOR* pt, s32 radius, VECTOR* centre, s32 slack);
-void hdTraverse(Cs* cs, s32* pt, HdCsHit* res, s32 slack);
+s32 hdIsPtInSphere(VECTOR3* pt, s32 radius, VECTOR3* centre, s32 slack);
+void hdTraverse(Cs* cs, VECTOR3* pt, HdCsHit* res, s32 slack);
 void hdLod(DbLod* node, HdEnt* e);
-s32 hdPntBox(HdBox* b, VECTOR* pos, HdCsHit* res, s32 matIdx);
-s32 hdPntVolume(DbVolume* n, VECTOR* pos, HdCsHit* res, s32 matIdx);
+s32 hdPntBox(HdBox* b, VECTOR3* pos, HdCsHit* res, s32 matIdx);
+s32 hdPntVolume(DbVolume* n, VECTOR3* pos, HdCsHit* res, s32 matIdx);
 void hdCtrlNode(HdEnt* e, s16 id0, s16 id1);
-s32 hdInCtrlBox(HdBox* box, s32* pt);
+s32 hdInCtrlBox(HdBox* box, VECTOR3* pt);
 void hdSetHitTag(HdCsHit* hit, s16 id0, s16 id1, HdEnt* e);
-void HdCsTest(Cs* cs, HdCsHit* hit, s32 doWorld, MATRIX* otherMat, s32* otherPos);
+void HdCsTest(Cs* cs, HdCsHit* hit, s32 doWorld, MATRIX* otherMat, VECTOR3* otherPos);
 void hdInit(HdEnt* stack);
 
 #endif /* __TM1_HD_H__ */

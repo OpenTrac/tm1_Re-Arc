@@ -4,6 +4,8 @@
 #include "common.h"
 #include <LIBGTE.H>
 
+#include "tm1/MATH.H"
+
 typedef union DbNode DbNode;
 
 typedef struct HdBox {
@@ -27,6 +29,13 @@ typedef struct DbPolyUV {
     /* 0x0D */ u8 v3;
     /* 0x0E */ u16 pad0E;
 } DbPolyUV; /* 0x10 */
+
+/* The {u1, v1, tpage} word of a textured quad primitive. */
+typedef struct UVWord {
+    /* 0x00 */ u8 u;
+    /* 0x01 */ u8 v;
+    /* 0x02 */ u16 page;
+} UVWord; /* 0x04 */
 
 /*
  * Header of a polygon record in a DbObject's polygon list.
@@ -68,7 +77,7 @@ typedef struct DbObject {
     /* 0x14 */ u16 sub;
     /* 0x16 */ u16 skip;
     /* 0x18 */ u32 flags;
-    /* 0x1C */ s32 center[3];
+    /* 0x1C */ VECTOR3 center;
     /* 0x28 */ s32 radius;
     /* 0x2C */ HdBox box;
 } DbObject;
@@ -78,7 +87,7 @@ typedef struct DbGroup {
     /* 0x00 */ u8 op;
     /* 0x01 */ u8 pad01;
     /* 0x02 */ u16 kind;
-    /* 0x04 */ s32 center[3];
+    /* 0x04 */ VECTOR3 center;
     /* 0x10 */ s32 radius;
     /* 0x14 */ u8 nChild;
     /* 0x15 */ u8 flags;
@@ -97,7 +106,7 @@ typedef struct DbLod {
     /* 0x00 */ u8 op;
     /* 0x01 */ u8 pad01;
     /* 0x02 */ u16 kind;
-    /* 0x04 */ s32 center[3];
+    /* 0x04 */ VECTOR3 center;
     /* 0x10 */ s32 nRec;
     /* 0x14 */ DbLodRec* rec[1];
 } DbLod;
@@ -124,7 +133,7 @@ typedef struct DbTrans {
     /* 0x00 */ u8 op;
     /* 0x01 */ u8 pad01;
     /* 0x02 */ u16 kind;
-    /* 0x04 */ s32 ofs[3];
+    /* 0x04 */ VECTOR3 ofs;
     /* 0x10 */ u16 sub;
     /* 0x12 */ u8 nChild;
     /* 0x13 */ u8 flags;

@@ -5,6 +5,8 @@
 #include "tm1/SOUND_ID_API.H"
 #include <LIBGTE.H>
 
+#include "tm1/MATH.H"
+
 // CD audio tracks for `soundStartPlayDA()`.
 // (Track 1 holds the game data, so it is used to mean "no music".)
 #define DA_TRACK_NONE 1
@@ -115,8 +117,8 @@ typedef struct {
     s32 numProgVabProgs; /* +44 */
 } SoundSystemAttributes; /* 0x30 */
 
-void soundMulVec(MATRIX* m, s32* v, s32* out);
-void soundSetRangeAndXPositionFromWorldLoc(s32* loc);
+void soundMulVec(MATRIX* m, VECTOR3* v, VECTOR3* out);
+void soundSetRangeAndXPositionFromWorldLoc(VECTOR3* loc);
 s32 getOpenVoice(void);
 void silenceUnusedVoices(void);
 void soundOff(Tone* t);

@@ -6,9 +6,9 @@
 #include "tm1/GRUTILS.H"
 
 void hudResetRadar(void);
-void hudDisplayRadar(u32* ot);
+void hudDisplayRadar(u_long* ot);
 void hudInitRadar(void);
-void hudAddRadarSig(s32 id, s32* pos, s32 ang);
+void hudAddRadarSig(s32 id, VECTOR3* pos, s32 ang);
 void hudradarActivate(void);
 void hudRadarToggle(void);
 void hudStoreArrowIcon(s32 id, DbObject* obj);

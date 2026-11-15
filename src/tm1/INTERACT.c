@@ -27,8 +27,8 @@
 #define MAX(a, b) ((a) < (b) ? (b) : (a))
 
 typedef struct {
-    /* 0x00 */ s32* pos;
-    /* 0x04 */ s32* targetPos;
+    /* 0x00 */ VECTOR3* pos;
+    /* 0x04 */ VECTOR3* targetPos;
     /* 0x08 */ s16 life;
     /* 0x0A */ u8 pad0A[2];
     /* 0x0C */ s32 target;
@@ -38,7 +38,7 @@ typedef struct {
     /* 0x00 */ u32 kind;
     /* 0x04 */ s16 life;
     /* 0x06 */ s16 type;
-    /* 0x08 */ s32 pos[3];
+    /* 0x08 */ VECTOR3 pos;
     /* 0x14 */ s32 power;
     /* 0x18 */ s32 idx;
     /* 0x1C */ GrSprite* sprite;
@@ -48,8 +48,8 @@ typedef struct {
     /* 0x00 */ Cs* cs;
     /* 0x04 */ s16 life;
     /* 0x06 */ u8 pad06[2];
-    /* 0x08 */ s32 pos[3];
-    /* 0x14 */ s32 world[3];
+    /* 0x08 */ VECTOR3 pos;
+    /* 0x14 */ VECTOR3 world;
     /* 0x20 */ s32 rear;
     /* 0x24 */ u8 flag;
     /* 0x25 */ u8 pad25[3];
@@ -59,13 +59,13 @@ typedef struct {
     /* 0x00 */ s32 obj;
     /* 0x04 */ u8 kind;
     /* 0x05 */ u8 pad05[3];
-    /* 0x08 */ s32 pos[3];
+    /* 0x08 */ VECTOR3 pos;
 } PickupWeap;
 
 typedef struct {
     /* 0x00 */ u8 active;
     /* 0x01 */ u8 pad01[3];
-    /* 0x04 */ s32 pos[3];
+    /* 0x04 */ VECTOR3 pos;
 } HealthStand;
 
 s16 numTriggerPoints = 0;
@@ -333,9 +333,9 @@ void UpdateAIWeaponPadStatus(AICar* car)
 
 void UpdateGuns(Car* car, u8 isPlayer)
 {
-    s32 r[3];
-    s32 d[3];
-    s32 v[3];
+    VECTOR3 r;
+    VECTOR3 d;
+    VECTOR3 v;
     u16 idx;
     CarStats* cfg;
     CarMotion* m;
@@ -363,7 +363,7 @@ void UpdateGuns(Car* car, u8 isPlayer)
         idx = AI_CAR(car)->playerIdx + 50;
         snd = GetAICarInfo((s16)AI_CAR(car)->playerIdx)->uaIndex;
     }
-    soundSetRangeAndXPositionFromWorldLoc(&m->pos.vx);
+    soundSetRangeAndXPositionFromWorldLoc(&m->pos);
     if ((s16)pad->gunDelay > 0) {
         --pad->gunDelay;
         return;
@@ -399,37 +399,37 @@ void UpdateGuns(Car* car, u8 isPlayer)
         // Keep muzzle setup together to preserve PsyQ's load scheduling.
         do {
             if (pad->unk04 != 0) {
-                v[0] = -(s16)cfg->unk110;
+                v.vx = -(s16)cfg->unk110;
             } else {
-                v[0] = (s16)cfg->unk110;
+                v.vx = (s16)cfg->unk110;
             }
-            v[1] = (s16)cfg->unk112;
-            v[2] = (s16)cfg->unk114;
+            v.vy = (s16)cfg->unk112;
+            v.vz = (s16)cfg->unk114;
         } while (0);
         mat = &m->mat2;
         pad->unk04 = 1 - pad->unk04;
-        mathMulTransVec(mat, v, d);
-        d[0] = d[0] + m->pos.vx;
-        d[1] = d[1] + m->pos.vy;
-        d[2] = d[2] + m->pos.vz;
-        r[0] = rsin(m->rot.vz - aim->unk38);
-        r[1] = rcos(m->rot.vz - aim->unk38);
-        r[2] = -rsin(m->rot.vx - aim->unk30);
-        create_bullet((s16)idx, r, d, gunDamage);
-        do_mflash(d);
+        mathMulTransVec(mat, &v, &d);
+        d.vx = d.vx + m->pos.vx;
+        d.vy = d.vy + m->pos.vy;
+        d.vz = d.vz + m->pos.vz;
+        r.vx = rsin(m->rot.vz - aim->unk38);
+        r.vy = rcos(m->rot.vz - aim->unk38);
+        r.vz = -rsin(m->rot.vx - aim->unk30);
+        create_bullet((s16)idx, &r, &d, gunDamage);
+        do_mflash(&d);
         if (snd == 0x82) {
             if (pad->unk04 != 0) {
-                v[0] = 0;
-                v[1] = -v[1];
-                mathMulTransVec(mat, v, d);
-                d[0] = d[0] + m->pos.vx;
-                d[1] = d[1] + m->pos.vy;
-                d[2] = d[2] + m->pos.vz;
-                r[0] = -r[0];
-                r[1] = -r[1];
-                r[2] = -r[2];
-                s_create_bullet((s16)idx, r, d, 2, gunDamage * 2, 20, 0);
-                do_mflash(d);
+                v.vx = 0;
+                v.vy = -v.vy;
+                mathMulTransVec(mat, &v, &d);
+                d.vx = d.vx + m->pos.vx;
+                d.vy = d.vy + m->pos.vy;
+                d.vz = d.vz + m->pos.vz;
+                r.vx = -r.vx;
+                r.vy = -r.vy;
+                r.vz = -r.vz;
+                s_create_bullet((s16)idx, &r, &d, 2, gunDamage * 2, 20, 0);
+                do_mflash(&d);
             }
         }
         pad->gunDelay = 3;
@@ -515,8 +515,8 @@ void UpdateNonGuns(Car* car, u8 isPlayer)
 
 void FireMissiles(Car* car, u8 isPlayer)
 {
-    s32 d[3];
-    s32 v[3];
+    VECTOR3 d;
+    VECTOR3 v;
     VECTOR3* tgt;
     CarStats* cfg;
     CarMotion* m;
@@ -542,35 +542,35 @@ void FireMissiles(Car* car, u8 isPlayer)
         flags = AI_CAR(car)->flags;
         cs = GetAICs3D((s16)AI_CAR(car)->playerIdx);
     }
-    v[0] = (s16)cfg->dropPower;
-    v[1] = 0;
-    v[2] = cfg->unk70 + 8;
-    mathMulTransVec(&m->mat2, v, d);
-    d[0] = d[0] + m->pos.vx;
-    d[1] = d[1] + m->pos.vy;
-    d[2] = d[2] + m->pos.vz;
+    v.vx = (s16)cfg->dropPower;
+    v.vy = 0;
+    v.vz = cfg->unk70 + 8;
+    mathMulTransVec(&m->mat2, &v, &d);
+    d.vx = d.vx + m->pos.vx;
+    d.vy = d.vy + m->pos.vy;
+    d.vz = d.vz + m->pos.vz;
     r = -1;
     switch (pad->cur) {
     case WEAPON_FIRE_MISSILE:
         carLockon(isPlayer, &tgt);
-        r = create_FIRE_missile(cs->unkC0, tgt, &m->rot, d, missileDamageFire);
+        r = create_FIRE_missile(cs->unkC0, tgt, &m->rot, &d, missileDamageFire);
         break;
     case WEAPON_FREEZE_MISSILE:
-        r = create_FREEZE_missile(cs->unkC0, &m->rot, d, HIT_FREEZE);
+        r = create_FREEZE_missile(cs->unkC0, &m->rot, &d, HIT_FREEZE);
         break;
     case WEAPON_POWER_MISSILE:
-        r = create_POWER_missile(cs->unkC0, &m->rot, d, missileDamagePower);
+        r = create_POWER_missile(cs->unkC0, &m->rot, &d, missileDamagePower);
         break;
     case WEAPON_SINGING_MISSILE:
-        r = create_SINGING_missile(cs->unkC0, &m->rot, d, missileDamageSinging);
+        r = create_SINGING_missile(cs->unkC0, &m->rot, &d, missileDamageSinging);
         break;
     case WEAPON_REAR_MISSILE:
         carLockon2(isPlayer, &tgt);
-        r = create_REAR_missile(cs->unkC0, tgt, &m->rot, d, missileDamageRear);
+        r = create_REAR_missile(cs->unkC0, tgt, &m->rot, &d, missileDamageRear);
         break;
     case WEAPON_HOMING_MISSILE:
         carLockon(isPlayer, &tgt);
-        r = create_HOMING_missile(cs->unkC0, tgt, &m->rot, d, missileDamageHoming);
+        r = create_HOMING_missile(cs->unkC0, tgt, &m->rot, &d, missileDamageHoming);
         break;
     }
     if (r >= 0) {
@@ -605,9 +605,9 @@ static inline void SpecialLaunch(CarWeap* pad, s32 cost, s32 sound)
 
 void FireSpecials(Car* car, u8 isPlayer)
 {
-    s32 d[3];
-    s32 v[3];
-    s32 r[3];
+    VECTOR3 d;
+    VECTOR3 v;
+    VECTOR3 r;
     VECTOR3* tgt;
     CarStats* cfg;
     CarMotion* m;
@@ -636,27 +636,27 @@ void FireSpecials(Car* car, u8 isPlayer)
         pad = &AI_CAR(car)->weap;
         flags = AI_CAR(car)->flags;
     }
-    soundSetRangeAndXPositionFromWorldLoc(&m->pos.vx);
-    v[0] = 0;
-    v[1] = (s16)cfg->unk112;
-    v[2] = (s16)cfg->unk114;
+    soundSetRangeAndXPositionFromWorldLoc(&m->pos);
+    v.vx = 0;
+    v.vy = (s16)cfg->unk112;
+    v.vz = (s16)cfg->unk114;
     mat = &m->mat2;
-    mathMulTransVec(mat, v, d);
-    d[0] = d[0] + m->pos.vx;
-    d[1] = d[1] + m->pos.vy;
-    d[2] = d[2] + m->pos.vz;
-    v[0] = 0;
-    v[1] = -100;
-    v[2] = 0;
-    mathMulTransVec(mat, v, r);
-    r[0] = rsin(m->rot.vz) >> 6;
-    r[1] = rcos(m->rot.vz) >> 6;
-    r[2] = -rsin(m->rot.vx) >> 6;
+    mathMulTransVec(mat, &v, &d);
+    d.vx = d.vx + m->pos.vx;
+    d.vy = d.vy + m->pos.vy;
+    d.vz = d.vz + m->pos.vz;
+    v.vx = 0;
+    v.vy = -100;
+    v.vz = 0;
+    mathMulTransVec(mat, &v, &r);
+    r.vx = rsin(m->rot.vz) >> 6;
+    r.vy = rcos(m->rot.vz) >> 6;
+    r.vz = -rsin(m->rot.vx) >> 6;
     switch (kind) {
     case UA_SEMI_TRUCK:
         if (pad->ammo[WEAPON_SPECIAL] >= weaponCost30) {
-            d[2] = d[2] - 16;
-            s_create_bullet(idx, r, d, 4, damage30, 12, 0);
+            d.vz = d.vz - 16;
+            s_create_bullet(idx, &r, &d, 4, damage30, 12, 0);
             pad->ammo[WEAPON_SPECIAL] -= weaponCost30;
             uasoundStopCarSpecialWeapon(SOUND_SPECIAL_SEMI_TRUCK);
             range = soundGetCalculatedSoundRange();
@@ -666,7 +666,7 @@ void FireSpecials(Car* car, u8 isPlayer)
         break;
     case UA_LAMBORGHINI:
         if (pad->ammo[WEAPON_SPECIAL] >= weaponCost60) {
-            s_create_bullet(idx, r, d, 6, damage60, 15, 0);
+            s_create_bullet(idx, &r, &d, 6, damage60, 15, 0);
             pad->ammo[WEAPON_SPECIAL] -= weaponCost60;
             uasoundStopCarSpecialWeapon(SOUND_SPECIAL_LAMBORGHINI);
             range = soundGetCalculatedSoundRange();
@@ -676,7 +676,7 @@ void FireSpecials(Car* car, u8 isPlayer)
         break;
     case UA_TAXI_CAB:
         if (pad->ammo[WEAPON_SPECIAL] >= weaponCost20) {
-            s_create_bullet(idx, r, d, 17, damage20, 30, 0);
+            s_create_bullet(idx, &r, &d, 17, damage20, 30, 0);
             pad->ammo[WEAPON_SPECIAL] -= weaponCost20;
             uasoundStopCarSpecialWeapon(SOUND_SPECIAL_TAXI_CAB);
             range = soundGetCalculatedSoundRange();
@@ -686,7 +686,7 @@ void FireSpecials(Car* car, u8 isPlayer)
         break;
     case UA_DUNE_BUGGY:
         if (pad->ammo[WEAPON_SPECIAL] >= weaponCost90) {
-            s_create_bullet(idx, r, d, 19, damage90, 30, 0);
+            s_create_bullet(idx, &r, &d, 19, damage90, 30, 0);
             pad->ammo[WEAPON_SPECIAL] -= weaponCost90;
             uasoundStopCarSpecialWeapon(SOUND_SPECIAL_DUNE_BUGGY);
             range = soundGetCalculatedSoundRange();
@@ -696,7 +696,7 @@ void FireSpecials(Car* car, u8 isPlayer)
         break;
     case UA_ICE_CREAM_TRUCK:
         if (pad->ammo[WEAPON_SPECIAL] >= weaponCost10) {
-            s_create_bullet(idx, r, d, 15, damage10, 30, 0);
+            s_create_bullet(idx, &r, &d, 15, damage10, 30, 0);
             pad->ammo[WEAPON_SPECIAL] -= weaponCost10;
             uasoundStopCarSpecialWeapon(SOUND_SPECIAL_ICE_CREAM_TRUCK);
             range = soundGetCalculatedSoundRange();
@@ -710,33 +710,33 @@ void FireSpecials(Car* car, u8 isPlayer)
             s32 res;
             carLockon(isPlayer, &tgt);
             mat2 = &m->mat2;
-            v[0] = (s16)cfg->dropPower;
-            v[1] = 0;
-            v[2] = cfg->unk70 + 8;
-            mathMulTransVec(mat2, v, d);
-            d[0] = d[0] + m->pos.vx;
-            d[1] = d[1] + m->pos.vy;
-            d[2] = d[2] + m->pos.vz;
-            res = create_SWARM_missile(idx, tgt, &m->rot, d, damage70);
+            v.vx = (s16)cfg->dropPower;
+            v.vy = 0;
+            v.vz = cfg->unk70 + 8;
+            mathMulTransVec(mat2, &v, &d);
+            d.vx = d.vx + m->pos.vx;
+            d.vy = d.vy + m->pos.vy;
+            d.vz = d.vz + m->pos.vz;
+            res = create_SWARM_missile(idx, tgt, &m->rot, &d, damage70);
             count = res >= 0;
-            v[0] = (s16)cfg->unk110;
-            v[1] = (s16)cfg->unk112;
-            v[2] = (s16)cfg->unk114;
-            mathMulTransVec(mat2, v, d);
-            d[0] = d[0] + m->pos.vx;
-            d[1] = d[1] + m->pos.vy;
-            d[2] = d[2] + m->pos.vz;
-            if (create_SWARM_missile(idx, tgt, &m->rot, d, damage70) >= 0) {
+            v.vx = (s16)cfg->unk110;
+            v.vy = (s16)cfg->unk112;
+            v.vz = (s16)cfg->unk114;
+            mathMulTransVec(mat2, &v, &d);
+            d.vx = d.vx + m->pos.vx;
+            d.vy = d.vy + m->pos.vy;
+            d.vz = d.vz + m->pos.vz;
+            if (create_SWARM_missile(idx, tgt, &m->rot, &d, damage70) >= 0) {
                 count = count + 1;
             }
-            v[0] = -(s16)cfg->unk110;
-            v[1] = (s16)cfg->unk112;
-            v[2] = (s16)cfg->unk114;
-            mathMulTransVec(mat2, v, d);
-            d[0] = d[0] + m->pos.vx;
-            d[1] = d[1] + m->pos.vy;
-            d[2] = d[2] + m->pos.vz;
-            if (create_SWARM_missile(idx, tgt, &m->rot, d, damage70) >= 0) {
+            v.vx = -(s16)cfg->unk110;
+            v.vy = (s16)cfg->unk112;
+            v.vz = (s16)cfg->unk114;
+            mathMulTransVec(mat2, &v, &d);
+            d.vx = d.vx + m->pos.vx;
+            d.vy = d.vy + m->pos.vy;
+            d.vz = d.vz + m->pos.vz;
+            if (create_SWARM_missile(idx, tgt, &m->rot, &d, damage70) >= 0) {
                 count = count + 1;
             }
             if (count != 0) {
@@ -746,7 +746,7 @@ void FireSpecials(Car* car, u8 isPlayer)
         break;
     case UA_HARLEY:
         if (pad->ammo[WEAPON_SPECIAL] >= weaponCost80) {
-            s_create_bullet(idx, r, d, 21, damage80, 20, 0);
+            s_create_bullet(idx, &r, &d, 21, damage80, 20, 0);
             pad->ammo[WEAPON_SPECIAL] -= weaponCost80;
             uasoundStopCarSpecialWeapon(SOUND_SPECIAL_HARLEY);
             range = soundGetCalculatedSoundRange();
@@ -757,14 +757,14 @@ void FireSpecials(Car* car, u8 isPlayer)
     case UA_CORVETTE:
         if (pad->ammo[WEAPON_SPECIAL] >= weaponCost110) {
             carLockon(isPlayer, &tgt);
-            v[0] = (s16)cfg->dropPower;
-            v[1] = 0;
-            v[2] = cfg->unk70 + 8;
-            mathMulTransVec(&m->mat2, v, d);
-            d[0] = d[0] + m->pos.vx;
-            d[1] = d[1] + m->pos.vy;
-            d[2] = d[2] + m->pos.vz;
-            if (create_GHOST_missile(idx, tgt, &m->rot, d, damage110) >= 0) {
+            v.vx = (s16)cfg->dropPower;
+            v.vy = 0;
+            v.vz = cfg->unk70 + 8;
+            mathMulTransVec(&m->mat2, &v, &d);
+            d.vx = d.vx + m->pos.vx;
+            d.vy = d.vy + m->pos.vy;
+            d.vz = d.vz + m->pos.vz;
+            if (create_GHOST_missile(idx, tgt, &m->rot, &d, damage110) >= 0) {
                 SpecialLaunch(pad, weaponCost110, SOUND_SPECIAL_CORVETTE);
             }
         }
@@ -787,14 +787,14 @@ void FireSpecials(Car* car, u8 isPlayer)
     case UA_MAD_MAX:
         if (pad->ammo[WEAPON_SPECIAL] >= weaponCost120) {
             carLockon(isPlayer, &tgt);
-            v[0] = (s16)cfg->dropPower;
-            v[1] = 0;
-            v[2] = cfg->unk70 + 8;
-            mathMulTransVec(&m->mat2, v, d);
-            d[0] = d[0] + m->pos.vx;
-            d[1] = d[1] + m->pos.vy;
-            d[2] = d[2] + m->pos.vz;
-            if (create_DEATHSPEAR_missile(idx, tgt, &m->rot, d, damage120) >= 0) {
+            v.vx = (s16)cfg->dropPower;
+            v.vy = 0;
+            v.vz = cfg->unk70 + 8;
+            mathMulTransVec(&m->mat2, &v, &d);
+            d.vx = d.vx + m->pos.vx;
+            d.vy = d.vy + m->pos.vy;
+            d.vz = d.vz + m->pos.vz;
+            if (create_DEATHSPEAR_missile(idx, tgt, &m->rot, &d, damage120) >= 0) {
                 SpecialLaunch(pad, weaponCost120, SOUND_SPECIAL_MAD_MAX);
             }
         }
@@ -803,28 +803,28 @@ void FireSpecials(Car* car, u8 isPlayer)
         if (pad->ammo[WEAPON_SPECIAL] >= weaponCost100) {
             VECTOR3 rot2;
             carLockon(isPlayer, &tgt);
-            v[0] = (s16)cfg->dropPower;
-            v[1] = 0;
-            v[2] = cfg->unk70 + 8;
-            mathMulTransVec(&m->mat2, v, d);
-            d[0] = d[0] + m->pos.vx;
-            d[1] = d[1] + m->pos.vy;
-            d[2] = d[2] + m->pos.vz;
-            create_SWARM_missile(idx, tgt, &m->rot, d, damage130);
+            v.vx = (s16)cfg->dropPower;
+            v.vy = 0;
+            v.vz = cfg->unk70 + 8;
+            mathMulTransVec(&m->mat2, &v, &d);
+            d.vx = d.vx + m->pos.vx;
+            d.vy = d.vy + m->pos.vy;
+            d.vz = d.vz + m->pos.vz;
+            create_SWARM_missile(idx, tgt, &m->rot, &d, damage130);
             carLockon2(isPlayer, &tgt);
             rot2.vx = m->rot.vx;
             rot2.vy = m->rot.vy;
             rot2.vz = m->rot.vz + 2048;
-            create_SWARM_missile(idx, tgt, &rot2, d, damage130);
-            s_create_bullet(idx, r, d, 19, damage130, 30, 0);
+            create_SWARM_missile(idx, tgt, &rot2, &d, damage130);
+            s_create_bullet(idx, &r, &d, 19, damage130, 30, 0);
             fire_taser(car, isPlayer);
-            fireFlameThrower(car, isPlayer, 2, r);
+            fireFlameThrower(car, isPlayer, 2, &r);
             CurrentSpecialLaunch(pad, weaponCost130, SOUND_SPECIAL_BOSS_CAR);
         }
         break;
     case UA_LOW_RIDER:
         if (pad->ammo[WEAPON_SPECIAL] >= weaponCost100) {
-            fireFlameThrower(car, isPlayer, 2, r);
+            fireFlameThrower(car, isPlayer, 2, &r);
             CurrentSpecialLaunch(pad, weaponCost100, SOUND_SPECIAL_LOW_RIDER);
         }
         break;
@@ -859,7 +859,7 @@ s32 fire_taser(Car* car, s32 isPlayer)
     CarMotion* m;
     Cs* cs;
     Cs* other;
-    s32* bestObj;
+    VECTOR3* bestObj;
     s32 bestId;
     s32 best;
     s32 myId;
@@ -896,7 +896,7 @@ s32 fire_taser(Car* car, s32 isPlayer)
                 if (dist < best) {
                     best = dist;
                     bestId = other->unkC0;
-                    bestObj = &GetPlayerInfo(i)->motion.pos.vx;
+                    bestObj = &GetPlayerInfo(i)->motion.pos;
                 }
             }
         }
@@ -913,7 +913,7 @@ s32 fire_taser(Car* car, s32 isPlayer)
                     if (dist < best) {
                         best = dist;
                         bestId = other->unkC0;
-                        bestObj = &GetAICarInfo(aiIndex)->motion.pos.vx;
+                        bestObj = &GetAICarInfo(aiIndex)->motion.pos;
                     }
                 }
             }
@@ -927,17 +927,17 @@ s32 fire_taser(Car* car, s32 isPlayer)
         taser[idx].target = bestId;
         taser[idx].targetPos = bestObj;
     }
-    taser[idx].pos = &m->pos.vx;
+    taser[idx].pos = &m->pos;
     return 1;
 }
 
 void draw_tasers(Db* db, s32 view)
 {
-    volatile s32 tp[3];
-    s32 w[3];
-    s32 pt[16][3];
-    s32 sc[16][3];
-    s32 d[3];
+    volatile VECTOR3 tp;
+    VECTOR3 w;
+    VECTOR3 pt[16];
+    VECTOR3 sc[16];
+    VECTOR3 d;
     s32 cx;
     s32 cy;
     MATRIX* mat;
@@ -959,56 +959,57 @@ void draw_tasers(Db* db, s32 view)
     for (i = 0; i < 3; i++) {
         if (taser[i].life > 0) {
             if (taser[i].target < 0) {
-                taser[i].targetPos = tp;
-                tp[0] = taser[i].pos[0] + (rcos(taser[i].life * 400) >> 4);
-                tp[1] = taser[i].pos[1] + (rsin(taser[i].life * 400) >> 4);
-                tp[2] = 0;
+                taser[i].targetPos = &tp;
+                tp.vx = taser[i].pos->vx + (rcos(taser[i].life * 400) >> 4);
+                tp.vy = taser[i].pos->vy + (rsin(taser[i].life * 400) >> 4);
+                tp.vz = 0;
                 if (shellGetCurrentLevel() == LEVEL6_ROOFTOPS) {
-                    tp[2] = taser[i].pos[2] - 40;
+                    tp.vz = taser[i].pos->vz - 40;
                 }
             }
-            d[0] = taser[i].targetPos[0] - taser[i].pos[0];
-            d[1] = taser[i].targetPos[1] - taser[i].pos[1];
-            d[2] = taser[i].targetPos[2] - taser[i].pos[2];
-            pt[0][0] = taser[i].pos[0];
-            pt[0][1] = taser[i].pos[1];
-            pt[0][2] = taser[i].pos[2] + 30;
-            pt[15][0] = taser[i].targetPos[0];
-            pt[15][1] = taser[i].targetPos[1];
-            pt[15][2] = taser[i].targetPos[2];
+            d.vx = taser[i].targetPos->vx - taser[i].pos->vx;
+            d.vy = taser[i].targetPos->vy - taser[i].pos->vy;
+            d.vz = taser[i].targetPos->vz - taser[i].pos->vz;
+            pt[0].vx = taser[i].pos->vx;
+            pt[0].vy = taser[i].pos->vy;
+            pt[0].vz = taser[i].pos->vz + 30;
+            pt[15].vx = taser[i].targetPos->vx;
+            pt[15].vy = taser[i].targetPos->vy;
+            pt[15].vz = taser[i].targetPos->vz;
             for (j = 1; j < 15; j++) {
-                ((VECTOR3*)pt)[j].vx = taser[i].pos[0] + d[0] * j / 16;
-                ((VECTOR3*)pt)[j].vy = taser[i].pos[1] + d[1] * j / 16;
-                ((VECTOR3*)pt)[j].vz = (taser[i].pos[2] + 30) + (d[2] * j / 16);
-                pt[j][2] -= 32 - (rand() & 0x3F);
-                pt[j][1] -= 8 - (rand() & 0xF);
-                pt[j][0] -= 8 - (rand() & 0xF);
+                /* Indexing through a pointer rather than the array is needed to match. */
+                ((VECTOR3*)pt)[j].vx = taser[i].pos->vx + d.vx * j / 16;
+                ((VECTOR3*)pt)[j].vy = taser[i].pos->vy + d.vy * j / 16;
+                ((VECTOR3*)pt)[j].vz = (taser[i].pos->vz + 30) + (d.vz * j / 16);
+                pt[j].vz -= 32 - (rand() & 0x3F);
+                pt[j].vy -= 8 - (rand() & 0xF);
+                pt[j].vx -= 8 - (rand() & 0xF);
             }
             for (j = 0; j < 16; j++) {
-                w[0] = pt[j][0] + tr->vx;
-                w[1] = pt[j][1] + tr->vy;
-                w[2] = pt[j][2] + tr->vz;
-                mathMulVec(mat, w, sc[j]);
-                z = sc[j][2];
+                w.vx = pt[j].vx + tr->vx;
+                w.vy = pt[j].vy + tr->vy;
+                w.vz = pt[j].vz + tr->vz;
+                mathMulVec(mat, &w, &sc[j]);
+                z = sc[j].vz;
                 if (z > 0) {
-                    sc[j][0] = cx + sc[j][0] * hfov / z;
-                    sc[j][1] = cy + sc[j][1] * vfov / sc[j][2];
-                    sc[j][2] = sc[j][2] / 4;
-                    if ((u32)(sc[j][0] + 4000) >= 8001) {
-                        sc[j][2] = 0;
+                    sc[j].vx = cx + sc[j].vx * hfov / z;
+                    sc[j].vy = cy + sc[j].vy * vfov / sc[j].vz;
+                    sc[j].vz = sc[j].vz / 4;
+                    if ((u32)(sc[j].vx + 4000) >= 8001) {
+                        sc[j].vz = 0;
                     }
-                    if ((u32)(sc[j][1] + 4000) >= 8001) {
-                        sc[j][2] = 0;
+                    if ((u32)(sc[j].vy + 4000) >= 8001) {
+                        sc[j].vz = 0;
                     }
                 }
             }
             if (rand() & 1) {
-                do_puff(pt[15]);
+                do_puff(&pt[15]);
             } else {
-                do_flash(pt[15]);
+                do_flash(&pt[15]);
             }
-            do_simple_spark(pt[(rand() & 7) + 8]);
-            do_simple_spark(pt[rand() & 0xF]);
+            do_simple_spark(&pt[(rand() & 7) + 8]);
+            do_simple_spark(&pt[rand() & 0xF]);
             --taser[i].life;
             if (taser[i].target >= 0) {
                 if (taser[i].life == 0) {
@@ -1016,7 +1017,7 @@ void draw_tasers(Db* db, s32 view)
                 }
             }
             for (j = 0; j < 15; j++) {
-                if (sc[j][2] > 0 && sc[j + 1][2] > 0 && sc[j][2] < 4091 && sc[j + 1][2] < 4091) {
+                if (sc[j].vz > 0 && sc[j + 1].vz > 0 && sc[j].vz < 4091 && sc[j + 1].vz < 4091) {
                     p = (LINE_G2*)db->prim;
                     if ((u32)(db->prim + 0x50) < (u32)db->areaEnd) {
                         setLineG2(p);
@@ -1027,11 +1028,11 @@ void draw_tasers(Db* db, s32 view)
                         p->r1 = -6 - (j + 1) * 12;
                         p->g1 = -6 - (j + 1) * 12;
                         p->b1 = 255;
-                        p->x0 = sc[j][0];
-                        p->y0 = sc[j][1];
-                        p->x1 = sc[j + 1][0];
-                        p->y1 = sc[j + 1][1];
-                        AddPrim(ot + sc[j + 1][2], p);
+                        p->x0 = sc[j].vx;
+                        p->y0 = sc[j].vy;
+                        p->x1 = sc[j + 1].vx;
+                        p->y1 = sc[j + 1].vy;
+                        AddPrim(ot + sc[j + 1].vz, p);
                     }
                 }
             }
@@ -1047,8 +1048,8 @@ static inline void ConsumeWeaponAmmo(CarWeap* pad)
 
 void LaunchDrops(Car* car, u8 isPlayer)
 {
-    s32 d[3];
-    s32 v[3];
+    VECTOR3 d;
+    VECTOR3 v;
     CarStats* cfg;
     CarMotion* m;
     CarWeap* pad;
@@ -1081,16 +1082,16 @@ void LaunchDrops(Car* car, u8 isPlayer)
     } else {
         power = (s16)t[3].unk22;
     }
-    v[0] = (s16)cfg->dropPower;
-    v[1] = 0;
-    v[2] = 0;
-    mathMulTransVec(&m->mat2, v, d);
-    d[0] = d[0] + m->pos.vx;
-    d[1] = d[1] + m->pos.vy;
-    d[2] = d[2] + m->pos.vz;
-    soundSetRangeAndXPositionFromWorldLoc(d);
+    v.vx = (s16)cfg->dropPower;
+    v.vy = 0;
+    v.vz = 0;
+    mathMulTransVec(&m->mat2, &v, &d);
+    d.vx = d.vx + m->pos.vx;
+    d.vy = d.vy + m->pos.vy;
+    d.vz = d.vz + m->pos.vz;
+    soundSetRangeAndXPositionFromWorldLoc(&d);
     weapon = pad->cur;
-    if (carDropWeapon(weapon, idx, d, power)) {
+    if (carDropWeapon(weapon, idx, &d, power)) {
         pad->fireDelay = 20;
         flags[9] = 1;
         ConsumeWeaponAmmo(pad);
@@ -1140,10 +1141,10 @@ s32 FindFreeDropWeap(void)
     return -1;
 }
 
-u8 carDropWeapon(u32 kind, s32 idx, s32* pos, s32 power)
+u8 carDropWeapon(u32 kind, s32 idx, VECTOR3* pos, s32 power)
 {
     s32 i;
-    s32* dst;
+    VECTOR3* dst;
     s32 first;
     GrSprite* sprite;
 
@@ -1156,12 +1157,12 @@ u8 carDropWeapon(u32 kind, s32 idx, s32* pos, s32 power)
     dropweapon[i].life = 400;
     dropweapon[i].power = power;
     do {
-        first = pos[0];
-        dst = dropweapon[i].pos;
+        first = pos->vx;
+        dst = &dropweapon[i].pos;
     } while (0);
-    dst[0] = first;
-    dst[1] = pos[1];
-    dst[2] = pos[2];
+    dst->vx = first;
+    dst->vy = pos->vy;
+    dst->vz = pos->vz;
     do {
         switch (kind) {
         case WEAPON_BOMB:
@@ -1193,7 +1194,7 @@ void check_dropweap_impact(s32 i)
 {
     volatile VECTOR3 v;
     DropWeap* d;
-    s32* pos;
+    VECTOR3* pos;
     s32 owner;
     s32 hit;
     s32 range;
@@ -1204,18 +1205,18 @@ void check_dropweap_impact(s32 i)
     if ((s16)d->life >= 360) {
         owner = d->idx;
     }
-    pos = d->pos;
-    d->pos[2] = d->pos[2] + 30;
+    pos = &d->pos;
+    d->pos.vz = d->pos.vz + 30;
     hit = CAR_HD(pos, owner, 2);
-    d->pos[2] = d->pos[2] - 30;
+    d->pos.vz = d->pos.vz - 30;
     if (hit != 0 && hit != 8) {
         soundSetRangeAndXPositionFromWorldLoc(pos);
         range = soundGetCalculatedSoundRange();
         uasoundPlayCarWeaponExplode(d->kind, range, soundGetCalculatedSoundXPosition(), 0x63);
         if (d->kind == WEAPON_BOMB) {
-            d->pos[2] = d->pos[2] + 50;
+            d->pos.vz = d->pos.vz + 50;
             do_big_explosion(pos);
-            d->pos[2] = d->pos[2] - 50;
+            d->pos.vz = d->pos.vz - 50;
             do_big_explosion(pos);
         }
         if (d->kind == WEAPON_SPIKE) {
@@ -1223,9 +1224,9 @@ void check_dropweap_impact(s32 i)
         }
         if (d->kind != WEAPON_BOMB) {
             for (j = 0; j < 6; j++) {
-                v.vx = d->pos[0] + (rand() & 0x3F) - 32;
-                v.vy = d->pos[1] + (rand() & 0x3F) - 32;
-                v.vz = d->pos[2];
+                v.vx = d->pos.vx + (rand() & 0x3F) - 32;
+                v.vy = d->pos.vy + (rand() & 0x3F) - 32;
+                v.vz = d->pos.vz;
                 do_puff(&v);
             }
         }
@@ -1244,7 +1245,7 @@ void check_dropweap_impact(s32 i)
     }
 }
 
-void drawOil(POLY_FT4* prim, s32* pos, s32 view)
+void drawOil(POLY_FT4* prim, VECTOR3* pos, s32 view)
 {
     VECTOR3 out[4];
     volatile VECTOR3 v;
@@ -1260,21 +1261,21 @@ void drawOil(POLY_FT4* prim, s32* pos, s32 view)
     hfov = viewGetCurrentHorzFOVH(view);
     vfov = viewGetCurrentVertFOVH(view);
     mat = viewGetEyeMat(view);
-    v.vx = pos[0] - 48;
-    v.vy = pos[1] - 48;
-    v.vz = pos[2];
+    v.vx = pos->vx - 48;
+    v.vy = pos->vy - 48;
+    v.vz = pos->vz;
     mathMulVec(mat, &v, &out[0]);
-    v.vx = pos[0] + 48;
-    v.vy = pos[1] - 48;
-    v.vz = pos[2];
+    v.vx = pos->vx + 48;
+    v.vy = pos->vy - 48;
+    v.vz = pos->vz;
     mathMulVec(mat, &v, &out[1]);
-    v.vx = pos[0] - 48;
-    v.vy = pos[1] + 48;
-    v.vz = pos[2];
+    v.vx = pos->vx - 48;
+    v.vy = pos->vy + 48;
+    v.vz = pos->vz;
     mathMulVec(mat, &v, &out[2]);
-    v.vx = pos[0] + 48;
-    v.vy = pos[1] + 48;
-    v.vz = pos[2];
+    v.vx = pos->vx + 48;
+    v.vy = pos->vy + 48;
+    v.vz = pos->vz;
     mathMulVec(mat, &v, &out[3]);
     for (i = 0; i < 4; i++) {
         z = out[i].vz;
@@ -1296,8 +1297,8 @@ void drawOil(POLY_FT4* prim, s32* pos, s32 view)
 
 void displayDropWeapons(Db* db, s32 view)
 {
-    s32 w[3];
-    s32 t[3];
+    VECTOR3 w;
+    VECTOR3 t;
     s32 cx;
     s32 cy;
     POLY_FT4* p;
@@ -1327,24 +1328,24 @@ void displayDropWeapons(Db* db, s32 view)
         if (dropweapon[i].life > 0) {
             // Keep the height read separate for PsyQ load scheduling.
             do {
-                groundZ = dropweapon[i].pos[2];
+                groundZ = dropweapon[i].pos.vz;
             } while (0);
             pw = dropweapon[i].power;
             if (pw < groundZ) {
                 if (groundZ - 12 >= pw) {
                     pw = groundZ - 12;
                 }
-                dropweapon[i].pos[2] = pw;
+                dropweapon[i].pos.vz = pw;
             }
             --dropweapon[i].life;
             check_dropweap_impact(i);
-            w[0] = dropweapon[i].pos[0] + tr->vx;
-            w[1] = dropweapon[i].pos[1] + tr->vy;
-            w[2] = dropweapon[i].pos[2] + tr->vz;
-            mathMulVec(mat, w, t);
-            z = t[2];
-            if (abs(t[0]) < 641) {
-                if (abs(t[1]) < 641 && z >= 16) {
+            w.vx = dropweapon[i].pos.vx + tr->vx;
+            w.vy = dropweapon[i].pos.vy + tr->vy;
+            w.vz = dropweapon[i].pos.vz + tr->vz;
+            mathMulVec(mat, &w, &t);
+            z = t.vz;
+            if (abs(t.vx) < 641) {
+                if (abs(t.vy) < 641 && z >= 16) {
                     if (z < 30001) {
                         p = (POLY_FT4*)db->prim;
                         if ((u8*)p < db->areaEnd) {
@@ -1379,9 +1380,9 @@ void displayDropWeapons(Db* db, s32 view)
                                 if (sc <= 0) {
                                     sc = 1;
                                 }
-                                x0 = cx + t[0] * hfov / depth - sc;
+                                x0 = cx + t.vx * hfov / depth - sc;
                                 w2 = sc * 2;
-                                y0 = cy + t[1] * vfov / depth - w2;
+                                y0 = cy + t.vy * vfov / depth - w2;
                                 p->x0 = x0;
                                 p->y0 = y0;
                                 p->x1 = x0 + w2;
@@ -1392,7 +1393,7 @@ void displayDropWeapons(Db* db, s32 view)
                                 p->x3 = x0 + w2;
                                 p->y3 = y1;
                             } else {
-                                drawOil(p, w, view);
+                                drawOil(p, &w, view);
                             }
                             AddPrim(db->ot + z, p);
                         }
@@ -1405,8 +1406,8 @@ void displayDropWeapons(Db* db, s32 view)
 
 void carLockon(u8 who, VECTOR3** out)
 {
-    volatile s32 d[3];
-    s32 r[3];
+    volatile VECTOR3 d;
+    VECTOR3 r;
     Cs* cs;
     Cs* cs2;
     VECTOR3* p;
@@ -1430,13 +1431,13 @@ void carLockon(u8 who, VECTOR3** out)
         cs = GetAICs3D(i);
         q = &cs->pos;
         if (q != 0 && GetAICarInfo(i)->stats.unk40 > 0) {
-            d[0] = cs->pos.vx - p->vx;
-            d[1] = cs->pos.vy - p->vy;
-            d[2] = cs->pos.vz - p->vz;
-            mathMulVec(&GetPlayerCs3D((s16)(who - 1))->mat, d, r);
-            z = r[1];
+            d.vx = cs->pos.vx - p->vx;
+            d.vy = cs->pos.vy - p->vy;
+            d.vz = cs->pos.vz - p->vz;
+            mathMulVec(&GetPlayerCs3D((s16)(who - 1))->mat, &d, &r);
+            z = r.vy;
             if (z >= 12) {
-                ax = r[0];
+                ax = r.vx;
                 az = ABS(z);
                 if (ax < 0) {
                     ax = -ax;
@@ -1455,13 +1456,13 @@ void carLockon(u8 who, VECTOR3** out)
             cs2 = GetPlayerCs3D(i);
             q = &cs2->pos;
             if (q != 0 && i != who - 1) {
-                d[0] = cs2->pos.vx - p->vx;
-                d[1] = cs2->pos.vy - p->vy;
-                d[2] = cs2->pos.vz - p->vz;
-                mathMulVec(&GetPlayerCs3D((s16)(who - 1))->mat, d, r);
-                z = r[1];
+                d.vx = cs2->pos.vx - p->vx;
+                d.vy = cs2->pos.vy - p->vy;
+                d.vz = cs2->pos.vz - p->vz;
+                mathMulVec(&GetPlayerCs3D((s16)(who - 1))->mat, &d, &r);
+                z = r.vy;
                 if (z >= 12) {
-                    ax = r[0];
+                    ax = r.vx;
                     az = ABS(z);
                     if (ax < 0) {
                         ax = -ax;
@@ -1478,8 +1479,8 @@ void carLockon(u8 who, VECTOR3** out)
 
 void carLockon2(u8 who, VECTOR3** out)
 {
-    volatile s32 d[3];
-    s32 r[3];
+    volatile VECTOR3 d;
+    VECTOR3 r;
     Cs* cs;
     Cs* cs2;
     VECTOR3* p;
@@ -1503,13 +1504,13 @@ void carLockon2(u8 who, VECTOR3** out)
         cs = GetAICs3D(i);
         q = &cs->pos;
         if (q != 0 && GetAICarInfo(i)->stats.unk40 > 0) {
-            d[0] = cs->pos.vx - p->vx;
-            d[1] = cs->pos.vy - p->vy;
-            d[2] = cs->pos.vz - p->vz;
-            mathMulVec(&GetPlayerCs3D((s16)(who - 1))->mat, d, r);
-            z = r[1];
+            d.vx = cs->pos.vx - p->vx;
+            d.vy = cs->pos.vy - p->vy;
+            d.vz = cs->pos.vz - p->vz;
+            mathMulVec(&GetPlayerCs3D((s16)(who - 1))->mat, &d, &r);
+            z = r.vy;
             if (z < -11) {
-                ax = r[0];
+                ax = r.vx;
                 if (z < 0) {
                     z = -z;
                 }
@@ -1533,13 +1534,13 @@ void carLockon2(u8 who, VECTOR3** out)
             cs2 = GetPlayerCs3D(i);
             q = &cs2->pos;
             if (i + 1 != who && q != 0) {
-                d[0] = cs2->pos.vx - p->vx;
-                d[1] = cs2->pos.vy - p->vy;
-                d[2] = cs2->pos.vz - p->vz;
-                mathMulVec(&GetPlayerCs3D((s16)(who - 1))->mat, d, r);
-                z = r[1];
+                d.vx = cs2->pos.vx - p->vx;
+                d.vy = cs2->pos.vy - p->vy;
+                d.vz = cs2->pos.vz - p->vz;
+                mathMulVec(&GetPlayerCs3D((s16)(who - 1))->mat, &d, &r);
+                z = r.vy;
                 if (z < -11) {
-                    ax = r[0];
+                    ax = r.vx;
                     if (z < 0) {
                         z = -z;
                     }
@@ -1590,7 +1591,7 @@ void fireRearFlameThrower(Car* car, u8 isPlayer)
         pad = &AI_CAR(car)->weap;
         m = &AI_CAR(car)->motion;
     }
-    soundSetRangeAndXPositionFromWorldLoc(&m->pos.vx);
+    soundSetRangeAndXPositionFromWorldLoc(&m->pos);
     range = soundGetCalculatedSoundRange();
     uasoundPlayCarWeaponLaunchOrInflight(
         WEAPON_FLAMETHROWER, range, soundGetCalculatedSoundXPosition());
@@ -1602,12 +1603,12 @@ void fireRearFlameThrower(Car* car, u8 isPlayer)
     }
 }
 
-s16 fireFlameThrower(Car* car, u8 isPlayer, u8 rear, s32* pos)
+s16 fireFlameThrower(Car* car, u8 isPlayer, u8 rear, VECTOR3* pos)
 {
     Cs* cs;
     s16 i;
-    s32* dst;
-    s32* wp;
+    VECTOR3* dst;
+    VECTOR3* wp;
     s32 range;
 
     if (isPlayer) {
@@ -1624,15 +1625,15 @@ s16 fireFlameThrower(Car* car, u8 isPlayer, u8 rear, s32* pos)
     if (rear == 0) {
         flameThrower[i].life = 12;
     } else {
-        dst = flameThrower[i].pos;
-        dst[0] = pos[0];
-        dst[1] = pos[1];
-        dst[2] = pos[2];
+        dst = &flameThrower[i].pos;
+        dst->vx = pos->vx;
+        dst->vy = pos->vy;
+        dst->vz = pos->vz;
         flameThrower[i].life = 25;
-        wp = flameThrower[i].world;
-        wp[0] = (s32)((u32)cs->pos.vx + (u32)pos[0]);
-        wp[1] = (s32)((u32)cs->pos.vy + (u32)pos[1]);
-        wp[2] = (s32)((u32)cs->pos.vz + (u32)pos[2]);
+        wp = &flameThrower[i].world;
+        wp->vx = (s32)((u32)cs->pos.vx + (u32)pos->vx);
+        wp->vy = (s32)((u32)cs->pos.vy + (u32)pos->vy);
+        wp->vz = (s32)((u32)cs->pos.vz + (u32)pos->vz);
         soundSetRangeAndXPositionFromWorldLoc(wp);
         range = soundGetCalculatedSoundRange();
         uasoundPlayCarWeaponLaunchOrInflight(
@@ -1644,8 +1645,8 @@ s16 fireFlameThrower(Car* car, u8 isPlayer, u8 rear, s32* pos)
 
 void displayFlamethrowers(void)
 {
-    s32 p[3];
-    s32 d[3];
+    VECTOR3 p;
+    VECTOR3 d;
     s32 hit;
     VECTOR3* cp;
     s32 i;
@@ -1675,17 +1676,17 @@ void displayFlamethrowers(void)
         } else {
             offset = -25;
         }
-        p[0] = 0;
-        p[1] = offset;
-        p[2] = 0;
+        p.vx = 0;
+        p.vy = offset;
+        p.vz = 0;
         do {
             flameThrower[i].life--;
-            mathMulTransVec(&flameThrower[i].cs->mat, p, d);
+            mathMulTransVec(&flameThrower[i].cs->mat, &p, &d);
         } while (0);
         cs = flameThrower[i].cs;
-        p[0] = cs->pos.vx + (d[0] << 2);
-        p[1] = cs->pos.vy + (d[1] << 2);
-        p[2] = cs->pos.vz + d[2];
+        p.vx = cs->pos.vx + (d.vx << 2);
+        p.vy = cs->pos.vy + (d.vy << 2);
+        p.vz = cs->pos.vz + d.vz;
         n = flameThrower[i].flag++;
         hitDone = 0;
         lim = (flameThrower[i].rear << 2) + 12;
@@ -1695,17 +1696,17 @@ void displayFlamethrowers(void)
             n = lim;
         }
         for (j = 0; j < n; j++) {
-            p[0] = p[0] + d[0];
-            p[1] = p[1] + d[1];
-            p[2] += 1 + d[2];
-            if (p[2] < 8 && cp->vz > 0) {
-                p[2] = 7;
+            p.vx = p.vx + d.vx;
+            p.vy = p.vy + d.vy;
+            p.vz += 1 + d.vz;
+            if (p.vz < 8 && cp->vz > 0) {
+                p.vz = 7;
             }
-            do_flamethrower_burst(p);
+            do_flamethrower_burst(&p);
             if ((j & 2) && (u8)hitDone == 0) {
-                hit = CAR_HD(p, flameThrower[i].cs->unkC0, 0x11);
+                hit = CAR_HD(&p, flameThrower[i].cs->unkC0, 0x11);
                 if (hit > 0) {
-                    bulDispatchDamage(hit, 0, 0, flameDamage, d, 0);
+                    bulDispatchDamage(hit, 0, 0, flameDamage, &d, 0);
                     hitDone = 1;
                 }
             }
@@ -1713,39 +1714,39 @@ void displayFlamethrowers(void)
         continue;
     spray:
         flameThrower[i].life--;
-        flameThrower[i].world[0] = flameThrower[i].world[0] + flameThrower[i].pos[0];
-        flameThrower[i].world[1] = flameThrower[i].world[1] + flameThrower[i].pos[1];
-        flameThrower[i].world[2] = flameThrower[i].world[2] + flameThrower[i].pos[2];
-        if (flameThrower[i].world[2] <= 0 && cp->vz > 0) {
-            flameThrower[i].world[2] = 1;
+        flameThrower[i].world.vx = flameThrower[i].world.vx + flameThrower[i].pos.vx;
+        flameThrower[i].world.vy = flameThrower[i].world.vy + flameThrower[i].pos.vy;
+        flameThrower[i].world.vz = flameThrower[i].world.vz + flameThrower[i].pos.vz;
+        if (flameThrower[i].world.vz <= 0 && cp->vz > 0) {
+            flameThrower[i].world.vz = 1;
         }
         if (flameThrower[i].flag < 20) {
             flameThrower[i].flag = flameThrower[i].flag + 1;
         }
         n = flameThrower[i].flag;
         if (flameThrower[i].life & 1) {
-            do_flare(flameThrower[i].world);
+            do_flare(&flameThrower[i].world);
         }
         for (j = 0; j < 8; j++) {
-            p[0] = flameThrower[i].world[0] + ((((rand() & 0xF) - 7) * n) >> 1);
-            p[1] = flameThrower[i].world[1] + ((((rand() & 0xF) - 7) * n) >> 1);
-            p[2] = flameThrower[i].world[2] + ((((rand() & 0xF) - 7) * n) >> 1);
-            if (p[2] <= 0 && cp->vz > 0) {
-                p[2] = 1;
+            p.vx = flameThrower[i].world.vx + ((((rand() & 0xF) - 7) * n) >> 1);
+            p.vy = flameThrower[i].world.vy + ((((rand() & 0xF) - 7) * n) >> 1);
+            p.vz = flameThrower[i].world.vz + ((((rand() & 0xF) - 7) * n) >> 1);
+            if (p.vz <= 0 && cp->vz > 0) {
+                p.vz = 1;
             }
-            do_flamethrower_burst(p);
+            do_flamethrower_burst(&p);
         }
         do {
             temp = n >> 1;
             m = flameFuel - temp;
         } while (0);
-        hit = CAR_HD(p, flameThrower[i].cs->unkC0, n + 5);
+        hit = CAR_HD(&p, flameThrower[i].cs->unkC0, n + 5);
         if (hit > 0) {
-            bulDispatchDamage(hit, 0, 0, flameDamage, d, 0);
+            bulDispatchDamage(hit, 0, 0, flameDamage, &d, 0);
             flameThrower[i].life = 0;
-            do_smoke(flameThrower[i].world);
+            do_smoke(&flameThrower[i].world);
         } else {
-            s32* world = flameThrower[i].world;
+            VECTOR3* world = &flameThrower[i].world;
             pnt = HdPntTest(flameThrower[i].cs->unkC0, 0, world, &hit);
             if (hit <= 0) {
                 continue;
@@ -1754,7 +1755,7 @@ void displayFlamethrowers(void)
             if (m < 0) {
                 m = 0;
             }
-            bulDispatchDamage(hit, pnt->tag0, pnt->tag1, flameDamage, d, 0);
+            bulDispatchDamage(hit, pnt->tag0, pnt->tag1, flameDamage, &d, 0);
             flameThrower[i].life = 0;
             do_smoke(world);
         }
@@ -1777,9 +1778,9 @@ void carInitPickupWeapons(void)
     numPickups = 0;
 }
 
-void setPickup(s32* pos, s32 obj, s32 n)
+void setPickup(VECTOR3* pos, s32 obj, s32 n)
 {
-    s32* dst;
+    VECTOR3* dst;
     s32 first;
 
     if (n < 51) {
@@ -1788,12 +1789,12 @@ void setPickup(s32* pos, s32 obj, s32 n)
             numPickups = numPickups + 1;
             pickup[n].kind = 1;
             do {
-                first = pos[0];
-                dst = pickup[n].pos;
+                first = pos->vx;
+                dst = &pickup[n].pos;
             } while (0);
-            dst[0] = first;
-            dst[1] = pos[1];
-            dst[2] = pos[2];
+            dst->vx = first;
+            dst->vy = pos->vy;
+            dst->vz = pos->vz;
             pickup[n].obj = obj;
         }
     }
@@ -1925,7 +1926,7 @@ void carGetPickup(Car* car, u8 isPlayer, s32 kind, s32 idx)
             pad->unk46 = (u32)pad->unk46 + (u32)weaponPickupAmount[12];
             break;
         }
-        soundSetRangeAndXPositionFromWorldLoc(&m->pos.vx);
+        soundSetRangeAndXPositionFromWorldLoc(&m->pos);
         range = soundGetCalculatedSoundRange();
         uasoundPlayCarWeaponPickup(kind, range, soundGetCalculatedSoundXPosition());
         uaswSetNumChildren(kind, idx + 1, 0);
@@ -1991,9 +1992,9 @@ void init_health_stands(void)
     numHealthStands = 0;
 }
 
-void set_health_stand(s32 n, s32* pos)
+void set_health_stand(s32 n, VECTOR3* pos)
 {
-    s32* dst;
+    VECTOR3* dst;
     s32 first;
 
     if ((u32)n - 1u < 10u) {
@@ -2001,11 +2002,11 @@ void set_health_stand(s32 n, s32* pos)
         do {
             HStand[n - 1].active = 1;
         } while (0);
-        first = pos[0];
-        dst = HStand[n - 1].pos;
-        dst[0] = first;
-        dst[1] = pos[1];
-        dst[2] = pos[2];
+        first = pos->vx;
+        dst = &HStand[n - 1].pos;
+        dst->vx = first;
+        dst->vy = pos->vy;
+        dst->vz = pos->vz;
         nextHealthStand = (s32)((u32)nextHealthStand + 1u);
         numHealthStands = (s32)((u32)numHealthStands + 1u);
     }
@@ -2014,7 +2015,7 @@ void set_health_stand(s32 n, s32* pos)
 void regen_healthstands(void)
 {
     PlayerCar* pi;
-    s32 d[3];
+    VECTOR3 d;
     s32 i;
     s32 t;
 
@@ -2023,10 +2024,10 @@ void regen_healthstands(void)
     do {
         for (; i < nextHealthStand; i++) {
             if (HStand[i].active != 0) {
-                d[0] = (s32)((u32)HStand[i].pos[0] - (u32)pi->motion.pos.vx);
-                d[1] = (s32)((u32)HStand[i].pos[1] - (u32)pi->motion.pos.vy);
-                d[2] = (s32)((u32)HStand[i].pos[2] - (u32)pi->motion.pos.vz);
-                hudAddRadarSig(UA_HEALTH_STAND, d, pi->motion.rot.vz);
+                d.vx = (s32)((u32)HStand[i].pos.vx - (u32)pi->motion.pos.vx);
+                d.vy = (s32)((u32)HStand[i].pos.vy - (u32)pi->motion.pos.vy);
+                d.vz = (s32)((u32)HStand[i].pos.vz - (u32)pi->motion.pos.vz);
+                hudAddRadarSig(UA_HEALTH_STAND, &d, pi->motion.rot.vz);
             }
         }
     } while (0);

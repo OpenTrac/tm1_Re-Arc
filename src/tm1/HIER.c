@@ -38,7 +38,7 @@ static s32 groundFlag;
 
 extern void geomProc(Db* db, ObjRec* objs, s32 nobj, MATRIX* mats, MATRIX* lights);
 
-void hierPush(DbNode* node, s32 mat, s32* pos, s32 eo)
+void hierPush(DbNode* node, s32 mat, VECTOR3* pos, s32 eo)
 {
     s32 i = stackIdx;
 
@@ -46,16 +46,16 @@ void hierPush(DbNode* node, s32 mat, s32* pos, s32 eo)
         fastStack[i].node = node;
         fastStack[i].matIdx = mat;
         fastStack[i].eoCnt = eo;
-        fastStack[i].pos[0] = pos[0];
-        fastStack[i].pos[1] = pos[1];
-        fastStack[i].pos[2] = pos[2];
+        fastStack[i].pos.vx = pos->vx;
+        fastStack[i].pos.vy = pos->vy;
+        fastStack[i].pos.vz = pos->vz;
     } else {
         hierStack[i].node = node;
         hierStack[i].matIdx = mat;
         hierStack[i].eoCnt = eo;
-        hierStack[i].pos[0] = pos[0];
-        hierStack[i].pos[1] = pos[1];
-        hierStack[i].pos[2] = pos[2];
+        hierStack[i].pos.vx = pos->vx;
+        hierStack[i].pos.vy = pos->vy;
+        hierStack[i].pos.vz = pos->vz;
     }
     if (stackIdx < 150) {
         stackIdx = stackIdx + 1;
@@ -95,7 +95,7 @@ void hierTraverse(Cs* cs, DbNode* node)
     matInfo[matIdx].light = &lightList[matIdx];
     matInfo[matIdx].fov0 = &cs->mat3;
     matInfo[matIdx].fov1 = &cs->mat4;
-    hierPush(node, matIdx, (s32*)&cs->wpos, eoCnt);
+    hierPush(node, matIdx, &cs->wpos, eoCnt);
     while (hierPop(&e) >= 0) {
         switch (e->node->h.op) {
         case 0: {
@@ -104,8 +104,8 @@ void hierTraverse(Cs* cs, DbNode* node)
             obj = &e->node->obj;
             ok = 1;
             if (!(obj->flags & 0x2000)) {
-                ok = hierIsInFov((VECTOR*)obj->center, obj->radius, (VECTOR*)e->pos,
-                    matInfo[e->matIdx].fov0, matInfo[e->matIdx].fov1);
+                ok = hierIsInFov(&obj->center, obj->radius, &e->pos, matInfo[e->matIdx].fov0,
+                    matInfo[e->matIdx].fov1);
             }
             if (ok == 1) {
                 no = objCnt;
@@ -114,9 +114,9 @@ void hierTraverse(Cs* cs, DbNode* node)
                     objList[no].matIdx = e->matIdx;
                     objList[no].cs = cs;
                     objList[no].eoCnt = e->eoCnt;
-                    objList[no].pos[0] = e->pos[0];
-                    objList[no].pos[1] = e->pos[1];
-                    objList[no].pos[2] = e->pos[2];
+                    objList[no].pos.vx = e->pos.vx;
+                    objList[no].pos.vy = e->pos.vy;
+                    objList[no].pos.vz = e->pos.vz;
                     objCnt = no + 1;
                 }
             }
@@ -125,8 +125,8 @@ void hierTraverse(Cs* cs, DbNode* node)
             grp = &e->node->grp;
             if (!(grp->flags & 2)) {
                 if (!(grp->flags & 4)) {
-                    ok = hierIsInFov((VECTOR*)grp->center, grp->radius, (VECTOR*)e->pos,
-                        matInfo[e->matIdx].fov0, matInfo[e->matIdx].fov1);
+                    ok = hierIsInFov(&grp->center, grp->radius, &e->pos, matInfo[e->matIdx].fov0,
+                        matInfo[e->matIdx].fov1);
                 } else {
                     ok = 1;
                 }
@@ -138,7 +138,7 @@ void hierTraverse(Cs* cs, DbNode* node)
                     i = 0;
                     if (n != 0) {
                         do {
-                            hierPush(grp->child[i], e->matIdx, e->pos, e->eoCnt);
+                            hierPush(grp->child[i], e->matIdx, &e->pos, e->eoCnt);
                             i++;
                         } while (i < n);
                     }
@@ -153,13 +153,13 @@ void hierTraverse(Cs* cs, DbNode* node)
 
             eo = &e->node->trans;
             if (!(eo->flags & 2)) {
-                e->pos[0] = e->pos[0] + eo->ofs[0];
-                e->pos[1] = e->pos[1] + eo->ofs[1];
-                e->pos[2] = e->pos[2] + eo->ofs[2];
+                e->pos.vx = e->pos.vx + eo->ofs.vx;
+                e->pos.vy = e->pos.vy + eo->ofs.vy;
+                e->pos.vz = e->pos.vz + eo->ofs.vz;
                 eoCnt = eoCnt + 1;
                 i = 0;
                 while (i < eo->nChild) {
-                    hierPush(eo->child[i], e->matIdx, e->pos, eoCnt);
+                    hierPush(eo->child[i], e->matIdx, &e->pos, eoCnt);
                     i++;
                 }
             }
@@ -172,13 +172,13 @@ void hierTraverse(Cs* cs, DbNode* node)
 
             rot = &e->node->rot;
             if (!(rot->flags & 2)) {
-                e->pos[0] = e->pos[0] + rot->mat.t[0];
-                e->pos[1] = e->pos[1] + rot->mat.t[1];
-                e->pos[2] = e->pos[2] + rot->mat.t[2];
-                v.vx = e->pos[0];
-                v.vy = e->pos[1];
-                v.vz = e->pos[2];
-                mathMulVec(&rot->mat, &v, e->pos);
+                e->pos.vx = e->pos.vx + rot->mat.t[0];
+                e->pos.vy = e->pos.vy + rot->mat.t[1];
+                e->pos.vz = e->pos.vz + rot->mat.t[2];
+                v.vx = e->pos.vx;
+                v.vy = e->pos.vy;
+                v.vz = e->pos.vz;
+                mathMulVec(&rot->mat, &v, &e->pos);
                 if (matIdx < 70) {
                     matIdx = matIdx + 1;
                     TransposeMatrix(&rot->mat, &m);
@@ -201,14 +201,14 @@ void hierTraverse(Cs* cs, DbNode* node)
                 eoCnt = eoCnt + 1;
                 i = 0;
                 while (i < rot->nChild) {
-                    hierPush(rot->child[i], matIdx, e->pos, eoCnt);
+                    hierPush(rot->child[i], matIdx, &e->pos, eoCnt);
                     i++;
                 }
             }
         } break;
         case 9:
             sw = &e->node->sw;
-            hierPush(sw->child[sw->sel], e->matIdx, e->pos, e->eoCnt);
+            hierPush(sw->child[sw->sel], e->matIdx, &e->pos, e->eoCnt);
             break;
         case 3:
             an = &e->node->anim;
@@ -217,10 +217,10 @@ void hierTraverse(Cs* cs, DbNode* node)
             } else {
                 hierAnimate(an);
             }
-            hierPush(an->child[an->cur], e->matIdx, e->pos, e->eoCnt);
+            hierPush(an->child[an->cur], e->matIdx, &e->pos, e->eoCnt);
             break;
         case 11:
-            hierCtrlNode((HierEnt*)e->node, e);
+            hierCtrlNode(e->node, e);
             break;
         }
     }
@@ -229,11 +229,11 @@ void hierTraverse(Cs* cs, DbNode* node)
 INCLUDE_ASM("asm/nonmatchings/tm1/HIER", hierTraverse);
 #endif
 
-s32 hierIsInFov(VECTOR* ofs, s32 dist, VECTOR* pos, MATRIX* fov0, MATRIX* fov1)
+s32 hierIsInFov(VECTOR3* ofs, s32 dist, VECTOR3* pos, MATRIX* fov0, MATRIX* fov1)
 {
-    VECTOR out0;
-    VECTOR out1;
-    VECTOR v;
+    VECTOR3 out0;
+    VECTOR3 out1;
+    VECTOR3 v;
     s32 lim;
 
     v.vx = pos->vx + ofs->vx;
@@ -253,18 +253,18 @@ s32 hierIsInFov(VECTOR* ofs, s32 dist, VECTOR* pos, MATRIX* fov0, MATRIX* fov1)
 
 void hierLod(DbLod* n, HierEnt* e)
 {
-    s32 d[3];
+    VECTOR3 d;
     s32 dist;
     s32 i;
     s32 go;
 
-    d[0] = e->pos[0] + n->center[0];
-    d[1] = e->pos[1] + n->center[1];
-    d[2] = e->pos[2] + n->center[2];
-    d[0] = d[0] >> lodScale;
-    d[1] = d[1] >> lodScale;
-    d[2] = d[2] >> lodScale;
-    dist = (d[0] * d[0]) + (d[1] * d[1]) + (d[2] * d[2]);
+    d.vx = e->pos.vx + n->center.vx;
+    d.vy = e->pos.vy + n->center.vy;
+    d.vz = e->pos.vz + n->center.vz;
+    d.vx = d.vx >> lodScale;
+    d.vy = d.vy >> lodScale;
+    d.vz = d.vz >> lodScale;
+    dist = (d.vx * d.vx) + (d.vy * d.vy) + (d.vz * d.vz);
     go = 1;
     i = 0;
     if (lodShiftValue > 0) {
@@ -277,14 +277,14 @@ void hierLod(DbLod* n, HierEnt* e)
             break;
         }
         if (dist >= n->rec[i]->near && dist < n->rec[i]->far) {
-            hierPush(n->rec[i]->child, e->matIdx, e->pos, e->eoCnt);
+            hierPush(n->rec[i]->child, e->matIdx, &e->pos, e->eoCnt);
             go = 0;
         }
         i++;
     }
 }
 
-void hierCtrlNode(HierEnt* unused, HierEnt* e)
+void hierCtrlNode(DbNode* unused, HierEnt* e)
 {
     DbCtrl* n;
     s32 i;
@@ -298,7 +298,7 @@ void hierCtrlNode(HierEnt* unused, HierEnt* e)
             if (i >= n->nBox) {
                 break;
             }
-            if (hierInBox(n->box[i], (VECTOR*)e->pos) != 0) {
+            if (hierInBox(n->box[i], &e->pos) != 0) {
                 ok = 0;
             }
             i++;
@@ -308,18 +308,18 @@ void hierCtrlNode(HierEnt* unused, HierEnt* e)
         }
         if (ok != 0) {
             if (n->childOut != 0) {
-                hierPush(n->childOut, e->matIdx, e->pos, e->eoCnt);
+                hierPush(n->childOut, e->matIdx, &e->pos, e->eoCnt);
             }
         } else {
             if (n->childIn != 0) {
-                hierPush(n->childIn, e->matIdx, e->pos, e->eoCnt);
+                hierPush(n->childIn, e->matIdx, &e->pos, e->eoCnt);
             }
         }
     }
 }
 
 #ifdef NON_MATCHING
-s32 hierInBox(HdBox* b, VECTOR* pos)
+s32 hierInBox(HdBox* b, VECTOR3* pos)
 {
     VECTOR p;
     VECTOR d;

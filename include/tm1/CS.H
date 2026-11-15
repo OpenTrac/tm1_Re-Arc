@@ -4,6 +4,7 @@
 #include "common.h"
 #include "tm1/LIGHT.H"
 #include "tm1/MATH.H"
+#include "tm1/SCENE.H"
 #include <LIBGTE.H>
 
 /* Coordinate system record -- 0x10C bytes (csCreate strides by 0x10C). */
@@ -23,7 +24,7 @@ typedef struct Cs {
     /* 0x0C0 */ s32 unkC0;
     /* 0x0C4 */ MATRIX mat3;
     /* 0x0E4 */ MATRIX mat4;
-    /* 0x104 */ void* epNode;
+    /* 0x104 */ DbNode* epNode;
     /* 0x108 */ struct Cs* next;
 } Cs;
 
@@ -32,7 +33,7 @@ extern void csInit(void);
 extern Cs* csGetWorldCs(void);
 extern Cs* csGetCsList(void);
 extern void csAddToCsList(Cs* cs);
-extern void csSetEpNode(Cs* cs, void* node);
+extern void csSetEpNode(Cs* cs, DbNode* node);
 extern void csSetNumInActiveDb(s32 n);
 extern void csSetDrawMode(Cs* cs, s32 mode);
 extern void csUpdMat(Cs* cs, MATRIX* out);
