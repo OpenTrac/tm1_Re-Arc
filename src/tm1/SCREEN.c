@@ -894,7 +894,7 @@ void screenInitCarOccupants(DbObject* model)
     POLY_FT4* top;
     s32 i;
 
-    if (model != 0 && model->op == 0) {
+    if (model != 0 && model->op == DB_OP_OBJECT) {
         if (gFaceObject == 0) {
             gFaceObject = model;
         }

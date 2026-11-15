@@ -400,7 +400,7 @@ void UAdashInitDashboardIcons(DbGroup* node)
 
     bias = 0;
     which = 1;
-    if (node != NULL && (node->op & 0xFF) == 1 && node->nChild >= 5) {
+    if (node != NULL && (node->op & 0xFF) == DB_OP_GROUP && node->nChild >= 5) {
         if (rtIsSplitScreenOn() != 0) {
             bias = -120;
             which = 2;
@@ -931,7 +931,7 @@ void uadashInitSteeringWheel(DbObject* obj)
     u8* base;
     DbPolyUV* uv;
 
-    if (obj != NULL && obj->op == 0) {
+    if (obj != NULL && obj->op == DB_OP_OBJECT) {
         vt = obj->verts;
         f = obj->polys;
         setPolyFT4(&gDash[0].wheel);

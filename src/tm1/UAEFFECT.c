@@ -229,7 +229,7 @@ void UAeffectInitTV(DbObject* node)
     if (node == 0) {
         return;
     }
-    if (node->op != 0) {
+    if (node->op != DB_OP_OBJECT) {
         return;
     }
     if (gNumTVs == 4) {
@@ -265,7 +265,7 @@ void UAeffectInitMonsterTruckWheel(DbRot* node)
     if (node == 0) {
         return;
     }
-    if (node->op != 5) {
+    if (node->op != DB_OP_ROT) {
         return;
     }
     id = node->sub;
@@ -403,7 +403,7 @@ void UAeffectInitHealthStandLightning(DbObject* node)
     if (node == 0) {
         return;
     }
-    if (node->op != 0) {
+    if (node->op != DB_OP_OBJECT) {
         return;
     }
     if (node->nPoly != 4) {

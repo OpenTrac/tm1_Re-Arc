@@ -12,12 +12,6 @@
 #include "tm1/HIER.H"
 #include "tm1/HIER_SUB.H"
 
-#define SPAD_DRMODE0 ((DR_MODE*)0x1F800060)
-#define SPAD_DRMODE1 ((DR_MODE*)0x1F80006C)
-#define sdSubPolyCount (*(s32*)0x1F800038)
-#define sdSubPolyPtr (*(SubPoly**)0x1F80004C)
-#define sdMirrorView (*(s32*)0x1F800088)
-
 static s32 fovDepth = 1200;
 static s32 fovDepthCfg = 1200;
 HierEnt* fastStack = (HierEnt*)0x1F800000;
@@ -98,7 +92,7 @@ void hierTraverse(Cs* cs, DbNode* node)
     hierPush(node, matIdx, &cs->wpos, eoCnt);
     while (hierPop(&e) >= 0) {
         switch (e->node->h.op) {
-        case 0: {
+        case DB_OP_OBJECT: {
             s32 no;
 
             obj = &e->node->obj;
@@ -121,10 +115,10 @@ void hierTraverse(Cs* cs, DbNode* node)
                 }
             }
         } break;
-        case 1:
+        case DB_OP_GROUP:
             grp = &e->node->grp;
-            if (!(grp->flags & 2)) {
-                if (!(grp->flags & 4)) {
+            if (!(grp->flags & DB_NODE_HIDDEN)) {
+                if (!(grp->flags & DB_NODE_NO_BOUNDS_TEST)) {
                     ok = hierIsInFov(&grp->center, grp->radius, &e->pos, matInfo[e->matIdx].fov0,
                         matInfo[e->matIdx].fov1);
                 } else {
@@ -145,14 +139,14 @@ void hierTraverse(Cs* cs, DbNode* node)
                 }
             }
             break;
-        case 2:
+        case DB_OP_LOD:
             hierLod(&e->node->lod, e);
             break;
-        case 4: {
+        case DB_OP_TRANS: {
             s32 i;
 
             eo = &e->node->trans;
-            if (!(eo->flags & 2)) {
+            if (!(eo->flags & DB_NODE_HIDDEN)) {
                 e->pos.vx = e->pos.vx + eo->ofs.vx;
                 e->pos.vy = e->pos.vy + eo->ofs.vy;
                 e->pos.vz = e->pos.vz + eo->ofs.vz;
@@ -164,14 +158,14 @@ void hierTraverse(Cs* cs, DbNode* node)
                 }
             }
         } break;
-        case 5: {
+        case DB_OP_ROT: {
             MATRIX m;
             VECTOR v;
             RECT unused;
             s32 i;
 
             rot = &e->node->rot;
-            if (!(rot->flags & 2)) {
+            if (!(rot->flags & DB_NODE_HIDDEN)) {
                 e->pos.vx = e->pos.vx + rot->mat.t[0];
                 e->pos.vy = e->pos.vy + rot->mat.t[1];
                 e->pos.vz = e->pos.vz + rot->mat.t[2];
@@ -206,11 +200,11 @@ void hierTraverse(Cs* cs, DbNode* node)
                 }
             }
         } break;
-        case 9:
+        case DB_OP_SWITCH:
             sw = &e->node->sw;
             hierPush(sw->child[sw->sel], e->matIdx, &e->pos, e->eoCnt);
             break;
-        case 3:
+        case DB_OP_ANIM:
             an = &e->node->anim;
             if (an->mode == 1) {
                 hierAnimateBiDirect(an);
@@ -219,7 +213,7 @@ void hierTraverse(Cs* cs, DbNode* node)
             }
             hierPush(an->child[an->cur], e->matIdx, &e->pos, e->eoCnt);
             break;
-        case 11:
+        case DB_OP_CTRL:
             hierCtrlNode(e->node, e);
             break;
         }
@@ -293,7 +287,7 @@ void hierCtrlNode(DbNode* unused, HierEnt* e)
     n = &e->node->ctrl;
     i = 0;
     ok = 1;
-    if (!(n->flags & 2)) {
+    if (!(n->flags & DB_NODE_HIDDEN)) {
         while (1) {
             if (i >= n->nBox) {
                 break;
@@ -433,8 +427,8 @@ void hierProc(Db* db, s32 which)
             cs = cs->next;
         } while (cs != 0);
     }
-    SetDrawMode(SPAD_DRMODE0, db->draw.dfe, db->draw.dtd, db->draw.tpage, &db->draw.tw);
-    SetDrawMode(SPAD_DRMODE1, db->draw.dfe, 1, db->draw.tpage, &db->draw.tw);
+    SetDrawMode(SPAD_DRMODE, db->draw.dfe, db->draw.dtd, db->draw.tpage, &db->draw.tw);
+    SetDrawMode(SPAD_DRMODE_DITHER, db->draw.dfe, 1, db->draw.tpage, &db->draw.tw);
     sdSubPolyPtr = subPolyList;
     if (viewGetCurrentFovSet(which) == 13) {
         sdMirrorView = 1;
@@ -459,8 +453,8 @@ void hierProcOne(Db* db, Cs* cs)
     csUpdMat(cs, lightList);
     hierTraverse(cs, cs->epNode);
     matIdx = matIdx + 1;
-    SetDrawMode(SPAD_DRMODE0, db->draw.dfe, db->draw.dtd, db->draw.tpage, &db->draw.tw);
-    SetDrawMode(SPAD_DRMODE1, db->draw.dfe, 1, db->draw.tpage, &db->draw.tw);
+    SetDrawMode(SPAD_DRMODE, db->draw.dfe, db->draw.dtd, db->draw.tpage, &db->draw.tw);
+    SetDrawMode(SPAD_DRMODE_DITHER, db->draw.dfe, 1, db->draw.tpage, &db->draw.tw);
     sdSubPolyPtr = subPolyList;
     sdMirrorView = 0;
     geomProc(db, objList, objCnt, matList, lightList);

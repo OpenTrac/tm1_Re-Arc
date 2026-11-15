@@ -583,12 +583,12 @@ void init_merc(s32 which, DbNode* ep)
         return;
     }
     n = ep->grp.child[0];
-    if (n->h.op == 9) {
+    if (n->h.op == DB_OP_SWITCH) {
         sw = &n->sw;
     } else {
         sw = &n->trans.child[0]->sw;
     }
-    if (sw->op != 9) {
+    if (sw->op != DB_OP_SWITCH) {
         printf("Unable to find switch for hovercop %ld\n", which);
         return;
     }
@@ -724,12 +724,12 @@ void init_pedestrian(s32 id, DbNode* ep)
         pedestrian[ped_made].obj = csCreate();
         if (pedestrian[ped_made].obj != NULL) {
             node = ep->grp.child[0];
-            if (node->h.op == 9) {
+            if (node->h.op == DB_OP_SWITCH) {
                 n = &node->sw;
             } else {
                 n = &node->trans.child[0]->sw;
             }
-            if (n->op == 9) {
+            if (n->op == DB_OP_SWITCH) {
                 pedestrian[ped_made].id = id;
                 csSetEpNode(pedestrian[ped_made].obj, ep);
                 csAddToCsList(pedestrian[ped_made].obj);
@@ -1004,7 +1004,7 @@ void setup_static_cop(DbSwitch* node, VECTOR3* pos)
     s32 i;
     VECTOR3* d;
 
-    if (node->op != 9) {
+    if (node->op != DB_OP_SWITCH) {
         printf("Error! Static Cop Not At SwNode!\n");
         return;
     }
