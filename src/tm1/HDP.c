@@ -126,7 +126,7 @@ push:
             if (res->hit == 0) {
                 break;
             }
-            hdpSetHitTag(res, n->kind, n->sub, e);
+            hdpSetHitTag(res, n->h.kind, n->sub, e);
             break;
         }
         case DB_OP_BOX: {
@@ -136,7 +136,7 @@ push:
             if (res->hit == 0) {
                 break;
             }
-            hdpSetHitTag(res, n->kind, n->code, e);
+            hdpSetHitTag(res, n->h.kind, n->code, e);
             break;
         }
         case DB_OP_VOLUME: {
@@ -146,7 +146,7 @@ push:
             if (res->hit == 0) {
                 break;
             }
-            hdpSetHitTag(res, n->kind, n->sub, e);
+            hdpSetHitTag(res, n->h.kind, n->sub, e);
             break;
         }
         case DB_OP_GROUP: {
@@ -160,7 +160,7 @@ push:
             if (hdpIsPtInSphere(&n->center, n->radius, &e->pos) == 0) {
                 break;
             }
-            hdpSetNodeIds(&id0, &id1, e, n->kind, n->sub);
+            hdpSetNodeIds(&id0, &id1, e, n->h.kind, n->sub);
             cnt = n->nChild;
             i = 0;
             if (cnt != 0) {
@@ -184,7 +184,7 @@ push:
             e->pos.vx = e->pos.vx - n->ofs.vx;
             e->pos.vy = e->pos.vy - n->ofs.vy;
             e->pos.vz = e->pos.vz - n->ofs.vz;
-            hdpSetNodeIds(&id0, &id1, e, n->kind, n->sub);
+            hdpSetNodeIds(&id0, &id1, e, n->h.kind, n->sub);
             for (i = 0; i < n->nChild; i++) {
                 hdpPush(n->child[i], &e->pos, id0, id1);
             }
@@ -206,7 +206,7 @@ push:
             v.vy = e->pos.vy;
             v.vz = e->pos.vz;
             mathMulVec(&n->mat, &v, &e->pos);
-            hdpSetNodeIds(&id0, &id1, e, n->kind, n->sub);
+            hdpSetNodeIds(&id0, &id1, e, n->h.kind, n->sub);
             for (i = 0; i < n->nChild; i++) {
                 hdpPush(n->child[i], &e->pos, id0, id1);
             }
@@ -215,7 +215,7 @@ push:
         case DB_OP_SWITCH: {
             DbSwitch* n = &e->node->sw;
 
-            hdpSetNodeIds(&id0, &id1, e, n->kind, n->sub);
+            hdpSetNodeIds(&id0, &id1, e, n->h.kind, n->sub);
             t0 = id0;
             t1 = id1;
             node = n->child[n->sel];
@@ -225,7 +225,7 @@ push:
         case DB_OP_ANIM: {
             DbAnim* n = &e->node->anim;
 
-            hdpSetNodeIds(&id0, &id1, e, n->kind, n->sub);
+            hdpSetNodeIds(&id0, &id1, e, n->h.kind, n->sub);
             t0 = id0;
             t1 = id1;
             node = n->child[n->cur];
@@ -238,7 +238,7 @@ push:
             if (n->flags & DB_NODE_NO_COLLIDE) {
                 break;
             }
-            hdpSetNodeIds(&id0, &id1, e, n->kind, n->sub);
+            hdpSetNodeIds(&id0, &id1, e, n->h.kind, n->sub);
             hdpCtrlNode(e, id0, id1);
             break;
         }

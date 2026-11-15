@@ -217,7 +217,7 @@ void uaswInitCarTire(DbNode* n)
     if (n->h.op != DB_OP_SWITCH) {
         return;
     }
-    idx = UA_CAR_SLOT(n->sw.kind);
+    idx = UA_CAR_SLOT(n->h.kind);
     if (idx < 16) {
         sub = n->sw.sub - 1;
         if (sub < 3) {
@@ -262,7 +262,7 @@ void uaswInitCarShadow(DbNode* n)
     if (n->h.op != DB_OP_GROUP) {
         return;
     }
-    idx = UA_CAR_SLOT(n->grp.kind);
+    idx = UA_CAR_SLOT(n->h.kind);
     if (idx < 16) {
         sub = n->grp.sub - 1;
         if (sub < 3) {
