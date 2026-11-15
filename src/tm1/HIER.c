@@ -16,7 +16,7 @@
 #define SPAD_DRMODE1 ((DR_MODE*)0x1F80006C)
 #define sdSubPolyCount (*(s32*)0x1F800038)
 #define sdSubPolyPtr (*(SubPoly**)0x1F80004C)
-#define sdFogEnable (*(s32*)0x1F800088)
+#define sdMirrorView (*(s32*)0x1F800088)
 
 static s32 fovDepth = 1200;
 static s32 fovDepthCfg = 1200;
@@ -103,7 +103,7 @@ void hierTraverse(Cs* cs, DbNode* node)
 
             obj = &e->node->obj;
             ok = 1;
-            if (!(obj->flags & 0x2000)) {
+            if (!(obj->flags & DB_OBJ_NO_FOV_TEST)) {
                 ok = hierIsInFov(&obj->center, obj->radius, &e->pos, matInfo[e->matIdx].fov0,
                     matInfo[e->matIdx].fov1);
             }
@@ -437,9 +437,9 @@ void hierProc(Db* db, s32 which)
     SetDrawMode(SPAD_DRMODE1, db->draw.dfe, 1, db->draw.tpage, &db->draw.tw);
     sdSubPolyPtr = subPolyList;
     if (viewGetCurrentFovSet(which) == 13) {
-        sdFogEnable = 1;
+        sdMirrorView = 1;
     } else {
-        sdFogEnable = 0;
+        sdMirrorView = 0;
     }
     geomProc(db, objList, objCnt, matList, lightList);
     subPoly3(db, subPolyList, sdSubPolyCount);
@@ -462,7 +462,7 @@ void hierProcOne(Db* db, Cs* cs)
     SetDrawMode(SPAD_DRMODE0, db->draw.dfe, db->draw.dtd, db->draw.tpage, &db->draw.tw);
     SetDrawMode(SPAD_DRMODE1, db->draw.dfe, 1, db->draw.tpage, &db->draw.tw);
     sdSubPolyPtr = subPolyList;
-    sdFogEnable = 0;
+    sdMirrorView = 0;
     geomProc(db, objList, objCnt, matList, lightList);
     subPoly3(db, subPolyList, sdSubPolyCount);
     subPoly4(db, subPolyList, sdSubPolyCount);

@@ -568,10 +568,10 @@ INCLUDE_ASM("asm/nonmatchings/tm1/VIEW", viewSetParent);
 void viewSetSky(Cs* node)
 {
     sky[0] = node;
-    node->unk00 = 0xFFE;
+    node->otIndex = 0xFFE;
     if (rtIsSplitScreenOn()) {
         sky[1] = csCreate();
-        sky[1]->unk00 = 0xFFE;
+        sky[1]->otIndex = 0xFFE;
         csSetEpNode(sky[1], node->epNode);
     }
 }

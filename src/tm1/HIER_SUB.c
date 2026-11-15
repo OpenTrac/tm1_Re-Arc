@@ -23,7 +23,7 @@ void subPoly3(Db* db, SubPoly* f, s32 count)
     u8* q0;
     u8* q1;
     u8* q2;
-    s32* flags;
+    DbPoly* poly;
     s32 i;
     s32 step;
     s32 half;
@@ -33,11 +33,11 @@ void subPoly3(Db* db, SubPoly* f, s32 count)
 
     out = db->prim;
     for (i = 0; i < count; i++) {
-        flags = f[i].flags;
-        if ((flags[3] & 0x70000) == 0x30000) {
-            half = ((u8*)flags)[14] >> 6;
+        poly = f[i].poly;
+        if (poly->numVert == 3) {
+            half = poly->vertStride;
             prim = (u8*)f[i].prim;
-            flags = f[i].flags;
+            poly = f[i].poly;
             step = half * 4;
             q0 = prim + 8;
             q1 = q0 + step;
@@ -45,7 +45,7 @@ void subPoly3(Db* db, SubPoly* f, s32 count)
             p0 = (s32*)q0;
             p1 = (s32*)q1;
             p2 = (s32*)q2;
-            nWords = ((u8*)flags)[3] + 1;
+            nWords = poly->primLen + 1;
             prim2D[0] = (s32*)out;
             prim2D[1] = (s32*)(out + nWords * 4);
             prim2D[2] = (s32*)((u8*)prim2D[1] + nWords * 4);
@@ -60,7 +60,7 @@ void subPoly3(Db* db, SubPoly* f, s32 count)
             POUT16[4] = (*(s16*)(q2 + 0) + *(s16*)(prim + 8)) >> 1;
             POUT16[5] = (*(s16*)(q2 + 2) + *(s16*)(prim + 10)) >> 1;
             subLoadPoly3Words(2, half);
-            if ((f[i].flags[0] & 0x7f) != 0) {
+            if ((f[i].poly->numUV & 0x7F) != 0) {
                 u8* r0;
                 u8* r1;
                 u8* r2;
@@ -82,10 +82,10 @@ void subPoly3(Db* db, SubPoly* f, s32 count)
                 subLoadPoly3Words(3, half);
             }
             prim = (u8*)f[i].prim;
-            flags = f[i].flags;
+            poly = f[i].poly;
             q0 = prim + 4;
             p0 = (s32*)q0;
-            if (((u8*)flags)[1] >= 2 || (sub = (((u8*)flags)[14] >> 3) & 7) >= 2) {
+            if (poly->numColor >= 2 || (sub = poly->numNormal) >= 2) {
                 q1 = q0 + step;
                 q2 = q1 + step;
                 p1 = (s32*)q1;
@@ -112,7 +112,7 @@ void subPoly3(Db* db, SubPoly* f, s32 count)
             ((u8*)prim2D[1])[3] = nWords - 1;
             ((u8*)prim2D[2])[3] = nWords - 1;
             out = (u8*)prim2D[2] + nWords * 4;
-            subAddPrim(db, &f[i], (SubPacket**)&out, (void**)prim2D);
+            subAddPrim(db, &f[i], (DR_MODE**)&out, (void**)prim2D);
         }
     }
     db->prim = out;
@@ -156,7 +156,7 @@ void subPoly4(Db* db, SubPoly* f, s32 count)
     u8* q1;
     u8* q2;
     u8* q3;
-    s32* flags;
+    DbPoly* poly;
     s32 i;
     s32 step;
     s32 half;
@@ -170,11 +170,11 @@ void subPoly4(Db* db, SubPoly* f, s32 count)
 
     out = db->prim;
     for (i = 0; i < count; i++) {
-        flags = f[i].flags;
-        if ((flags[3] & 0x70000) == 0x40000) {
-            half = ((u8*)flags)[14] >> 6;
+        poly = f[i].poly;
+        if (poly->numVert == 4) {
+            half = poly->vertStride;
             prim = (u8*)f[i].prim;
-            flags = f[i].flags;
+            poly = f[i].poly;
             step = half * 4;
             q0 = prim + 8;
             q1 = q0 + step;
@@ -184,7 +184,7 @@ void subPoly4(Db* db, SubPoly* f, s32 count)
             p1 = (s32*)q1;
             p2 = (s32*)q2;
             p3 = (s32*)q3;
-            nWords = ((u8*)flags)[3] + 1;
+            nWords = poly->primLen + 1;
             prim2D[0] = (s32*)out;
             prim2D[1] = (s32*)(out + nWords * 4);
             prim2D[2] = (s32*)((u8*)prim2D[1] + nWords * 4);
@@ -207,7 +207,7 @@ void subPoly4(Db* db, SubPoly* f, s32 count)
             POUT16[9] = (my0 + my2) >> 1;
             POUT16[7] = (*(s16*)(q3 + 2) + *(s16*)(q2 + 2)) >> 1;
             subLoadPoly4Words(2, half);
-            if ((f[i].flags[0] & 0x7f) != 0) {
+            if ((f[i].poly->numUV & 0x7F) != 0) {
                 u8* r0;
                 u8* r1;
                 u8* r2;
@@ -250,10 +250,10 @@ void subPoly4(Db* db, SubPoly* f, s32 count)
                 *(u16*)((u8*)prim2D[2] + 14) = *(u16*)((u8*)p0 + 2);
             }
             prim = (u8*)f[i].prim;
-            flags = f[i].flags;
+            poly = f[i].poly;
             q0 = prim + 4;
             p0 = (s32*)q0;
-            if (((u8*)flags)[1] >= 2 || (sub = (((u8*)flags)[14] >> 3) & 7) >= 2) {
+            if (poly->numColor >= 2 || (sub = poly->numNormal) >= 2) {
                 s32 b0;
                 s32 c0;
                 s32 b2;
@@ -303,7 +303,7 @@ void subPoly4(Db* db, SubPoly* f, s32 count)
             ((u8*)prim2D[1])[3] = nWords - 1;
             ((u8*)prim2D[2])[3] = nWords - 1;
             out = (u8*)prim2D[2] + nWords * 4;
-            subAddPrim(db, &f[i], (SubPacket**)&out, (void**)prim2D);
+            subAddPrim(db, &f[i], (DR_MODE**)&out, (void**)prim2D);
         }
     }
     db->prim = out;
@@ -346,30 +346,30 @@ void subLoadPoly4Words(s32 col, s32 row)
 }
 
 #ifdef NON_MATCHING
-void subAddPrim(Db* db, SubPoly* f, SubPacket** cursor, void** extra)
+void subAddPrim(Db* db, SubPoly* f, DR_MODE** cursor, void** extra)
 {
-    if ((*f->flags & 0x80) != 0 || f->twoSided != 0) {
-        (*cursor)->w0 = *getScratchAddr(0x18);
-        (*cursor)->w1 = *getScratchAddr(0x19);
-        (*cursor)->w2 = *getScratchAddr(0x1A);
+    if ((f->poly->numUV & DB_POLY_DRAW_MODE) != 0 || f->dither != 0) {
+        (*cursor)->tag = *getScratchAddr(0x18);
+        (*cursor)->code[0] = *getScratchAddr(0x19);
+        (*cursor)->code[1] = *getScratchAddr(0x1A);
         AddPrim(db->ot + f->otIdx, *cursor);
         *cursor += 1;
         AddPrim(db->ot + f->otIdx, f->prim);
         AddPrim(db->ot + f->otIdx, extra[0]);
         AddPrim(db->ot + f->otIdx, extra[1]);
         AddPrim(db->ot + f->otIdx, extra[2]);
-        if (f->twoSided != 0) {
-            (*cursor)->w0 = *getScratchAddr(0x1B);
-            (*cursor)->w1 = *getScratchAddr(0x1C);
-            (*cursor)->w2 = *getScratchAddr(0x1D);
+        if (f->dither != 0) {
+            (*cursor)->tag = *getScratchAddr(0x1B);
+            (*cursor)->code[0] = *getScratchAddr(0x1C);
+            (*cursor)->code[1] = *getScratchAddr(0x1D);
         } else {
-            (*cursor)->w0 = *getScratchAddr(0x18);
-            (*cursor)->w1 = *getScratchAddr(0x19);
-            (*cursor)->w2 = *getScratchAddr(0x1A);
+            (*cursor)->tag = *getScratchAddr(0x18);
+            (*cursor)->code[0] = *getScratchAddr(0x19);
+            (*cursor)->code[1] = *getScratchAddr(0x1A);
         }
-        if ((*f->flags & 0x80) != 0) {
-            (*cursor)->w2 = *f->back;
-            ((u8*)*cursor)[4] = f->code;
+        if ((f->poly->numUV & DB_POLY_DRAW_MODE) != 0) {
+            (*cursor)->code[1] = *f->texWindow;
+            *(u8*)&(*cursor)->code[0] = f->tpage;
         }
         AddPrim(db->ot + f->otIdx, *cursor);
         *cursor += 1;

@@ -9,7 +9,7 @@
 
 /* Coordinate system record -- 0x10C bytes (csCreate strides by 0x10C). */
 typedef struct Cs {
-    /* 0x000 */ s32 unk00;
+    /* 0x000 */ s32 otIndex; /* fixed OT index for this object; 0 = sort by depth */
     /* 0x004 */ LightEnv* env;
     /* 0x008 */ s32 drawMode;
     /* 0x00C */ s32 unk0C;
