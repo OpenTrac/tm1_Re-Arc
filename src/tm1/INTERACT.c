@@ -1100,7 +1100,7 @@ void LaunchDrops(Car* car, u8 isPlayer)
     }
 }
 
-void carAddWeapTex(GrObj* obj, s32 id)
+void carAddWeapTex(DbObject* obj, s32 id)
 {
     switch (id) {
     case UA_BOMB:

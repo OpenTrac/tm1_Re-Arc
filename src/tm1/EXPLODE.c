@@ -705,9 +705,9 @@ void explodeStoreArmorIcon(void* data)
     ArmorInfo.unk1 += 2;
 }
 
-void explodeLoadFragTexture(s32 id, GrObj* data)
+void explodeLoadFragTexture(s32 id, DbObject* data)
 {
-    if (data->kind != 0) {
+    if (data->op != 0) {
         printf("\nError Parsing Fragment Sprite %d\n", id);
     } else if (id == UA_FRAGMENT_A) {
         grutilsParse3DSprite(data, fragmenta, 4);

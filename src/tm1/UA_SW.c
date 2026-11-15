@@ -11,7 +11,7 @@ static DbSwitch* BreakingWindowSwitch;
 static s32 numDestroySwitches;
 static s32 numDestroyGroups;
 
-void uaswInitDbSwitch(DbSwitch* node, s32 type)
+void uaswInitDbSwitch(DbNode* node, s32 type)
 {
     s32 idx;
 
@@ -30,47 +30,47 @@ void uaswInitDbSwitch(DbSwitch* node, s32 type)
     case UA_UNK_1009:
     case UA_UNK_1010:
     case UA_UNK_1017:
-        if (node->kind == 9) {
+        if (node->h.op == 9) {
             idx = numDestroySwitches;
             if (idx < 30) {
-                destroySwitch[idx] = node;
-                node->sub = idx;
+                destroySwitch[idx] = &node->sw;
+                node->sw.sub = idx;
                 numDestroySwitches = idx + 1;
             }
         }
         break;
     case UA_BREAKING_WINDOW:
-        if (node->kind == 9) {
-            BreakingWindowSwitch = node;
+        if (node->h.op == 9) {
+            BreakingWindowSwitch = &node->sw;
         }
         break;
     case UA_BAZ_COP:
-        if (node->kind == 9) {
-            bazCopSwitch = node;
+        if (node->h.op == 9) {
+            bazCopSwitch = &node->sw;
         }
         break;
     case UA_HOVER_COP:
-        if (node->kind == 9) {
-            hoverCopSwitch = node;
+        if (node->h.op == 9) {
+            hoverCopSwitch = &node->sw;
         }
         break;
     case UA_HEALTH_STAND:
-        if (node->kind == 9) {
-            if (node->sub < 11) {
-                healthstandSwitch[node->sub - 1] = node;
+        if (node->h.op == 9) {
+            if (node->sw.sub < 11) {
+                healthstandSwitch[node->sw.sub - 1] = &node->sw;
             }
         }
         break;
     case UA_BARRICADE:
-        if (node->kind == 9) {
-            barricadeSwitch[node->sub - 1] = node;
+        if (node->h.op == 9) {
+            barricadeSwitch[node->sw.sub - 1] = &node->sw;
         }
         break;
     case UA_FALLING_BOX:
-        FallingBoxSwitch = node;
+        FallingBoxSwitch = &node->sw;
         break;
     case UA_DROP_BOX:
-        DropBoxSwitch = node;
+        DropBoxSwitch = &node->sw;
         break;
     case UA_ICE_CREAM_TRUCK_HEADLIGHTS:
     case UA_TAXI_CAB_HEADLIGHTS:
@@ -85,10 +85,10 @@ void uaswInitDbSwitch(DbSwitch* node, s32 type)
     case UA_CORVETTE_HEADLIGHTS:
     case UA_MAD_MAX_HEADLIGHTS:
     case UA_BOSS_CAR_HEADLIGHTS:
-        if (node->kind == 1) {
-            if (node->shadowSub < 4) {
-                if (node->shadowSub != 0) {
-                    carHeadlightSwitch[UA_CAR_SLOT(type)][node->shadowSub - 1] = node;
+        if (node->h.op == 1) {
+            if (node->grp.sub < 4) {
+                if (node->grp.sub != 0) {
+                    carHeadlightSwitch[UA_CAR_SLOT(type)][node->grp.sub - 1] = &node->grp;
                 }
             }
         }
@@ -150,16 +150,16 @@ void uaswSetState(s32 id, s32 num, u32 state)
 void uaswSetSwitch(DbSwitch* s, u32 state)
 {
     if (s != 0) {
-        if (state < s->numStates) {
-            s->state = state;
+        if (state < s->nChild) {
+            s->sel = state;
         }
     }
 }
 
 void uaswInitCarSwitch(Cs* cs, s32 id)
 {
-    DbSwitch* p;
-    DbSwitch* q;
+    DbNode* p;
+    DbNode* q;
     s32 kind;
     s32 idx;
 
@@ -167,28 +167,28 @@ void uaswInitCarSwitch(Cs* cs, s32 id)
     if (p == 0) {
         return;
     }
-    kind = p->kind;
+    kind = p->h.op;
     if (kind != 1) {
         return;
     }
-    p = p->child;
+    p = p->grp.child[0];
     if (p == 0) {
         return;
     }
-    if (p->kind != kind) {
+    if (p->h.op != kind) {
         return;
     }
-    q = p->child;
+    q = p->grp.child[0];
     if (q == 0) {
         return;
     }
-    if (q->kind != 9) {
+    if (q->h.op != 9) {
         return;
     }
     idx = UA_CAR_SLOT(id);
     if (idx < 16) {
-        carSwitch[idx] = q;
-        q->state = 0;
+        carSwitch[idx] = &q->sw;
+        q->sw.sel = 0;
     }
 }
 
@@ -199,14 +199,14 @@ void uaswSetCarState(s32 id, u32 state, s8 unused)
     idx = UA_CAR_SLOT(id);
     if (idx < 16) {
         if (carSwitch[idx] != 0) {
-            if (state < carSwitch[idx]->numStates) {
-                carSwitch[idx]->state = state;
+            if (state < carSwitch[idx]->nChild) {
+                carSwitch[idx]->sel = state;
             }
         }
     }
 }
 
-void uaswInitCarTire(DbSwitch* n)
+void uaswInitCarTire(DbNode* n)
 {
     s32 idx;
     s32 sub;
@@ -214,14 +214,14 @@ void uaswInitCarTire(DbSwitch* n)
     if (n == 0) {
         return;
     }
-    if (n->kind != 9) {
+    if (n->h.op != 9) {
         return;
     }
-    idx = UA_CAR_SLOT(n->id);
+    idx = UA_CAR_SLOT(n->sw.kind);
     if (idx < 16) {
-        sub = n->sub - 1;
+        sub = n->sw.sub - 1;
         if (sub < 3) {
-            carTireSwitch[idx][sub] = n;
+            carTireSwitch[idx][sub] = &n->sw;
         }
     }
 }
@@ -236,14 +236,14 @@ void uaswToggleCarTireState(s32 idx, s32 dir)
             n = carTireSwitch[idx][j];
             if (n != 0) {
                 if (dir < 0) {
-                    n->state--;
-                    if (n->state >= n->numStates) {
-                        n->state = n->numStates - 1;
+                    n->sel--;
+                    if (n->sel >= n->nChild) {
+                        n->sel = n->nChild - 1;
                     }
                 } else {
-                    n->state++;
-                    if (n->state >= n->numStates) {
-                        n->state = 0;
+                    n->sel++;
+                    if (n->sel >= n->nChild) {
+                        n->sel = 0;
                     }
                 }
             }
@@ -251,7 +251,7 @@ void uaswToggleCarTireState(s32 idx, s32 dir)
     }
 }
 
-void uaswInitCarShadow(DbSwitch* n)
+void uaswInitCarShadow(DbNode* n)
 {
     s32 idx;
     s32 sub;
@@ -259,14 +259,14 @@ void uaswInitCarShadow(DbSwitch* n)
     if (n == 0) {
         return;
     }
-    if (n->kind != 1) {
+    if (n->h.op != 1) {
         return;
     }
-    idx = UA_CAR_SLOT(n->id);
+    idx = UA_CAR_SLOT(n->grp.kind);
     if (idx < 16) {
-        sub = n->shadowSub - 1;
+        sub = n->grp.sub - 1;
         if (sub < 3) {
-            carShadowSwitch[idx][sub] = n;
+            carShadowSwitch[idx][sub] = &n->grp;
         }
     }
 }
@@ -275,7 +275,7 @@ void uaswSetCarShadow(s32 id, s32 on)
 {
     s32 idx;
     s32 j;
-    DbSwitch* n;
+    DbGroup* n;
 
     idx = UA_CAR_SLOT(id);
     if (idx < 16) {
@@ -283,16 +283,16 @@ void uaswSetCarShadow(s32 id, s32 on)
             n = carShadowSwitch[idx][j];
             if (n != 0) {
                 if (on) {
-                    n->numGroupsChildren = 1;
+                    n->nChild = 1;
                 } else {
-                    n->numGroupsChildren = 0;
+                    n->nChild = 0;
                 }
             }
         }
     }
 }
 
-void uaswInitDbEditNumChildren(DbSwitch* node, s32 type)
+void uaswInitDbEditNumChildren(DbNode* node, s32 type)
 {
     s32 idx;
 
@@ -316,10 +316,10 @@ void uaswInitDbEditNumChildren(DbSwitch* node, s32 type)
     case UA_UNK_430:
     case UA_UNK_431:
     case UA_PICKUP_SPECIAL:
-        if (node->kind == 4) {
-            idx = node->num - 1;
+        if (node->h.op == 4) {
+            idx = node->trans.sub - 1;
             if (idx < 50) {
-                gWeaponPickup[idx] = node;
+                gWeaponPickup[idx] = &node->trans;
             }
         }
         break;
@@ -333,11 +333,11 @@ void uaswInitDbEditNumChildren(DbSwitch* node, s32 type)
     case UA_UNK_1005:
     case UA_UNK_1008:
     case UA_UNK_1015:
-        if (node->kind == 1) {
+        if (node->h.op == 1) {
             idx = numDestroyGroups;
             if (idx < 30) {
-                destroyGroup[idx] = node;
-                node->shadowSub = idx;
+                destroyGroup[idx] = &node->grp;
+                node->grp.sub = idx;
                 numDestroyGroups = idx + 1;
             }
         }
@@ -389,17 +389,17 @@ void uaswSetNumChildren(s32 id, s32 num, s32 n)
     }
 }
 
-void uaswSetNumGroupsChildren(DbSwitch* s, s32 n)
+void uaswSetNumGroupsChildren(DbGroup* s, s32 n)
 {
     if (s != 0) {
-        s->numGroupsChildren = n;
+        s->nChild = n;
     }
 }
 
-void uaswSetNumTransChildren(DbSwitch* s, s32 n)
+void uaswSetNumTransChildren(DbTrans* s, s32 n)
 {
     if (s != 0) {
-        s->numTransChildren = n;
+        s->nChild = n;
     }
 }
 
@@ -447,9 +447,9 @@ void uaswCarHeadlightsOnOff(u32 id, s32 mode)
         if (idx < 15) {
             if (carHeadlightSwitch[idx][j] != 0) {
                 if (mode == 1) {
-                    carHeadlightSwitch[idx][j]->numGroupsChildren = 2;
+                    carHeadlightSwitch[idx][j]->nChild = 2;
                 } else {
-                    carHeadlightSwitch[idx][j]->numGroupsChildren = 0;
+                    carHeadlightSwitch[idx][j]->nChild = 0;
                 }
             }
         }

@@ -214,11 +214,6 @@
 // (A car and its tire, shadow, and headlight nodes all share the same ID.)
 #define UA_CAR_SLOT(type) ((type) / 10)
 
-typedef struct DrawNode {
-    /*0x00*/ u8 pad00[0x14];
-    /*0x14*/ u8 drawFlag;
-} DrawNode;
-
 void UASetBattleMusicOn(void);
 void UAAddCs(Cs* cs, s32 name);
 void uaInit(void);

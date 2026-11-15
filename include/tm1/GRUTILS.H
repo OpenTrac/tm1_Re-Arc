@@ -4,6 +4,8 @@
 #include "common.h"
 #include <LIBGPU.H>
 
+#include "tm1/SCENE.H"
+
 // TODO: Consolidate; these are probably SDK types
 
 /* The UV/CLUT/TPAGE block a polygon record carries at +16 (POLY_FT4 layout). */
@@ -21,16 +23,6 @@ typedef struct {
     u8 v3; /* +13 */
     u16 pad3; /* +14 */
 } GrTexUV;
-
-/* A parsed DMD-style object: a polygon list plus its vertex list. */
-typedef struct GrObj {
-    u8 kind; /* 0 = sprite object */
-    u8 pad0[3];
-    SVECTOR* verts; /* +4  vertex array */
-    u8 pad1[4];
-    u8* polys; /* +12 first polygon record */
-    s32 count; /* +16 number of polygon records */
-} GrObj;
 
 /* Parsed DMD3D sprite. */
 typedef struct GrSprite {
@@ -51,9 +43,9 @@ typedef struct {
 } GrScreenSprite;
 
 u16 Load4BitClut(u32* data, int x, int y);
-u32 grutilsParse2DScreenSprite(GrObj* obj, GrScreenSprite* out, u32 max);
-u32 grutilsParse3DSprite(GrObj* obj, GrSprite* out, u32 max);
-s32 grutilsParse2DSprite(GrObj* obj, GrSprite* out, u32 max);
+u32 grutilsParse2DScreenSprite(DbObject* obj, GrScreenSprite* out, u32 max);
+u32 grutilsParse3DSprite(DbObject* obj, GrSprite* out, u32 max);
+s32 grutilsParse2DSprite(DbObject* obj, GrSprite* out, u32 max);
 void grutilsDrawNumberUsingSprites(s32 num, SPRT* prim, GrSprite* digits, u32* ot);
 
 #endif
