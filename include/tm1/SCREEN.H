@@ -7,6 +7,7 @@
 #include "tm1/CAR.H"
 #include "tm1/CS.H"
 #include "tm1/RT.H"
+#include "tm1/SCENE.H"
 
 typedef struct ScreenCarEnding {
     /* 0x000 */ CarStats stats;
@@ -54,7 +55,7 @@ void screenChooseBattleground(s32 split);
 s32 screenCharacterRowPosition(s32 row, s32 numRows, s32 center, s32 spacing);
 void screenDisplayChoicesFromBottom(
     s32 mode, s32 count, s32 unused, s32 sel, char** names, char** names2, s32 bottom, s32 spacing);
-void screenInitCarOccupants(u8* model);
+void screenInitCarOccupants(DbObject* model);
 void screenLoadCarSelectionBackground(void);
 void screenShowCarBio(s32 carName, s32 pad);
 s32 screenHoldForTwoPlayerControl(s32* pad, s32* player, u_long* image);

@@ -12,6 +12,44 @@ typedef struct HdBox {
     /* 0x28 */ SVECTOR hi;
 } HdBox; /* 0x30 */
 
+/* UV block of a textured polygon record (same layout as in POLY_FT4). */
+typedef struct DbPolyUV {
+    /* 0x00 */ u8 u0;
+    /* 0x01 */ u8 v0;
+    /* 0x02 */ u16 clut;
+    /* 0x04 */ u8 u1;
+    /* 0x05 */ u8 v1;
+    /* 0x06 */ u16 tpage;
+    /* 0x08 */ u8 u2;
+    /* 0x09 */ u8 v2;
+    /* 0x0A */ u16 pad0A;
+    /* 0x0C */ u8 u3;
+    /* 0x0D */ u8 v3;
+    /* 0x0E */ u16 pad0E;
+} DbPolyUV; /* 0x10 */
+
+/*
+ * Header of a polygon record in a DbObject's polygon list.
+ * Records are `len` words long. The header is followed by `uvOfs` words of
+ * colour data, then a DbPolyUV.
+ */
+typedef struct DbPoly {
+    /* 0x00 */ u8 unk00;
+    /* 0x01 */ u8 unk01;
+    /* 0x02 */ u8 len;
+    /* 0x03 */ u8 unk03;
+    /* 0x04 */ s16 vi[4];
+    /* 0x0C */ u32 unk0C : 16;
+    u32 unk0C_16 : 3;
+    u32 unk0C_19 : 3;
+    u32 unk0C_22 : 2;
+    u32 unk0C_24 : 4;
+    u32 uvOfs : 3;
+    u32 unk0C_31 : 1;
+} DbPoly; /* 0x10 */
+
+#define DB_POLY_NEXT(p) ((DbPoly*)((u8*)(p) + (p)->len * 4))
+
 typedef struct DbNodeHdr {
     /* 0x00 */ u8 op;
     /* 0x01 */ u8 pad01;
@@ -24,8 +62,8 @@ typedef struct DbObject {
     /* 0x01 */ u8 pad01;
     /* 0x02 */ u16 kind;
     /* 0x04 */ SVECTOR* verts;
-    /* 0x08 */ u8 pad08[4];
-    /* 0x0C */ u8* polys;
+    /* 0x08 */ s32 unk08;
+    /* 0x0C */ DbPoly* polys;
     /* 0x10 */ s32 nPoly;
     /* 0x14 */ u16 sub;
     /* 0x16 */ u16 skip;

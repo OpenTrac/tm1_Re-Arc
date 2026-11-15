@@ -927,24 +927,26 @@ INCLUDE_ASM("asm/nonmatchings/tm1/UA_DASH", UAdashSetDashboardDrawFlag);
 void uadashInitSteeringWheel(DbObject* obj)
 {
     SVECTOR* vt;
-    DashFace* f;
-    GrTexUV* uv;
+    DbPoly* f;
+    u8* base;
+    DbPolyUV* uv;
 
     if (obj != NULL && obj->op == 0) {
         vt = obj->verts;
-        f = (DashFace*)obj->polys;
+        f = obj->polys;
         setPolyFT4(&gDash[0].wheel);
-        uv = (GrTexUV*)((u8*)&f->uv + ((f->uvsel >> 2) & 0x1C));
+        base = (u8*)(f + 1);
+        uv = (DbPolyUV*)(base + f->uvOfs * 4);
         SetSemiTrans(&gDash[0].wheel, 1);
         setRGB0(&gDash[0].wheel, 0xFF, 0xFF, 0xFF);
-        gDash[0].wheel.x0 = vt[f->vi0].vx / 8 - 120;
-        gDash[0].wheel.y0 = -(vt[f->vi0].vy / 8) - 64;
-        gDash[0].wheel.x1 = vt[f->vi1].vx / 8 - 120;
-        gDash[0].wheel.y1 = -(vt[f->vi1].vy / 8) - 64;
-        gDash[0].wheel.x2 = vt[f->vi2].vx / 8 - 120;
-        gDash[0].wheel.y2 = vt[f->vi2].vy / 8 - 64;
-        gDash[0].wheel.x3 = vt[f->vi3].vx / 8 - 120;
-        gDash[0].wheel.y3 = vt[f->vi3].vy / 8 - 64;
+        gDash[0].wheel.x0 = vt[f->vi[0]].vx / 8 - 120;
+        gDash[0].wheel.y0 = -(vt[f->vi[0]].vy / 8) - 64;
+        gDash[0].wheel.x1 = vt[f->vi[1]].vx / 8 - 120;
+        gDash[0].wheel.y1 = -(vt[f->vi[1]].vy / 8) - 64;
+        gDash[0].wheel.x2 = vt[f->vi[2]].vx / 8 - 120;
+        gDash[0].wheel.y2 = vt[f->vi[2]].vy / 8 - 64;
+        gDash[0].wheel.x3 = vt[f->vi[3]].vx / 8 - 120;
+        gDash[0].wheel.y3 = vt[f->vi[3]].vy / 8 - 64;
         gDash[0].wheel.u0 = uv->u0;
         gDash[0].wheel.v0 = uv->v0;
         gDash[0].wheel.u1 = uv->u1;

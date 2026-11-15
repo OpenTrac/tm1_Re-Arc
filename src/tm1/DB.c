@@ -514,7 +514,7 @@ void dbProcessInteractives(s32 type, DbNode* node, s32* loc, s32 parent, s32* pa
         uadashInitSteeringWheel(&node->obj);
         break;
     case UA_CAR_OCCUPANTS:
-        screenInitCarOccupants(node);
+        screenInitCarOccupants(&node->obj);
         break;
     case UA_REAR_VIEW_MIRROR:
         uadashInitRearViewMirror();

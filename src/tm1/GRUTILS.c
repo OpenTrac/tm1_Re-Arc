@@ -18,9 +18,9 @@ u16 Load4BitClut(u32* data, int x, int y)
 u32 grutilsParse2DScreenSprite(DbObject* obj, GrScreenSprite* out, u32 max)
 {
     SVECTOR* verts;
-    u8* poly;
+    DbPoly* poly;
     u8* base;
-    GrTexUV* tex;
+    DbPolyUV* tex;
     int i;
 
     if (obj == 0 || obj->op != 0) {
@@ -32,26 +32,26 @@ u32 grutilsParse2DScreenSprite(DbObject* obj, GrScreenSprite* out, u32 max)
         max = obj->nPoly;
     }
     for (i = 0; i < (int)max; i++) {
-        base = poly + 16;
-        tex = (GrTexUV*)(base + ((poly[15] >> 2) & 0x1c));
-        out[i].x = verts[(s16) * (u16*)(poly + 4)].vx / 8;
-        out[i].y = -verts[(s16) * (u16*)(poly + 4)].vy / 8;
+        base = (u8*)(poly + 1);
+        tex = (DbPolyUV*)(base + poly->uvOfs * 4);
+        out[i].x = verts[poly->vi[0]].vx / 8;
+        out[i].y = -verts[poly->vi[0]].vy / 8;
         out[i].u0 = tex->u0;
         out[i].v0 = tex->v0;
-        out[i].w = (verts[(s16) * (u16*)(poly + 6)].vx - verts[(s16) * (u16*)(poly + 4)].vx) / 8;
-        out[i].h = (verts[(s16) * (u16*)(poly + 4)].vy - verts[(s16) * (u16*)(poly + 8)].vy) / 8;
+        out[i].w = (verts[poly->vi[1]].vx - verts[poly->vi[0]].vx) / 8;
+        out[i].h = (verts[poly->vi[0]].vy - verts[poly->vi[2]].vy) / 8;
         out[i].clut = tex->clut;
         out[i].tpage = tex->tpage;
-        poly += 4 * poly[2];
+        poly = DB_POLY_NEXT(poly);
     }
     return max;
 }
 
 u32 grutilsParse3DSprite(DbObject* obj, GrSprite* out, u32 max)
 {
-    u8* poly;
+    DbPoly* poly;
     u8* base;
-    GrTexUV* tex;
+    DbPolyUV* tex;
     int i;
 
     if (obj == 0 || obj->op != 0) {
@@ -62,15 +62,15 @@ u32 grutilsParse3DSprite(DbObject* obj, GrSprite* out, u32 max)
         max = obj->nPoly;
     }
     for (i = 0; i < (int)max; i++) {
-        base = poly + 16;
-        tex = (GrTexUV*)(base + ((poly[15] >> 2) & 0x1c));
+        base = (u8*)(poly + 1);
+        tex = (DbPolyUV*)(base + poly->uvOfs * 4);
         out[i].u0 = tex->u0;
         out[i].v0 = tex->v0;
         out[i].w = tex->u3 - tex->u2;
         out[i].h = tex->v3 - tex->v1;
         out[i].clut = tex->clut;
         out[i].tpage = tex->tpage;
-        poly += 4 * poly[2];
+        poly = DB_POLY_NEXT(poly);
     }
     return max;
 }
