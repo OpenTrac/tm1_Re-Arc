@@ -28,7 +28,7 @@ static s32 gLightningVoffset;
 static DbRot* gTruckWheel[4];
 static s32 gCarSpeed[15];
 static HitLight gHitLight[6];
-static u8* gTVpolyUVs[4];
+static UVWord* gTVpolyUVs[4];
 
 u8* gLightningPart[4] = { 0, 0, 0, 0 };
 
@@ -151,7 +151,7 @@ s32 D_801714AC[24] = {
 void UAeffectInit(void)
 {
     s32 i;
-    u8** p;
+    UVWord** p;
 
     i = 0;
     gTruckWheel[0] = 0;
@@ -214,7 +214,7 @@ void UAeffectUpdateTVs(void)
     buf = rtWhichDisplayBuffer();
     for (i = 0; i < gNumTVs; i++) {
         if (gTVpolyUVs[i] != 0) {
-            ((UVWord*)gTVpolyUVs[i])->page = gTVsTPage[buf];
+            gTVpolyUVs[i]->page = gTVsTPage[buf];
         }
     }
 }
@@ -222,7 +222,9 @@ void UAeffectUpdateTVs(void)
 #ifdef NON_MATCHING
 void UAeffectInitTV(DbObject* node)
 {
-    u8* uv;
+    DbPoly* poly;
+    u8* base;
+    DbPolyUV* uv;
 
     if (node == 0) {
         return;
@@ -233,17 +235,18 @@ void UAeffectInitTV(DbObject* node)
     if (gNumTVs == 4) {
         return;
     }
-    uv = node->polys;
-    uv = uv + 16 + ((uv[15] >> 2) & 0x1c);
-    uv[0] = 0x1c;
-    uv[1] = 0x3a;
-    uv[4] = 0xa2;
-    uv[5] = 0x3a;
-    uv[8] = 0x1c;
-    uv[9] = 0x9d;
-    uv[12] = 0xa2;
-    uv[13] = 0x9d;
-    gTVpolyUVs[gNumTVs] = uv + 4;
+    poly = node->polys;
+    base = (u8*)(poly + 1);
+    uv = (DbPolyUV*)(base + poly->uvOfs * 4);
+    uv->u0 = 0x1c;
+    uv->v0 = 0x3a;
+    uv->u1 = 0xa2;
+    uv->v1 = 0x3a;
+    uv->u2 = 0x1c;
+    uv->v2 = 0x9d;
+    uv->u3 = 0xa2;
+    uv->v3 = 0x9d;
+    gTVpolyUVs[gNumTVs] = (UVWord*)&uv->u1;
     gNumTVs = gNumTVs + 1;
     node->sub = gNumTVs;
     if (gNumTVs == 1) {
@@ -394,7 +397,7 @@ void UAeffectClearFreezeLight(Cs* node)
 
 void UAeffectInitHealthStandLightning(DbObject* node)
 {
-    u8* p;
+    DbPoly* p;
     s32 i;
 
     if (node == 0) {
@@ -417,9 +420,9 @@ void UAeffectInitHealthStandLightning(DbObject* node)
     for (i = 0; i < 4; i++) {
         u8* q;
 
-        q = p + 16;
-        gLightningPart[i] = q + ((p[15] >> 2) & 0x1c);
-        p = p + p[2] * 4;
+        q = (u8*)(p + 1);
+        gLightningPart[i] = q + p->uvOfs * 4;
+        p = DB_POLY_NEXT(p);
     }
     gLightningUoffset = gLightningPart[0][0];
     gLightningVoffset = gLightningPart[0][1];

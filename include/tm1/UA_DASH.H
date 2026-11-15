@@ -55,18 +55,6 @@ typedef struct Dashboard {
     /* 0x720 */ POLY_F4 mirrors[4];
 } Dashboard; /* 0x780 */
 
-/* Quad record in a DbObject polygon list. */
-typedef struct DashFace {
-    /* 0x00 */ u8 pad00[4];
-    /* 0x04 */ s16 vi0;
-    /* 0x06 */ s16 vi1;
-    /* 0x08 */ s16 vi2;
-    /* 0x0A */ s16 vi3;
-    /* 0x0C */ u8 pad0C[3];
-    /* 0x0F */ u8 uvsel;
-    /* 0x10 */ GrTexUV uv;
-} DashFace;
-
 typedef struct DashCockpitBuf {
     /* 0x00 */ GrScreenSprite spr[7];
     /* 0x70 */ u_long* pix[2];

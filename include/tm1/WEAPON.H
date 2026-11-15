@@ -9,6 +9,7 @@
 #include "tm1/GRUTILS.H"
 #include "tm1/MATH.H"
 #include "tm1/RT.H"
+#include "tm1/SCENE.H"
 
 typedef struct Bullet {
     /* 0x00 */ VECTOR3 pos;
@@ -24,37 +25,9 @@ typedef struct Bullet {
 } Bullet; /* 0x3C */
 
 typedef struct ContrailPt {
-    /* 0x00 */ u8 f00;
-    /* 0x01 */ u8 f01;
-    /* 0x02 */ u8 f02;
-    /* 0x03 */ u8 f03;
-    /* 0x04 */ s16 f04;
-    /* 0x06 */ s16 f06;
-    /* 0x08 */ s16 f08;
-    /* 0x0A */ s16 f0A;
-    /* 0x0C */ unsigned int b0 : 16;
-    unsigned int b1 : 3;
-    unsigned int b2 : 3;
-    unsigned int b3 : 2;
-    unsigned int b4 : 4;
-    unsigned int b5 : 3;
-    unsigned int b6 : 1;
-    /* 0x10 */ u8 r;
-    /* 0x11 */ u8 g;
-    /* 0x12 */ u8 b;
-    /* 0x13 */ u8 code;
-    /* 0x14 */ u8 u0;
-    /* 0x15 */ u8 v0;
-    /* 0x16 */ u16 clut;
-    /* 0x18 */ u8 u1;
-    /* 0x19 */ u8 v1;
-    /* 0x1A */ u16 tpage;
-    /* 0x1C */ u8 u2;
-    /* 0x1D */ u8 v2;
-    /* 0x1E */ u16 pad1E;
-    /* 0x20 */ u8 u3;
-    /* 0x21 */ u8 v3;
-    /* 0x22 */ u16 pad22;
+    /* 0x00 */ DbPoly poly;
+    /* 0x10 */ CVECTOR color;
+    /* 0x14 */ DbPolyUV uv;
 } ContrailPt; /* 0x24 */
 
 typedef struct Missile {
@@ -80,19 +53,7 @@ typedef struct Missile {
     /* 0x056 */ s16 unk56;
     /* 0x058 */ SVECTOR trail[21];
     /* 0x100 */ Cs* csB;
-    /* 0x104 */ u8 f104;
-    /* 0x105 */ u8 pad105;
-    /* 0x106 */ s16 f106;
-    /* 0x108 */ SVECTOR* f108;
-    /* 0x10C */ s32 f10C;
-    /* 0x110 */ ContrailPt* f110;
-    /* 0x114 */ s32 numPts;
-    /* 0x118 */ s16 f118;
-    /* 0x11A */ s16 f11A;
-    /* 0x11C */ s32 f11C;
-    /* 0x120 */ VECTOR3 f120;
-    /* 0x12C */ s32 f12C;
-    /* 0x130 */ u8 pad130[0x30];
+    /* 0x104 */ DbObject obj;
     /* 0x160 */ ContrailPt pts[18];
 } Missile; /* 0x3E8 */
 

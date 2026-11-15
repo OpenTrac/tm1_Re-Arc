@@ -737,7 +737,7 @@ done:
     return ret;
 }
 
-static u8* gFaceObject;
+static DbObject* gFaceObject;
 static s16 InLeft;
 static s32 gHeading;
 static s16 screen_whichOT;
@@ -884,22 +884,23 @@ void screenDisplayChoicesFromBottom(
     }
 }
 
-void screenInitCarOccupants(u8* model)
+void screenInitCarOccupants(DbObject* model)
 {
-    u8* prim;
-    u8* verts;
-    u8* uv;
+    DbPoly* prim;
+    SVECTOR* verts;
+    u8* base;
+    DbPolyUV* uv;
     POLY_FT4* p;
     POLY_FT4* top;
     s32 i;
 
-    if (model != 0 && model[0] == 0) {
+    if (model != 0 && model->op == 0) {
         if (gFaceObject == 0) {
             gFaceObject = model;
         }
         top = (POLY_FT4*)uadashGetTopBlitAddr();
-        prim = *(u8**)(model + 12);
-        verts = *(u8**)(model + 4);
+        prim = model->polys;
+        verts = model->verts;
         Face = top;
         for (i = 0; i < 12; i++) {
             setlen(&Face[i], 9);
@@ -908,28 +909,28 @@ void screenInitCarOccupants(u8* model)
             Face[i].r0 = 0xbf;
             Face[i].g0 = 0xbf;
             Face[i].b0 = 0xbf;
-            uv = prim + 16;
-            uv += (prim[15] >> 2) & 0x1c;
-            Face[i].u0 = uv[0];
-            Face[i].v0 = uv[5];
-            Face[i].u1 = uv[4];
-            Face[i].v1 = uv[9];
-            Face[i].u2 = uv[8];
-            Face[i].v2 = uv[13];
-            Face[i].u3 = uv[12];
-            Face[i].v3 = uv[1];
+            base = (u8*)(prim + 1);
+            uv = (DbPolyUV*)(base + prim->uvOfs * 4);
+            Face[i].u0 = uv->u0;
+            Face[i].v0 = uv->v1;
+            Face[i].u1 = uv->u1;
+            Face[i].v1 = uv->v2;
+            Face[i].u2 = uv->u2;
+            Face[i].v2 = uv->v3;
+            Face[i].u3 = uv->u3;
+            Face[i].v3 = uv->v0;
             p = (POLY_FT4*)(i * 40 + (s32)Face);
-            p->x0 = *(s16*)(verts + *(s16*)(prim + 4) * 8) >> 8;
-            p->y0 = *(s16*)(verts + *(s16*)(prim + 4) * 8 + 4) >> 8;
-            p->x1 = *(s16*)(verts + *(s16*)(prim + 6) * 8) >> 8;
-            p->y1 = *(s16*)(verts + *(s16*)(prim + 6) * 8 + 4) >> 8;
-            p->x2 = *(s16*)(verts + *(s16*)(prim + 8) * 8) >> 8;
-            p->y2 = *(s16*)(verts + *(s16*)(prim + 8) * 8 + 4) >> 8;
-            p->x3 = *(s16*)(verts + *(s16*)(prim + 10) * 8) >> 8;
-            p->y3 = *(s16*)(verts + *(s16*)(prim + 10) * 8 + 4) >> 8;
-            p->clut = *(u16*)(uv + 2);
-            p->tpage = *(u16*)(uv + 6);
-            prim += prim[2] * 4;
+            p->x0 = verts[prim->vi[0]].vx >> 8;
+            p->y0 = verts[prim->vi[0]].vz >> 8;
+            p->x1 = verts[prim->vi[1]].vx >> 8;
+            p->y1 = verts[prim->vi[1]].vz >> 8;
+            p->x2 = verts[prim->vi[2]].vx >> 8;
+            p->y2 = verts[prim->vi[2]].vz >> 8;
+            p->x3 = verts[prim->vi[3]].vx >> 8;
+            p->y3 = verts[prim->vi[3]].vz >> 8;
+            p->clut = uv->clut;
+            p->tpage = uv->tpage;
+            prim = DB_POLY_NEXT(prim);
         }
     }
 }
@@ -1103,7 +1104,7 @@ s32 screenVehicleChoice(s32 players, u8 demo)
     lightSetColor(0, 2, 60, 60, 128);
     screenSetVehicleHeading(120);
     hierSetLodScale(8);
-    screenInitCarOccupants((u8*)gFaceObject);
+    screenInitCarOccupants(gFaceObject);
     reset = 0;
     released = 1;
     faces[0].x = playerX[0];

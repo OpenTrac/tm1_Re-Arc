@@ -741,51 +741,51 @@ void InitContrails(void)
     s32 i;
     s32 j;
     SVECTOR* tp;
-    VECTOR3* vp;
-    s32* fp;
+    s32* vp;
+    u32* fp;
 
     for (i = 0; i < 10; i++) {
         for (j = 0; j < 18; j++) {
-            mlist[i].pts[j].b0 = 0;
-            mlist[i].pts[j].f00 = 4;
-            mlist[i].pts[j].f08 = 2;
-            mlist[i].pts[j].f0A = 3;
-            mlist[i].pts[j].code = 0x2E;
-            mlist[i].pts[j].f01 = 1;
-            mlist[i].pts[j].f02 = 9;
-            mlist[i].pts[j].f03 = 9;
-            mlist[i].pts[j].f04 = 0;
-            mlist[i].pts[j].f06 = 1;
-            mlist[i].pts[j].r = 0x80;
-            mlist[i].pts[j].g = 0x80;
-            mlist[i].pts[j].b = 0x80;
-            mlist[i].pts[j].b1 = 4;
-            mlist[i].pts[j].b2 = 0;
-            mlist[i].pts[j].b3 = 2;
-            mlist[i].pts[j].b4 = 0;
-            mlist[i].pts[j].b5 = 1;
-            mlist[i].pts[j].b6 = 0;
+            mlist[i].pts[j].poly.unk0C = 0;
+            mlist[i].pts[j].poly.unk00 = 4;
+            mlist[i].pts[j].poly.vi[2] = 2;
+            mlist[i].pts[j].poly.vi[3] = 3;
+            mlist[i].pts[j].color.cd = 0x2E;
+            mlist[i].pts[j].poly.unk01 = 1;
+            mlist[i].pts[j].poly.len = 9;
+            mlist[i].pts[j].poly.unk03 = 9;
+            mlist[i].pts[j].poly.vi[0] = 0;
+            mlist[i].pts[j].poly.vi[1] = 1;
+            mlist[i].pts[j].color.r = 0x80;
+            mlist[i].pts[j].color.g = 0x80;
+            mlist[i].pts[j].color.b = 0x80;
+            mlist[i].pts[j].poly.unk0C_16 = 4;
+            mlist[i].pts[j].poly.unk0C_19 = 0;
+            mlist[i].pts[j].poly.unk0C_22 = 2;
+            mlist[i].pts[j].poly.unk0C_24 = 0;
+            mlist[i].pts[j].poly.uvOfs = 1;
+            mlist[i].pts[j].poly.unk0C_31 = 0;
         }
     }
     for (i = 0; i < 10; i++) {
         tp = mlist[i].trail;
-        mlist[i].f110 = mlist[i].pts;
-        mlist[i].numPts = 18;
-        mlist[i].f11A = 1;
-        mlist[i].f104 = 0;
-        mlist[i].f106 = 0;
-        mlist[i].f108 = tp;
-        mlist[i].f10C = 0;
-        fp = &mlist[i].f11C;
+        mlist[i].obj.polys = &mlist[i].pts[0].poly;
+        mlist[i].obj.nPoly = 18;
+        mlist[i].obj.skip = 1;
+        mlist[i].obj.op = 0;
+        mlist[i].obj.kind = 0;
+        mlist[i].obj.verts = tp;
+        mlist[i].obj.unk08 = 0;
+        fp = &mlist[i].obj.flags;
         *fp = 0x2000;
-        mlist[i].f118 = 0;
-        vp = &mlist[i].f120;
-        vp->vx = 0;
-        vp->vy = 0;
-        vp->vz = 0;
-        mlist[i].f12C = 0x7FFF;
+        mlist[i].obj.sub = 0;
+        vp = mlist[i].obj.center;
+        vp[0] = 0;
+        vp[1] = 0;
+        vp[2] = 0;
+        mlist[i].obj.radius = 0x7FFF;
         mlist[i].csB = csCreate();
-        mlist[i].csB->epNode = &mlist[i].f104;
+        mlist[i].csB->epNode = &mlist[i].obj;
         mlist[i].csB->drawMode = 0;
         mlist[i].csB->pos.vx = 0;
         mlist[i].csB->pos.vy = 0;
@@ -805,9 +805,9 @@ void setContrailColor(u32 i, u8 r, u8 g, u8 b)
     if (i < 10) {
         p = mlist[i].pts;
         for (j = 0; j < 18; j++) {
-            p[j].r = r;
-            p[j].g = g;
-            p[j].b = b;
+            p[j].color.r = r;
+            p[j].color.g = g;
+            p[j].color.b = b;
         }
     }
 }
@@ -822,20 +822,20 @@ void startContrail(s32 i)
     VECTOR out;
 
     m = &mlist[i];
-    m->numPts = m->unk54 * 3;
+    m->obj.nPoly = m->unk54 * 3;
     for (j = 0; j < m->unk54; j++) {
-        m->pts[j * 3 + 0].f08 = 0;
-        m->pts[j * 3 + 0].f0A = 0;
-        m->pts[j * 3 + 0].f04 = 1;
-        m->pts[j * 3 + 0].f06 = 1;
-        m->pts[j * 3 + 1].f08 = 1;
-        m->pts[j * 3 + 1].f0A = 1;
-        m->pts[j * 3 + 1].f04 = 2;
-        m->pts[j * 3 + 1].f06 = 2;
-        m->pts[j * 3 + 2].f08 = 2;
-        m->pts[j * 3 + 2].f0A = 2;
-        m->pts[j * 3 + 2].f04 = 0;
-        m->pts[j * 3 + 2].f06 = 0;
+        m->pts[j * 3 + 0].poly.vi[2] = 0;
+        m->pts[j * 3 + 0].poly.vi[3] = 0;
+        m->pts[j * 3 + 0].poly.vi[0] = 1;
+        m->pts[j * 3 + 0].poly.vi[1] = 1;
+        m->pts[j * 3 + 1].poly.vi[2] = 1;
+        m->pts[j * 3 + 1].poly.vi[3] = 1;
+        m->pts[j * 3 + 1].poly.vi[0] = 2;
+        m->pts[j * 3 + 1].poly.vi[1] = 2;
+        m->pts[j * 3 + 2].poly.vi[2] = 2;
+        m->pts[j * 3 + 2].poly.vi[3] = 2;
+        m->pts[j * 3 + 2].poly.vi[0] = 0;
+        m->pts[j * 3 + 2].poly.vi[1] = 0;
     }
     back.vx = 0;
     back.vy = -200;
@@ -876,11 +876,11 @@ void animate_contrails(Missile* m)
     for (j = 0; j < m->unk54; j++) {
         q = (j * 8 + (m->unk54 >> 1)) / m->unk54;
         k = head * 3;
-        CONTRAIL_UV(&m->pts[k], q)
+        CONTRAIL_UV(&m->pts[k].uv, q)
         k++;
-        CONTRAIL_UV(&m->pts[k], q)
+        CONTRAIL_UV(&m->pts[k].uv, q)
         k++;
-        CONTRAIL_UV(&m->pts[k], q)
+        CONTRAIL_UV(&m->pts[k].uv, q)
         head--;
         if (head < 0) {
             head = m->unk54 - 1;
@@ -949,23 +949,23 @@ void drop_contrail(Missile* m, s32 i)
             m->unk4C = 0;
         }
         h = m->unk4C * 3;
-        m->pts[h].f0A = a + 1;
-        m->pts[h].f06 = a;
-        m->pts[h + 1].f0A = a + 2;
-        m->pts[h + 1].f06 = a + 1;
-        m->pts[h + 2].f0A = a;
-        m->pts[h + 2].f06 = a + 2;
+        m->pts[h].poly.vi[3] = a + 1;
+        m->pts[h].poly.vi[1] = a;
+        m->pts[h + 1].poly.vi[3] = a + 2;
+        m->pts[h + 1].poly.vi[1] = a + 1;
+        m->pts[h + 2].poly.vi[3] = a;
+        m->pts[h + 2].poly.vi[1] = a + 2;
         m->unk4D++;
         if (m->unk4D >= 7) {
             m->unk4D = 0;
         }
         b = m->unk4D * 3;
-        m->pts[h].f08 = b + 1;
-        m->pts[h].f04 = b;
-        m->pts[h + 1].f08 = b + 2;
-        m->pts[h + 1].f04 = b + 1;
-        m->pts[h + 2].f08 = b;
-        m->pts[h + 2].f04 = b + 2;
+        m->pts[h].poly.vi[2] = b + 1;
+        m->pts[h].poly.vi[0] = b;
+        m->pts[h + 1].poly.vi[2] = b + 2;
+        m->pts[h + 1].poly.vi[0] = b + 1;
+        m->pts[h + 2].poly.vi[2] = b;
+        m->pts[h + 2].poly.vi[0] = b + 2;
         in.vx = 0;
         in.vy = 0;
         in.vz = 8;

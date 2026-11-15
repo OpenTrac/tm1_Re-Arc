@@ -6,24 +6,6 @@
 
 #include "tm1/SCENE.H"
 
-// TODO: Consolidate; these are probably SDK types
-
-/* The UV/CLUT/TPAGE block a polygon record carries at +16 (POLY_FT4 layout). */
-typedef struct {
-    u8 u0; /* +0 */
-    u8 v0; /* +1 */
-    u16 clut; /* +2 */
-    u8 u1; /* +4 */
-    u8 v1; /* +5 */
-    u16 tpage; /* +6 */
-    u8 u2; /* +8 */
-    u8 v2; /* +9 */
-    u16 pad2; /* +10 */
-    u8 u3; /* +12 */
-    u8 v3; /* +13 */
-    u16 pad3; /* +14 */
-} GrTexUV;
-
 /* Parsed DMD3D sprite. */
 typedef struct GrSprite {
     u8 u0, v0, w, h;
