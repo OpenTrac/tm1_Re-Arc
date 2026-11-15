@@ -12,7 +12,7 @@
 // COMMON
 extern s32 bgColor[3];
 
-static ViewNode* sky[2] = { NULL, NULL };
+static Cs* sky[2] = { NULL, NULL };
 static s32 numViews = 0;
 static s32 gFov = 6;
 
@@ -268,14 +268,14 @@ static FovDat fovDat[14] = {
     },
 };
 
-static ViewNode* ownship;
-static ViewNode* view[2];
-static ViewDb* curViewDb[2];
+static Cs* ownship;
+static Cs* view[2];
+static Db* curViewDb[2];
 static s32 curFovEntry[2];
 
 extern MATRIX swap;
-extern EyeTrans worldSpaceTrans[2];
-extern EyeMat worldSpaceMat[2];
+extern VECTOR3 worldSpaceTrans[2];
+extern MATRIX worldSpaceMat[2];
 
 
 s32 viewGetCurrentFOVH(s32 which)
@@ -341,7 +341,7 @@ void viewInit()
     }
 }
 
-void viewCreate(ViewDb* db, s32 entry, s32 which)
+void viewCreate(Db* db, s32 entry, s32 which)
 {
     s32 w;
     s32 h;
@@ -367,25 +367,25 @@ void viewCreate(ViewDb* db, s32 entry, s32 which)
     y = fovDat[entry].drawY;
     sw = fovDat[entry].screenWidth;
     sh = fovDat[entry].screenHeight;
-    SetDefDrawEnv(&db->draw0, x, y, w, h);
-    SetDefDrawEnv(&db->draw1, x + sw, y, w, h);
-    SetDefDispEnv(&db->disp0, sw, 0, sw, sh);
-    SetDefDispEnv(&db->disp1, 0, 0, sw, sh);
+    SetDefDrawEnv(&db[0].draw, x, y, w, h);
+    SetDefDrawEnv(&db[1].draw, x + sw, y, w, h);
+    SetDefDispEnv(&db[0].disp, sw, 0, sw, sh);
+    SetDefDispEnv(&db[1].disp, 0, 0, sw, sh);
     SetGeomScreen(fovDat[entry].fovh);
     SetGeomOffset(w / 2, h / 2);
-    db->draw0.isbg = 1;
-    db->draw1.isbg = 1;
-    db->draw0.dtd = 0;
-    db->draw1.dtd = 0;
+    db[0].draw.isbg = 1;
+    db[1].draw.isbg = 1;
+    db[0].draw.dtd = 0;
+    db[1].draw.dtd = 0;
     bgColor[0] = 0x14;
     bgColor[1] = 0x14;
     bgColor[2] = 0x14;
-    db->draw0.r0 = bgColor[0];
-    db->draw0.g0 = bgColor[1];
-    db->draw0.b0 = bgColor[2];
-    db->draw1.r0 = bgColor[0];
-    db->draw1.g0 = bgColor[1];
-    db->draw1.b0 = bgColor[2];
+    db[0].draw.r0 = bgColor[0];
+    db[0].draw.g0 = bgColor[1];
+    db[0].draw.b0 = bgColor[2];
+    db[1].draw.r0 = bgColor[0];
+    db[1].draw.g0 = bgColor[1];
+    db[1].draw.b0 = bgColor[2];
     ownship = csCreate();
     view[which] = csCreate();
     view[which]->parent = ownship;
@@ -474,7 +474,7 @@ void viewProc(s32 which)
     MATRIX m3;
     s32 out[3];
     s32 negTrans[3];
-    ViewNode* node;
+    Cs* node;
     Cs* cs;
     s32* fe;
 
@@ -549,7 +549,7 @@ s32 viewGetCurrentFovSet(s32 which)
 }
 
 #ifdef NON_MATCHING
-void viewSetParent(void* node, s32 which)
+void viewSetParent(Cs* node, s32 which)
 {
     if (node != 0) {
         if (view[which] != 0) {
@@ -565,7 +565,7 @@ void viewSetParent(void* node, s32 which)
 INCLUDE_ASM("asm/nonmatchings/tm1/VIEW", viewSetParent);
 #endif
 
-void viewSetSky(ViewNode* node)
+void viewSetSky(Cs* node)
 {
     sky[0] = node;
     node->unk00 = 0xFFE;
@@ -576,7 +576,7 @@ void viewSetSky(ViewNode* node)
     }
 }
 
-ViewNode* viewGetSky(s32 which)
+Cs* viewGetSky(s32 which)
 {
     return sky[which];
 }
@@ -614,7 +614,7 @@ void viewSetDeltaTrans(void* src, s32 which)
     }
 }
 
-void* viewGetOwnship(s32 which)
+Cs* viewGetOwnship(s32 which)
 {
     return view[which]->parent;
 }
@@ -622,16 +622,16 @@ void* viewGetOwnship(s32 which)
 void viewSetBgColor()
 {
     s32 i;
-    ViewDb* db;
+    Db* db;
 
     for (i = 0; i < numViews; i++) {
         db = curViewDb[i];
-        db->draw0.r0 = bgColor[0];
-        db->draw0.g0 = bgColor[1];
-        db->draw0.b0 = bgColor[2];
-        db->draw1.r0 = bgColor[0];
-        db->draw1.g0 = bgColor[1];
-        db->draw1.b0 = bgColor[2];
+        db[0].draw.r0 = bgColor[0];
+        db[0].draw.g0 = bgColor[1];
+        db[0].draw.b0 = bgColor[2];
+        db[1].draw.r0 = bgColor[0];
+        db[1].draw.g0 = bgColor[1];
+        db[1].draw.b0 = bgColor[2];
     }
 }
 
@@ -641,12 +641,12 @@ void viewGetCenter(s32 which, s32* cx, s32* cy)
     *cy = fovDat[curFovEntry[which]].centerHeight / 2;
 }
 
-EyeTrans* viewGetEyeTrans(s32 which)
+VECTOR3* viewGetEyeTrans(s32 which)
 {
     return &worldSpaceTrans[which];
 }
 
-EyeMat* viewGetEyeMat(s32 which)
+MATRIX* viewGetEyeMat(s32 which)
 {
     return &worldSpaceMat[which];
 }
