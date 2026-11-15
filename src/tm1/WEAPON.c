@@ -109,7 +109,7 @@ void bulAddCs(void* node, s32 id)
     }
 }
 
-void bulMakeSpecialBullet(s32 id, GrObj* obj)
+void bulMakeSpecialBullet(s32 id, DbObject* obj)
 {
     switch (id) {
     case UA_UNK_301:

@@ -116,12 +116,12 @@ void dbScanForInteractiveStuff(DbNode* group)
             case 1: {
                 s32 i, n;
                 kind = node->h.kind;
-                n = node->v1.nChild;
+                n = node->grp.nChild;
                 for (i = 0; i < n; i++) {
                     location[sp][0] = loc[0];
                     location[sp][1] = loc[1];
                     location[sp][2] = loc[2];
-                    gHierNodes[sp] = node->v1.child[i];
+                    gHierNodes[sp] = node->grp.child[i];
                     sp++;
                 }
                 break;
@@ -129,12 +129,12 @@ void dbScanForInteractiveStuff(DbNode* group)
             case 2: {
                 s32 i, n;
                 kind = node->h.kind;
-                n = node->v2.nChild;
+                n = node->lod.nRec;
                 for (i = 0; i < n; i++) {
                     location[sp][0] = loc[0];
                     location[sp][1] = loc[1];
                     location[sp][2] = loc[2];
-                    gHierNodes[sp] = node->v2.child[i]->f8;
+                    gHierNodes[sp] = node->lod.rec[i]->child;
                     sp++;
                 }
                 break;
@@ -142,34 +142,34 @@ void dbScanForInteractiveStuff(DbNode* group)
             case 3: {
                 s32 i, n;
                 kind = node->h.kind;
-                if (node->v3.fA == 1) {
-                    node->v3.fD = 1;
+                if (node->anim.mode == 1) {
+                    node->anim.dir = 1;
                 }
-                n = node->v3.nChild;
+                n = node->anim.nChild;
                 for (i = 0; i < n; i++) {
                     location[sp][0] = loc[0];
                     location[sp][1] = loc[1];
                     location[sp][2] = loc[2];
-                    gHierNodes[sp] = node->v3.child[i];
+                    gHierNodes[sp] = node->anim.child[i];
                     sp++;
                 }
                 break;
             }
             case 4: {
                 s32 i, n;
-                loc[0] = loc[0] + node->v4.t[0];
-                loc[1] = loc[1] + node->v4.t[1];
-                loc[2] = loc[2] + node->v4.t[2];
+                loc[0] = loc[0] + node->trans.ofs[0];
+                loc[1] = loc[1] + node->trans.ofs[1];
+                loc[2] = loc[2] + node->trans.ofs[2];
                 parentLoc[0] = loc[0];
                 parentLoc[1] = loc[1];
                 parentLoc[2] = loc[2];
                 kind = node->h.kind;
-                n = node->v4.nChild;
+                n = node->trans.nChild;
                 for (i = 0; i < n; i++) {
                     location[sp][0] = loc[0];
                     location[sp][1] = loc[1];
                     location[sp][2] = loc[2];
-                    gHierNodes[sp] = node->v4.child[i];
+                    gHierNodes[sp] = node->trans.child[i];
                     sp++;
                 }
                 break;
@@ -180,19 +180,19 @@ void dbScanForInteractiveStuff(DbNode* group)
                 parentLoc[0] = loc[0];
                 parentLoc[1] = loc[1];
                 parentLoc[2] = loc[2];
-                loc[0] = loc[0] + node->v5.mat.t[0];
-                loc[1] = loc[1] + node->v5.mat.t[1];
-                loc[2] = loc[2] + node->v5.mat.t[2];
+                loc[0] = loc[0] + node->rot.mat.t[0];
+                loc[1] = loc[1] + node->rot.mat.t[1];
+                loc[2] = loc[2] + node->rot.mat.t[2];
                 preRot[0] = loc[0];
                 preRot[1] = loc[1];
                 preRot[2] = loc[2];
-                mathMulVec(&node->v5.mat, preRot, loc);
-                n = node->v5.nChild;
+                mathMulVec(&node->rot.mat, preRot, loc);
+                n = node->rot.nChild;
                 for (i = 0; i < n; i++) {
                     location[sp][0] = loc[0];
                     location[sp][1] = loc[1];
                     location[sp][2] = loc[2];
-                    gHierNodes[sp] = node->v5.child[i];
+                    gHierNodes[sp] = node->rot.child[i];
                     sp++;
                 }
                 break;
@@ -205,11 +205,11 @@ void dbScanForInteractiveStuff(DbNode* group)
             case 9: {
                 s32 i;
                 kind = node->h.kind;
-                for (i = 0; i < node->v9.nChild; i++) {
+                for (i = 0; i < node->sw.nChild; i++) {
                     location[sp][0] = loc[0];
                     location[sp][1] = loc[1];
                     location[sp][2] = loc[2];
-                    gHierNodes[sp] = node->v9.child[i];
+                    gHierNodes[sp] = node->sw.child[i];
                     sp++;
                 }
                 break;
@@ -218,12 +218,12 @@ void dbScanForInteractiveStuff(DbNode* group)
                 location[sp][0] = loc[0];
                 location[sp][1] = loc[1];
                 location[sp][2] = loc[2];
-                gHierNodes[sp] = node->v11.childA;
+                gHierNodes[sp] = node->ctrl.childOut;
                 sp++;
                 location[sp][0] = loc[0];
                 location[sp][1] = loc[1];
                 location[sp][2] = loc[2];
-                gHierNodes[sp] = node->v11.childB;
+                gHierNodes[sp] = node->ctrl.childIn;
                 sp++;
                 kind = node->h.kind;
                 break;
@@ -321,7 +321,7 @@ void dbProcessInteractives(s32 type, DbNode* node, s32* loc, s32 parent, s32* pa
     case UA_CORVETTE_TIRE:
     case UA_MAD_MAX_TIRE:
     case UA_BOSS_CAR_TIRE:
-        uaswInitCarTire(&node->sw);
+        uaswInitCarTire(node);
         break;
     case UA_ICE_CREAM_TRUCK_SHADOW:
     case UA_TAXI_CAB_SHADOW:
@@ -336,13 +336,13 @@ void dbProcessInteractives(s32 type, DbNode* node, s32* loc, s32 parent, s32* pa
     case UA_CORVETTE_SHADOW:
     case UA_MAD_MAX_SHADOW:
     case UA_BOSS_CAR_SHADOW:
-        uaswInitCarShadow(&node->sw);
+        uaswInitCarShadow(node);
         break;
     case UA_ARROW_UP:
     case UA_ARROW_RIGHT:
     case UA_ARROW_DOWN:
     case UA_ARROW_LEFT:
-        hudStoreArrowIcon(type, &node->gr);
+        hudStoreArrowIcon(type, &node->obj);
         break;
     case UA_UNK_600:
     case UA_UNK_601:
@@ -360,7 +360,7 @@ void dbProcessInteractives(s32 type, DbNode* node, s32* loc, s32 parent, s32* pa
     case UA_UNK_1009:
     case UA_UNK_1010:
     case UA_UNK_1017:
-        uaswInitDbSwitch(&node->sw, type);
+        uaswInitDbSwitch(node, type);
         init_target(type, node->sw.sub, (VECTOR3*)loc);
         break;
     case UA_UNK_715:
@@ -373,8 +373,8 @@ void dbProcessInteractives(s32 type, DbNode* node, s32* loc, s32 parent, s32* pa
     case UA_UNK_1005:
     case UA_UNK_1008:
     case UA_UNK_1015:
-        uaswInitDbEditNumChildren(&node->sw, type);
-        init_target(type, node->sw.shadowSub, (VECTOR3*)loc);
+        uaswInitDbEditNumChildren(node, type);
+        init_target(type, node->grp.sub, (VECTOR3*)loc);
         break;
     case UA_BAZ_COP:
     case UA_HOVER_COP:
@@ -418,22 +418,22 @@ void dbProcessInteractives(s32 type, DbNode* node, s32* loc, s32 parent, s32* pa
     case UA_BOMB:
     case UA_OIL:
     case UA_SPIKE:
-        carAddWeapTex(&node->gr, type);
+        carAddWeapTex(&node->obj, type);
         break;
     case UA_DASHBOARD:
         UAdashInitDashboard((u_long*)node);
         break;
     case UA_DASHBOARD_ICONS:
-        UAdashInitDashboardIcons(&node->dash);
+        UAdashInitDashboardIcons(&node->grp);
         break;
     case UA_MONSTER_TRUCK_WHEEL:
-        UAeffectInitMonsterTruckWheel(&node->wheel);
+        UAeffectInitMonsterTruckWheel(&node->rot);
         break;
     case UA_UNK_301:
     case UA_UNK_302:
     case UA_UNK_308:
     case UA_UNK_309:
-        bulMakeSpecialBullet(type, &node->gr);
+        bulMakeSpecialBullet(type, &node->obj);
         break;
     case UA_UNK_400:
     case UA_PICKUP_FIRE_MISSILE:
@@ -454,11 +454,11 @@ void dbProcessInteractives(s32 type, DbNode* node, s32* loc, s32 parent, s32* pa
     case UA_UNK_430:
     case UA_UNK_431:
     case UA_PICKUP_SPECIAL:
-        uaswInitDbEditNumChildren(&node->sw, type);
-        setPickup(loc, type, node->sw.num);
+        uaswInitDbEditNumChildren(node, type);
+        setPickup(loc, type, node->trans.sub);
         break;
     case UA_TV:
-        UAeffectInitTV(&node->eff);
+        UAeffectInitTV(&node->obj);
         break;
     case UA_FLAME_ANIMATION:
         explodeStoreFlameAnimation(node);
@@ -485,7 +485,7 @@ void dbProcessInteractives(s32 type, DbNode* node, s32* loc, s32 parent, s32* pa
     case UA_FRAGMENT_B:
     case UA_FRAGMENT_C:
     case UA_FRAGMENT_D:
-        explodeLoadFragTexture(type, &node->gr);
+        explodeLoadFragTexture(type, &node->obj);
         break;
     case UA_ICE_CREAM_TRUCK_HEADLIGHTS:
     case UA_TAXI_CAB_HEADLIGHTS:
@@ -505,13 +505,13 @@ void dbProcessInteractives(s32 type, DbNode* node, s32* loc, s32 parent, s32* pa
     case UA_FALLING_BOX:
     case UA_BREAKING_WINDOW:
     doSwitch:
-        uaswInitDbSwitch(&node->sw, type);
+        uaswInitDbSwitch(node, type);
         break;
     case UA_HEALTH_STAND_LIGHTNING:
-        UAeffectInitHealthStandLightning(&node->eff);
+        UAeffectInitHealthStandLightning(&node->obj);
         break;
     case UA_STEERING_WHEEL:
-        uadashInitSteeringWheel(&node->gr);
+        uadashInitSteeringWheel(&node->obj);
         break;
     case UA_CAR_OCCUPANTS:
         screenInitCarOccupants(node);

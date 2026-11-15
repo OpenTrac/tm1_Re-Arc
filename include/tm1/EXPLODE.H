@@ -49,7 +49,7 @@ void explodeStoreSparkAnimation(void* data);
 void explodeStoreContrailAnimation(void* data);
 void explodeStoreFlareAnimation(void* data);
 void explodeStorePlasmaAnimation(void* data);
-void explodeLoadFragTexture(s32 id, GrObj* data);
+void explodeLoadFragTexture(s32 id, DbObject* data);
 void explodeCreateFragments(s32 count, VECTOR* pos);
 ArmorIconInfo* explodeGetArmorIcon(void);
 

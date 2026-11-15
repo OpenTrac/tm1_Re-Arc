@@ -21,7 +21,7 @@ static s32 matCnt;
 static MATRIX* matPtrs[70];
 static s32 worldToTp[9][3];
 
-void hdPush(void* node, s32* v, s32 matIdx, s32 id0, s16 id1)
+void hdPush(DbNode* node, s32* v, s32 matIdx, s32 id0, s16 id1)
 {
     HdEnt* e;
     HdEnt* base;
@@ -106,7 +106,7 @@ void hdTraverse(Cs* cs, s32* pt, HdCsHit* res, s32 slack)
     HdEnt* e;
     s16 id0;
     s16 id1;
-    void* node;
+    DbNode* node;
     s32* pos;
     s32 t0;
     s32 t1;
@@ -123,25 +123,25 @@ void hdTraverse(Cs* cs, s32* pt, HdCsHit* res, s32 slack)
 push:
     hdPush(node, pos, matIdx, t0, t1);
     while (res->depth == 0 && hdPop(&e) >= 0) {
-        switch (*(u8*)e->node) {
+        switch (e->node->h.op) {
         case 0: {
-            HdLeaf* n = (HdLeaf*)e->node;
+            DbObject* n = &e->node->obj;
 
             if (n->skip == 1) {
                 break;
             }
-            if (hdIsPtInSphere((VECTOR*)n->c, n->rad, (VECTOR*)e->v, slack) == 0) {
+            if (hdIsPtInSphere((VECTOR*)n->center, n->radius, (VECTOR*)e->v, slack) == 0) {
                 break;
             }
             res->depth = hdPntBox(&n->box, (VECTOR*)e->v, res, e->matIdx);
             if (res->hit == 0) {
                 break;
             }
-            hdSetHitTag(res, n->tag, n->tag2, e);
+            hdSetHitTag(res, n->kind, n->sub, e);
             break;
         }
         case 7: {
-            HdBoxNode* n = (HdBoxNode*)e->node;
+            DbBox* n = &e->node->box;
 
             if (n->code == -2) {
                 r = hdpPntBox(&n->box, (VECTOR*)e->v, &res->hit, 1);
@@ -152,11 +152,11 @@ push:
             if (res->hit == 0) {
                 break;
             }
-            hdSetHitTag(res, n->tag, n->code, e);
+            hdSetHitTag(res, n->kind, n->code, e);
             break;
         }
         case 8: {
-            HdVol* n = (HdVol*)e->node;
+            DbVolume* n = &e->node->vol;
 
             if (n->code == -2) {
                 r = hdpPntVolume(n, (VECTOR*)e->v, res, 1);
@@ -167,11 +167,11 @@ push:
             if (res->hit == 0) {
                 break;
             }
-            hdSetHitTag(res, n->tag, n->tag2, e);
+            hdSetHitTag(res, n->kind, n->sub, e);
             break;
         }
         case 1: {
-            HdGroup* n = (HdGroup*)e->node;
+            DbGroup* n = &e->node->grp;
             s32 i;
             s32 cnt;
 
@@ -179,13 +179,13 @@ push:
                 break;
             }
             if (!(n->flags & 4)) {
-                if (hdIsPtInSphere((VECTOR*)n->c, n->rad, (VECTOR*)e->v, slack) == 0) {
+                if (hdIsPtInSphere((VECTOR*)n->center, n->radius, (VECTOR*)e->v, slack) == 0) {
                     break;
                 }
             }
-            cnt = n->cnt;
+            cnt = n->nChild;
             i = 0;
-            hdSetNodeIds(&id0, &id1, e, n->tag, n->tag2);
+            hdSetNodeIds(&id0, &id1, e, n->kind, n->sub);
             if (cnt != 0) {
                 while (1) {
                     hdPush(n->child[i], e->v, e->matIdx, id0, id1);
@@ -198,10 +198,10 @@ push:
             break;
         }
         case 2:
-            hdLod((HdLodNode*)e->node, e);
+            hdLod(&e->node->lod, e);
             break;
         case 4: {
-            HdTrans* n = (HdTrans*)e->node;
+            DbTrans* n = &e->node->trans;
             s32 i;
 
             if (n->flags & 1) {
@@ -210,14 +210,14 @@ push:
             e->v[0] = e->v[0] - n->ofs[0];
             e->v[1] = e->v[1] - n->ofs[1];
             e->v[2] = e->v[2] - n->ofs[2];
-            hdSetNodeIds(&id0, &id1, e, n->tag, n->tag2);
-            for (i = 0; i < n->cnt; i++) {
+            hdSetNodeIds(&id0, &id1, e, n->kind, n->sub);
+            for (i = 0; i < n->nChild; i++) {
                 hdPush(n->child[i], e->v, e->matIdx, id0, id1);
             }
             break;
         }
         case 5: {
-            HdRot* n = (HdRot*)e->node;
+            DbRot* n = &e->node->rot;
             VECTOR v;
             s32 dead[2];
             s32 i;
@@ -234,16 +234,16 @@ push:
             mathMulVec(&n->mat, &v, e->v);
             matPtrs[e->matIdx] = &n->mat;
             e->matIdx = e->matIdx + 1;
-            hdSetNodeIds(&id0, &id1, e, n->tag, n->tag2);
-            for (i = 0; i < n->cnt; i++) {
+            hdSetNodeIds(&id0, &id1, e, n->kind, n->sub);
+            for (i = 0; i < n->nChild; i++) {
                 hdPush(n->child[i], e->v, e->matIdx, id0, id1);
             }
             break;
         }
         case 9: {
-            HdSwitch9* n = (HdSwitch9*)e->node;
+            DbSwitch* n = &e->node->sw;
 
-            hdSetNodeIds(&id0, &id1, e, n->tag, n->tag2);
+            hdSetNodeIds(&id0, &id1, e, n->kind, n->sub);
             t0 = id0;
             t1 = id1;
             node = n->child[n->sel];
@@ -252,23 +252,23 @@ push:
             goto push;
         }
         case 3: {
-            HdSwitch3* n = (HdSwitch3*)e->node;
+            DbAnim* n = &e->node->anim;
 
-            hdSetNodeIds(&id0, &id1, e, n->tag, n->tag2);
+            hdSetNodeIds(&id0, &id1, e, n->kind, n->sub);
             t0 = id0;
             t1 = id1;
-            node = n->child[n->sel];
+            node = n->child[n->cur];
             matIdx = e->matIdx;
             pos = e->v;
             goto push;
         }
         case 11: {
-            HdCtrl* n = (HdCtrl*)e->node;
+            DbCtrl* n = &e->node->ctrl;
 
             if (n->flags & 1) {
                 break;
             }
-            hdSetNodeIds(&id0, &id1, e, n->tag, n->tag2);
+            hdSetNodeIds(&id0, &id1, e, n->kind, n->sub);
             hdCtrlNode(e, id0, id1);
             break;
         }
@@ -281,23 +281,23 @@ INCLUDE_ASM("asm/nonmatchings/tm1/HD", hdTraverse);
 #endif
 
 #ifdef NON_MATCHING
-void hdLod(HdLodNode* node, HdEnt* e)
+void hdLod(DbLod* node, HdEnt* e)
 {
     s32 d[3];
     u32 dist;
     s32 i;
     s32 more;
 
-    d[0] = node->c[0] - e->v[0];
-    d[1] = node->c[1] - e->v[1];
-    d[2] = node->c[2] - e->v[2];
+    d[0] = node->center[0] - e->v[0];
+    d[1] = node->center[1] - e->v[1];
+    d[2] = node->center[2] - e->v[2];
     d[0] = d[0] >> 3;
     d[1] = d[1] >> 3;
     d[2] = d[2] >> 3;
     more = 1;
     i = 0;
     dist = d[0] * d[0] + d[1] * d[1] + d[2] * d[2];
-    for (i = 0; i < node->cnt; i++) {
+    for (i = 0; i < node->nRec; i++) {
         if (more == 0) {
             break;
         }
@@ -470,7 +470,7 @@ INCLUDE_ASM("asm/nonmatchings/tm1/HD", hdPntBox);
 #endif
 
 #ifdef NON_MATCHING
-s32 hdPntVolume(HdVol* n, VECTOR* pos, HdCsHit* res, s32 matIdx)
+s32 hdPntVolume(DbVolume* n, VECTOR* pos, HdCsHit* res, s32 matIdx)
 {
     VECTOR o0;
     VECTOR o1;
@@ -662,14 +662,14 @@ INCLUDE_ASM("asm/nonmatchings/tm1/HD", hdPntVolume);
 #ifdef NON_MATCHING
 void hdCtrlNode(HdEnt* e, s16 id0, s16 id1)
 {
-    HdCtrl* node;
+    DbCtrl* node;
     s32 i;
     s32 in;
 
-    node = e->node;
+    node = &e->node->ctrl;
     i = 0;
     in = 1;
-    while (i < node->cnt) {
+    while (i < node->nBox) {
         if (hdInCtrlBox(node->box[i], e->v) != 0) {
             in = 0;
         }
@@ -679,12 +679,12 @@ void hdCtrlNode(HdEnt* e, s16 id0, s16 id1)
         }
     }
     if (in != 0) {
-        if (node->inNode != 0) {
-            hdPush(node->inNode, e->v, e->matIdx, id0, id1);
+        if (node->childOut != 0) {
+            hdPush(node->childOut, e->v, e->matIdx, id0, id1);
         }
     } else {
-        if (node->outNode != 0) {
-            hdPush(node->outNode, e->v, e->matIdx, id0, id1);
+        if (node->childIn != 0) {
+            hdPush(node->childIn, e->v, e->matIdx, id0, id1);
         }
     }
 }
@@ -738,7 +738,7 @@ void HdCsTest(Cs* cs, HdCsHit* hit, s32 doWorld, MATRIX* otherMat, s32* otherPos
     s32 rad;
     s32 i;
     MATRIX** m;
-    HdCsInfo* info;
+    DbGroup* info;
 
     hit->hit = 0;
     hit->unk04 = 0;
@@ -750,7 +750,7 @@ void HdCsTest(Cs* cs, HdCsHit* hit, s32 doWorld, MATRIX* otherMat, s32* otherPos
     hdCsSelf = cs;
     hdCsOtherPos = otherPos;
     info = cs->epNode;
-    if (info == 0 || info->kind != 1) {
+    if (info == 0 || info->op != 1) {
         rad = 100;
     } else {
         rad = info->radius;

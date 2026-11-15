@@ -13,9 +13,9 @@ HdpEnt* fastHdpStack = (HdpEnt*)0x1F800000;
 static HdpEnt* hdpStack;
 static s32 hdp_stackIdx;
 
-void hdpPush(void* node, s32* pos, s32 id0, s32 id1);
+void hdpPush(DbNode* node, s32* pos, s32 id0, s32 id1);
 #ifdef NON_MATCHING
-void hdpPush(void* node, s32* pos, s32 id0, s32 id1)
+void hdpPush(DbNode* node, s32* pos, s32 id0, s32 id1)
 {
     HdpEnt* base;
     s32 i = hdp_stackIdx;
@@ -96,7 +96,7 @@ void hdpTraverse(Cs* cs, s32* pt, HdCsHit* res)
     HdpEnt* e;
     s16 id0;
     s16 id1;
-    void* node;
+    DbNode* node;
     s32* pos;
     s32 t0;
     s32 t1;
@@ -111,57 +111,57 @@ void hdpTraverse(Cs* cs, s32* pt, HdCsHit* res)
 push:
     hdpPush(node, pos, t0, t1);
     while (res->depth == 0 && hdpPop(&e) >= 0) {
-        kind = *(u8*)e->node;
+        kind = e->node->h.op;
         switch (kind) {
         case 0: {
-            HdLeaf* n = (HdLeaf*)e->node;
+            DbObject* n = &e->node->obj;
 
             if (n->skip == 1) {
                 break;
             }
-            if (hdpIsPtInSphere(n->c, n->rad, e->pos) == 0) {
+            if (hdpIsPtInSphere(n->center, n->radius, e->pos) == 0) {
                 break;
             }
             res->depth = hdpPntBox(&n->box, (VECTOR*)e->pos, &res->hit, 0);
             if (res->hit == 0) {
                 break;
             }
-            hdpSetHitTag(res, n->tag, n->tag2, e);
+            hdpSetHitTag(res, n->kind, n->sub, e);
             break;
         }
         case 7: {
-            HdBoxNode* n = (HdBoxNode*)e->node;
+            DbBox* n = &e->node->box;
 
             res->depth = hdpPntBox(&n->box, (VECTOR*)e->pos, &res->hit, n->code == -2);
             if (res->hit == 0) {
                 break;
             }
-            hdpSetHitTag(res, n->tag, n->code, e);
+            hdpSetHitTag(res, n->kind, n->code, e);
             break;
         }
         case 8: {
-            HdVol* n = (HdVol*)e->node;
+            DbVolume* n = &e->node->vol;
 
             res->depth = hdpPntVolume(n, (VECTOR*)e->pos, res, n->code == -2);
             if (res->hit == 0) {
                 break;
             }
-            hdpSetHitTag(res, n->tag, n->tag2, e);
+            hdpSetHitTag(res, n->kind, n->sub, e);
             break;
         }
         case 1: {
-            HdGroup* n = (HdGroup*)e->node;
+            DbGroup* n = &e->node->grp;
             s32 i;
             s32 cnt;
 
             if (n->flags & 1) {
                 break;
             }
-            if (hdpIsPtInSphere(n->c, n->rad, e->pos) == 0) {
+            if (hdpIsPtInSphere(n->center, n->radius, e->pos) == 0) {
                 break;
             }
-            hdpSetNodeIds(&id0, &id1, e, n->tag, n->tag2);
-            cnt = n->cnt;
+            hdpSetNodeIds(&id0, &id1, e, n->kind, n->sub);
+            cnt = n->nChild;
             i = 0;
             if (cnt != 0) {
                 do {
@@ -172,10 +172,10 @@ push:
             break;
         }
         case 2:
-            hdpLod((HdLodNode*)e->node, e);
+            hdpLod(&e->node->lod, e);
             break;
         case 4: {
-            HdTrans* n = (HdTrans*)e->node;
+            DbTrans* n = &e->node->trans;
             s32 i;
 
             if (n->flags & 1) {
@@ -184,14 +184,14 @@ push:
             e->pos[0] = e->pos[0] - n->ofs[0];
             e->pos[1] = e->pos[1] - n->ofs[1];
             e->pos[2] = e->pos[2] - n->ofs[2];
-            hdpSetNodeIds(&id0, &id1, e, n->tag, n->tag2);
-            for (i = 0; i < n->cnt; i++) {
+            hdpSetNodeIds(&id0, &id1, e, n->kind, n->sub);
+            for (i = 0; i < n->nChild; i++) {
                 hdpPush(n->child[i], e->pos, id0, id1);
             }
             break;
         }
         case 5: {
-            HdRot* n = (HdRot*)e->node;
+            DbRot* n = &e->node->rot;
             VECTOR v;
             s32 dead[2];
             s32 i;
@@ -206,16 +206,16 @@ push:
             v.vy = e->pos[1];
             v.vz = e->pos[2];
             mathMulVec(&n->mat, &v, e->pos);
-            hdpSetNodeIds(&id0, &id1, e, n->tag, n->tag2);
-            for (i = 0; i < n->cnt; i++) {
+            hdpSetNodeIds(&id0, &id1, e, n->kind, n->sub);
+            for (i = 0; i < n->nChild; i++) {
                 hdpPush(n->child[i], e->pos, id0, id1);
             }
             break;
         }
         case 9: {
-            HdSwitch9* n = (HdSwitch9*)e->node;
+            DbSwitch* n = &e->node->sw;
 
-            hdpSetNodeIds(&id0, &id1, e, n->tag, n->tag2);
+            hdpSetNodeIds(&id0, &id1, e, n->kind, n->sub);
             t0 = id0;
             t1 = id1;
             node = n->child[n->sel];
@@ -223,22 +223,22 @@ push:
             goto push;
         }
         case 3: {
-            HdSwitch3* n = (HdSwitch3*)e->node;
+            DbAnim* n = &e->node->anim;
 
-            hdpSetNodeIds(&id0, &id1, e, n->tag, n->tag2);
+            hdpSetNodeIds(&id0, &id1, e, n->kind, n->sub);
             t0 = id0;
             t1 = id1;
-            node = n->child[n->sel];
+            node = n->child[n->cur];
             pos = e->pos;
             goto push;
         }
         case 11: {
-            HdCtrl* n = (HdCtrl*)e->node;
+            DbCtrl* n = &e->node->ctrl;
 
             if (n->flags & 1) {
                 break;
             }
-            hdpSetNodeIds(&id0, &id1, e, n->tag, n->tag2);
+            hdpSetNodeIds(&id0, &id1, e, n->kind, n->sub);
             hdpCtrlNode(e, id0, id1);
             break;
         }
@@ -249,22 +249,22 @@ push:
 INCLUDE_ASM("asm/nonmatchings/tm1/HDP", hdpTraverse);
 #endif
 
-void hdpLod(HdLodNode* n, HdpEnt* e)
+void hdpLod(DbLod* n, HdpEnt* e)
 {
     s32 d[3];
     u32 dist;
     s32 i;
     s32 go;
 
-    d[0] = n->c[0] - e->pos[0];
-    d[1] = n->c[1] - e->pos[1];
-    d[2] = n->c[2] - e->pos[2];
+    d[0] = n->center[0] - e->pos[0];
+    d[1] = n->center[1] - e->pos[1];
+    d[2] = n->center[2] - e->pos[2];
     d[0] = d[0] >> 3;
     d[1] = d[1] >> 3;
     d[2] = d[2] >> 3;
     dist = (d[0] * d[0]) + (d[1] * d[1]) + (d[2] * d[2]);
     go = 1;
-    for (i = 0; i < n->cnt; i++) {
+    for (i = 0; i < n->nRec; i++) {
         if (go == 0) {
             break;
         }
@@ -298,7 +298,7 @@ s32 hdpPntBox(HdBox* b, VECTOR* pos, s32* hit, s32 mode)
     return *hit == 1;
 }
 
-s32 hdpPntVolume(HdVol* n, VECTOR* pos, HdCsHit* res, s32 mode)
+s32 hdpPntVolume(DbVolume* n, VECTOR* pos, HdCsHit* res, s32 mode)
 {
     VECTOR p;
 
@@ -326,14 +326,14 @@ s32 hdpPntVolume(HdVol* n, VECTOR* pos, HdCsHit* res, s32 mode)
 #ifdef NON_MATCHING
 void hdpCtrlNode(HdpEnt* e, s16 id0, s16 id1)
 {
-    HdCtrl* n;
+    DbCtrl* n;
     s32 i;
     s32 ok;
 
-    n = e->node;
+    n = &e->node->ctrl;
     i = 0;
     ok = 1;
-    while (i < n->cnt) {
+    while (i < n->nBox) {
         if (hdpInCtrlBox(n->box[i], (VECTOR*)e->pos) != 0) {
             ok = 0;
         }
@@ -343,12 +343,12 @@ void hdpCtrlNode(HdpEnt* e, s16 id0, s16 id1)
         }
     }
     if (ok != 0) {
-        if (n->inNode != 0) {
-            hdpPush(n->inNode, e->pos, id0, id1);
+        if (n->childOut != 0) {
+            hdpPush(n->childOut, e->pos, id0, id1);
         }
     } else {
-        if (n->outNode != 0) {
-            hdpPush(n->outNode, e->pos, id0, id1);
+        if (n->childIn != 0) {
+            hdpPush(n->childIn, e->pos, id0, id1);
         }
     }
 }
@@ -414,7 +414,7 @@ HdCsHit* HdPntTest(s32 skip0, s32 skip1, VECTOR3* pt, s32* hitId)
         for (cs = csGetCsList(); cs != NULL && *hitId == 0; cs = cs->next) {
             if (cs->drawMode != 0 && cs->unkC0 != skip0 && cs->unkC0 != skip1 && cs->unk0C != 0
                 && cs->unkC0 > 0 && cs->unkC0 < 80
-                && hdpIsPtInSphere(&cs->pos.vx, ((HdCsInfo*)cs->epNode)->radius, &pt->vx) != 0) {
+                && hdpIsPtInSphere(&cs->pos.vx, ((DbGroup*)cs->epNode)->radius, &pt->vx) != 0) {
                 *hitId = cs->unkC0;
             }
         }

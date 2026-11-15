@@ -55,18 +55,7 @@ typedef struct Dashboard {
     /* 0x720 */ POLY_F4 mirrors[4];
 } Dashboard; /* 0x780 */
 
-/* Scene node holding the dashboard icon sprite objects. */
-typedef struct DashNode {
-    /* 0x00 */ u8 op;
-    /* 0x01 */ u8 pad01;
-    /* 0x02 */ u16 kind;
-    /* 0x04 */ u8 pad04[0x10];
-    /* 0x14 */ u8 nChild;
-    /* 0x15 */ u8 pad15[3];
-    /* 0x18 */ GrObj* child[8];
-} DashNode;
-
-/* Quad record in a GrObj polygon list. */
+/* Quad record in a DbObject polygon list. */
 typedef struct DashFace {
     /* 0x00 */ u8 pad00[4];
     /* 0x04 */ s16 vi0;
@@ -97,7 +86,7 @@ s32 UAdashTierFromPercentageOfHealth(s32 pct, s32 setHoles);
 void uadashMaxCarryCapacity(void);
 void uadashClearCarryCapacity(void);
 void UAdashDrawInstruments(s32 player, Db* cdb);
-void UAdashInitDashboardIcons(DashNode* node);
+void UAdashInitDashboardIcons(DbGroup* node);
 void UAdashInitDashboard(u_long* tim);
 u_long* uadashGetTopBlitAddr(void);
 void uadashInitCockpit(u_long* tim);
@@ -107,7 +96,7 @@ void uadashReloadSteeringWheel(u_long* tim);
 void uadashLoadHarleyTms(u_long* tims);
 void uadashLoadCockpit(s32 car);
 void UAdashSetDashboardDrawFlag(s32 flag);
-void uadashInitSteeringWheel(GrObj* obj);
+void uadashInitSteeringWheel(DbObject* obj);
 void uadashInitHarleyHandleBars(void);
 void uadashDrawSteeringWheel(u32* ot);
 void uadashDrawHarleyHandleBars(u32* ot);

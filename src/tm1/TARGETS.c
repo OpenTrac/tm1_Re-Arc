@@ -442,13 +442,13 @@ void move_mercs(void)
                     hovermerc[i].unk18 = D_80171534[k] * 8;
                 }
                 hovermerc[i].timer = -1;
-                hovermerc[i].node->state = 0;
+                hovermerc[i].node->sel = 0;
                 hovermerc[i].obj->drawMode = 1;
             }
         } else if (st == 1) {
             if (hovermerc[i].unk18 >= hovermerc[i].obj->pos.vz) {
                 hovermerc[i].unk14 = 2;
-                hovermerc[i].node->state = 1;
+                hovermerc[i].node->sel = 1;
                 hovermerc[i].timer = 16;
             } else {
                 hovermerc[i].obj->pos.vz -= 4;
@@ -456,7 +456,7 @@ void move_mercs(void)
         } else if (st == 2) {
             hovermerc[i].timer--;
             if (hovermerc[i].timer <= 0) {
-                hovermerc[i].node->state = 2;
+                hovermerc[i].node->sel = 2;
                 hovermerc[i].unk14 = 3;
                 r = rand() & 7;
                 if (i != 0) {
@@ -470,7 +470,7 @@ void move_mercs(void)
             hovermerc[i].timer--;
             if (hovermerc[i].timer > 0) {
                 if (hovermerc[i].timer < 8) {
-                    hovermerc[i].node->state = 2;
+                    hovermerc[i].node->sel = 2;
                 }
                 continue;
             }
@@ -486,7 +486,7 @@ void move_mercs(void)
                     aim.vz = pp.vz - hovermerc[i].obj->pos.vz;
                     s_create_bullet(
                         -hovermerc[i].state, &aim, (VECTOR3*)&hovermerc[i].obj->pos, 2, 1, 28, 0);
-                    hovermerc[i].node->state = 3;
+                    hovermerc[i].node->sel = 3;
                     hovermerc[i].timer = (rand() & 0x1F) + 10;
                     hovermerc[i].unk10++;
                     if (hovermerc[i].unk10 == 5) {
@@ -506,7 +506,7 @@ void move_mercs(void)
                     goto fire;
                 }
             }
-            hovermerc[i].node->state = 1;
+            hovermerc[i].node->sel = 1;
             hovermerc[i].unk14 = 4;
             goto sound;
         fire:
@@ -524,7 +524,7 @@ void move_mercs(void)
             do_flash((VECTOR3*)&hovermerc[i].obj->pos);
             do_puff((VECTOR3*)&hovermerc[i].obj->pos);
             hovermerc[i].obj->pos.vz -= 62;
-            hovermerc[i].node->state = 3;
+            hovermerc[i].node->sel = 3;
             launching = 1;
             hovermerc[i].timer = (rand() & 0x3F) + 30;
             hovermerc[i].unk10++;
@@ -537,7 +537,7 @@ void move_mercs(void)
             } else {
                 hovermerc[i].unk14 = 0;
                 hovermerc[i].timer = rand() % gTargetUnk1052 + (gTargetUnk1052 >> 1);
-                hovermerc[i].node->state = 4;
+                hovermerc[i].node->sel = 4;
                 hovermerc[i].unk16 = -1;
             }
         }
@@ -555,7 +555,7 @@ void merc_takehit(s32 which, s32 who)
 
     i = (which != UA_BAZ_COP);
     uasoundPlayMaleScream();
-    hovermerc[i].node->state = 4;
+    hovermerc[i].node->sel = 4;
     do_smoke((VECTOR3*)&hovermerc[i].obj->pos);
     do_burn((VECTOR3*)&hovermerc[i].obj->pos);
     do_steam((VECTOR3*)&hovermerc[i].obj->pos);
@@ -583,13 +583,13 @@ void init_merc(s32 which, DbNode* ep)
         printf("Unable to allocate CS for hovercop %ld\n", which);
         return;
     }
-    n = ep->v1.child[0];
+    n = ep->grp.child[0];
     if (n->h.op == 9) {
         sw = &n->sw;
     } else {
-        sw = &n->v4.child[0]->sw;
+        sw = &n->trans.child[0]->sw;
     }
-    if (sw->kind != 9) {
+    if (sw->op != 9) {
         printf("Unable to find switch for hovercop %ld\n", which);
         return;
     }
@@ -707,7 +707,7 @@ void choose_ped_path(Pedestrian* ped)
     RotMatrixYXZ(&ped->obj->rot, &ped->obj->mat);
     ped->obj->drawMode = 1;
     ped->unk0C = 0;
-    ped->node->state = 1;
+    ped->node->sel = 1;
     ped->unk10 = 0;
     ped->unk24 = 0;
 }
@@ -724,13 +724,13 @@ void init_pedestrian(s32 id, DbNode* ep)
     if (ped_made < 6) {
         pedestrian[ped_made].obj = csCreate();
         if (pedestrian[ped_made].obj != NULL) {
-            node = ep->v1.child[0];
+            node = ep->grp.child[0];
             if (node->h.op == 9) {
                 n = &node->sw;
             } else {
-                n = &node->v4.child[0]->sw;
+                n = &node->trans.child[0]->sw;
             }
-            if (n->kind == 9) {
+            if (n->op == 9) {
                 pedestrian[ped_made].id = id;
                 csSetEpNode(pedestrian[ped_made].obj, ep);
                 csAddToCsList(pedestrian[ped_made].obj);
@@ -806,8 +806,8 @@ void move_pedestrians(void)
                     pedestrian[i].unk10++;
                 }
                 pedestrian[i].unk0C = 0;
-                if (pedestrian[i].unk10 < pedestrian[i].node->numStates) {
-                    pedestrian[i].node->state = pedestrian[i].unk10;
+                if (pedestrian[i].unk10 < pedestrian[i].node->nChild) {
+                    pedestrian[i].node->sel = pedestrian[i].unk10;
                 }
             }
         }
@@ -834,8 +834,8 @@ void move_pedestrians(void)
                                 pedestrian[i].unk10 = pedestrian[i].unk26 + 1;
                             }
                             pedestrian[i].unk0C = 0;
-                            if (pedestrian[i].unk10 < pedestrian[i].node->numStates) {
-                                pedestrian[i].node->state = pedestrian[i].unk10;
+                            if (pedestrian[i].unk10 < pedestrian[i].node->nChild) {
+                                pedestrian[i].node->sel = pedestrian[i].unk10;
                             }
                         }
                     }
@@ -861,8 +861,8 @@ void move_pedestrians(void)
                 if (pedestrian[i].unk26 < pedestrian[i].unk10) {
                     pedestrian[i].unk10 = 0;
                 }
-                if (pedestrian[i].unk10 < pedestrian[i].node->numStates) {
-                    pedestrian[i].node->state = pedestrian[i].unk10;
+                if (pedestrian[i].unk10 < pedestrian[i].node->nChild) {
+                    pedestrian[i].node->sel = pedestrian[i].unk10;
                 }
                 if (pedestrian[i].obj->pos.vx == pos.vx && pedestrian[i].obj->pos.vy == pos.vy) {
                     pedestrian[i].dir = -pedestrian[i].dir;
@@ -900,8 +900,8 @@ void move_pedestrians(void)
                     if (pedestrian[i].unk10 < pedestrian[i].unk28) {
                         pedestrian[i].unk10++;
                     }
-                    if (pedestrian[i].unk10 < pedestrian[i].node->numStates) {
-                        pedestrian[i].node->state = pedestrian[i].unk10;
+                    if (pedestrian[i].unk10 < pedestrian[i].node->nChild) {
+                        pedestrian[i].node->sel = pedestrian[i].unk10;
                     }
                     if ((pedestrian[i].id == UA_UNK_756 || pedestrian[i].id == UA_UNK_751)
                         && !(rand() & 0xF)) {
@@ -918,7 +918,7 @@ void move_pedestrians(void)
                     pedestrian[i].unk24 = 0;
                     pedestrian[i].unk10 = 0;
                     pedestrian[i].unk0C = 0;
-                    pedestrian[i].node->state = 0;
+                    pedestrian[i].node->sel = 0;
                 }
             }
         }
@@ -951,8 +951,8 @@ void pedestrian_takehit(s32 id, s32 damage)
         pedestrian[i].unk10 = pedestrian[i].unk28 + 1;
     }
     pedestrian[i].unk0C = 0;
-    if (pedestrian[i].unk10 < pedestrian[i].node->numStates) {
-        pedestrian[i].node->state = pedestrian[i].unk10;
+    if (pedestrian[i].unk10 < pedestrian[i].node->nChild) {
+        pedestrian[i].node->sel = pedestrian[i].unk10;
     }
     pedestrian[i].obj->pos.vz += 4;
     GetPlayerRot(GetClosestPlayer((VECTOR3*)&pedestrian[i].obj->pos, -1), &pedestrian[i].obj->rot);
@@ -1006,7 +1006,7 @@ void setup_static_cop(DbSwitch* node, VECTOR3* pos)
     s32 i;
     VECTOR3* d;
 
-    if (node->kind != 9) {
+    if (node->op != 9) {
         printf("Error! Static Cop Not At SwNode!\n");
         return;
     }
@@ -1017,7 +1017,7 @@ void setup_static_cop(DbSwitch* node, VECTOR3* pos)
     }
     scop[i].hits = 0;
     scop[i].node = node;
-    scop[i].state = node->id;
+    scop[i].state = node->kind;
     d = &scop[i].pos;
     d->vx = pos->vx;
     d->vy = pos->vy;
@@ -1123,8 +1123,8 @@ void move_static_cops(void)
             }
             break;
         }
-        if (scop[i].hits < scop[i].node->numStates) {
-            scop[i].node->state = scop[i].hits;
+        if (scop[i].hits < scop[i].node->nChild) {
+            scop[i].node->sel = scop[i].hits;
         }
     }
     gTargetUnk1068++;
@@ -1147,7 +1147,7 @@ void static_cop_takehit(s32 num)
             if (scop[num].hits < 4) {
                 node = scop[num].node;
                 scop[num].hits = 4;
-                node->state = 4;
+                node->sel = 4;
             }
         }
     }

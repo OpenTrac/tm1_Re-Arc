@@ -38,7 +38,7 @@ static s32 groundFlag;
 
 extern void geomProc(Db* db, ObjRec* objs, s32 nobj, MATRIX* mats, MATRIX* lights);
 
-void hierPush(void* node, s32 mat, s32* pos, s32 eo)
+void hierPush(DbNode* node, s32 mat, s32* pos, s32 eo)
 {
     s32 i = stackIdx;
 
@@ -77,15 +77,15 @@ s32 hierPop(HierEnt** out)
 }
 
 #ifdef NON_MATCHING
-void hierTraverse(Cs* cs, void* node)
+void hierTraverse(Cs* cs, DbNode* node)
 {
     HierEnt* e;
-    HierObj* obj;
-    HierGroup* grp;
-    HierEo* eo;
-    HierRot* rot;
-    HierSwitch* sw;
-    HierAnim* an;
+    DbObject* obj;
+    DbGroup* grp;
+    DbTrans* eo;
+    DbRot* rot;
+    DbSwitch* sw;
+    DbAnim* an;
     s32 ok;
 
     e = 0;
@@ -97,14 +97,14 @@ void hierTraverse(Cs* cs, void* node)
     matInfo[matIdx].fov1 = &cs->mat4;
     hierPush(node, matIdx, (s32*)&cs->wpos, eoCnt);
     while (hierPop(&e) >= 0) {
-        switch (*(u8*)e->node) {
+        switch (e->node->h.op) {
         case 0: {
             s32 no;
 
-            obj = (HierObj*)e->node;
+            obj = &e->node->obj;
             ok = 1;
             if (!(obj->flags & 0x2000)) {
-                ok = hierIsInFov((VECTOR*)obj->ofs, obj->dist, (VECTOR*)e->pos,
+                ok = hierIsInFov((VECTOR*)obj->center, obj->radius, (VECTOR*)e->pos,
                     matInfo[e->matIdx].fov0, matInfo[e->matIdx].fov1);
             }
             if (ok == 1) {
@@ -122,10 +122,10 @@ void hierTraverse(Cs* cs, void* node)
             }
         } break;
         case 1:
-            grp = (HierGroup*)e->node;
+            grp = &e->node->grp;
             if (!(grp->flags & 2)) {
                 if (!(grp->flags & 4)) {
-                    ok = hierIsInFov((VECTOR*)grp->ofs, grp->dist, (VECTOR*)e->pos,
+                    ok = hierIsInFov((VECTOR*)grp->center, grp->radius, (VECTOR*)e->pos,
                         matInfo[e->matIdx].fov0, matInfo[e->matIdx].fov1);
                 } else {
                     ok = 1;
@@ -134,7 +134,7 @@ void hierTraverse(Cs* cs, void* node)
                     s32 i;
                     s32 n;
 
-                    n = grp->count;
+                    n = grp->nChild;
                     i = 0;
                     if (n != 0) {
                         do {
@@ -146,19 +146,19 @@ void hierTraverse(Cs* cs, void* node)
             }
             break;
         case 2:
-            hierLod((HierLod*)e->node, e);
+            hierLod(&e->node->lod, e);
             break;
         case 4: {
             s32 i;
 
-            eo = (HierEo*)e->node;
+            eo = &e->node->trans;
             if (!(eo->flags & 2)) {
                 e->pos[0] = e->pos[0] + eo->ofs[0];
                 e->pos[1] = e->pos[1] + eo->ofs[1];
                 e->pos[2] = e->pos[2] + eo->ofs[2];
                 eoCnt = eoCnt + 1;
                 i = 0;
-                while (i < eo->count) {
+                while (i < eo->nChild) {
                     hierPush(eo->child[i], e->matIdx, e->pos, eoCnt);
                     i++;
                 }
@@ -170,7 +170,7 @@ void hierTraverse(Cs* cs, void* node)
             RECT unused;
             s32 i;
 
-            rot = (HierRot*)e->node;
+            rot = &e->node->rot;
             if (!(rot->flags & 2)) {
                 e->pos[0] = e->pos[0] + rot->mat.t[0];
                 e->pos[1] = e->pos[1] + rot->mat.t[1];
@@ -200,18 +200,18 @@ void hierTraverse(Cs* cs, void* node)
                 }
                 eoCnt = eoCnt + 1;
                 i = 0;
-                while (i < rot->count) {
+                while (i < rot->nChild) {
                     hierPush(rot->child[i], matIdx, e->pos, eoCnt);
                     i++;
                 }
             }
         } break;
         case 9:
-            sw = (HierSwitch*)e->node;
+            sw = &e->node->sw;
             hierPush(sw->child[sw->sel], e->matIdx, e->pos, e->eoCnt);
             break;
         case 3:
-            an = (HierAnim*)e->node;
+            an = &e->node->anim;
             if (an->mode == 1) {
                 hierAnimateBiDirect(an);
             } else {
@@ -251,16 +251,16 @@ s32 hierIsInFov(VECTOR* ofs, s32 dist, VECTOR* pos, MATRIX* fov0, MATRIX* fov1)
     return out1.vz >= (-(fovDepth << 3) - dist);
 }
 
-void hierLod(HierLod* n, HierEnt* e)
+void hierLod(DbLod* n, HierEnt* e)
 {
     s32 d[3];
     s32 dist;
     s32 i;
     s32 go;
 
-    d[0] = e->pos[0] + n->ofs[0];
-    d[1] = e->pos[1] + n->ofs[1];
-    d[2] = e->pos[2] + n->ofs[2];
+    d[0] = e->pos[0] + n->center[0];
+    d[1] = e->pos[1] + n->center[1];
+    d[2] = e->pos[2] + n->center[2];
     d[0] = d[0] >> lodScale;
     d[1] = d[1] >> lodScale;
     d[2] = d[2] >> lodScale;
@@ -272,12 +272,12 @@ void hierLod(HierLod* n, HierEnt* e)
     } else {
         dist = dist >> -lodShiftValue;
     }
-    while (i < n->nrec) {
+    while (i < n->nRec) {
         if (go == 0) {
             break;
         }
         if (dist >= n->rec[i]->near && dist < n->rec[i]->far) {
-            hierPush(n->rec[i]->node, e->matIdx, e->pos, e->eoCnt);
+            hierPush(n->rec[i]->child, e->matIdx, e->pos, e->eoCnt);
             go = 0;
         }
         i++;
@@ -286,16 +286,16 @@ void hierLod(HierLod* n, HierEnt* e)
 
 void hierCtrlNode(HierEnt* unused, HierEnt* e)
 {
-    HierCtrl* n;
+    DbCtrl* n;
     s32 i;
     s32 ok;
 
-    n = (HierCtrl*)e->node;
+    n = &e->node->ctrl;
     i = 0;
     ok = 1;
     if (!(n->flags & 2)) {
         while (1) {
-            if (i >= n->nbox) {
+            if (i >= n->nBox) {
                 break;
             }
             if (hierInBox(n->box[i], (VECTOR*)e->pos) != 0) {
@@ -307,12 +307,12 @@ void hierCtrlNode(HierEnt* unused, HierEnt* e)
             }
         }
         if (ok != 0) {
-            if (n->onNode != 0) {
-                hierPush(n->onNode, e->matIdx, e->pos, e->eoCnt);
+            if (n->childOut != 0) {
+                hierPush(n->childOut, e->matIdx, e->pos, e->eoCnt);
             }
         } else {
-            if (n->offNode != 0) {
-                hierPush(n->offNode, e->matIdx, e->pos, e->eoCnt);
+            if (n->childIn != 0) {
+                hierPush(n->childIn, e->matIdx, e->pos, e->eoCnt);
             }
         }
     }
@@ -358,7 +358,7 @@ out:
 INCLUDE_ASM("asm/nonmatchings/tm1/HIER", hierInBox);
 #endif
 
-void hierAnimate(HierAnim* a)
+void hierAnimate(DbAnim* a)
 {
     a->timer++;
     if (a->timer > a->rate) {
@@ -370,7 +370,7 @@ void hierAnimate(HierAnim* a)
     }
 }
 
-void hierAnimateBiDirect(HierAnim* a)
+void hierAnimateBiDirect(DbAnim* a)
 {
     a->timer++;
     if (a->timer > a->rate) {

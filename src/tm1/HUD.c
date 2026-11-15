@@ -322,7 +322,7 @@ void hudRadarToggle(void)
     radarOn = 1 - radarOn;
 }
 
-void hudStoreArrowIcon(s32 id, GrObj* obj)
+void hudStoreArrowIcon(s32 id, DbObject* obj)
 {
     switch (id) {
     case UA_ARROW_UP:

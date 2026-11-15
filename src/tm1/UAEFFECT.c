@@ -25,7 +25,7 @@ static u16 gTVsTPage[2];
 static s32 gLightningUoffset;
 static s32 gLightningVoffset;
 
-static WheelNode* gTruckWheel[4];
+static DbRot* gTruckWheel[4];
 static s32 gCarSpeed[15];
 static HitLight gHitLight[6];
 static u8* gTVpolyUVs[4];
@@ -193,15 +193,15 @@ void UAeffectUpdateMonsterTruckWheels(s32 speed)
     RotMatrixX(-gTruckWheelAngle, &m);
     for (i = 0; i < 4; i++) {
         if (gTruckWheel[i] != 0) {
-            gTruckWheel[i]->rot[0] = m.m[0][0];
-            gTruckWheel[i]->rot[1] = m.m[0][1];
-            gTruckWheel[i]->rot[2] = m.m[0][2];
-            gTruckWheel[i]->rot[3] = m.m[1][0];
-            gTruckWheel[i]->rot[4] = m.m[1][1];
-            gTruckWheel[i]->rot[5] = m.m[1][2];
-            gTruckWheel[i]->rot[6] = m.m[2][0];
-            gTruckWheel[i]->rot[7] = m.m[2][1];
-            gTruckWheel[i]->rot[8] = m.m[2][2];
+            gTruckWheel[i]->mat.m[0][0] = m.m[0][0];
+            gTruckWheel[i]->mat.m[0][1] = m.m[0][1];
+            gTruckWheel[i]->mat.m[0][2] = m.m[0][2];
+            gTruckWheel[i]->mat.m[1][0] = m.m[1][0];
+            gTruckWheel[i]->mat.m[1][1] = m.m[1][1];
+            gTruckWheel[i]->mat.m[1][2] = m.m[1][2];
+            gTruckWheel[i]->mat.m[2][0] = m.m[2][0];
+            gTruckWheel[i]->mat.m[2][1] = m.m[2][1];
+            gTruckWheel[i]->mat.m[2][2] = m.m[2][2];
         }
     }
 }
@@ -220,20 +220,20 @@ void UAeffectUpdateTVs(void)
 }
 
 #ifdef NON_MATCHING
-void UAeffectInitTV(EffNode* node)
+void UAeffectInitTV(DbObject* node)
 {
     u8* uv;
 
     if (node == 0) {
         return;
     }
-    if (node->type != 0) {
+    if (node->op != 0) {
         return;
     }
     if (gNumTVs == 4) {
         return;
     }
-    uv = node->prim;
+    uv = node->polys;
     uv = uv + 16 + ((uv[15] >> 2) & 0x1c);
     uv[0] = 0x1c;
     uv[1] = 0x3a;
@@ -245,7 +245,7 @@ void UAeffectInitTV(EffNode* node)
     uv[13] = 0x9d;
     gTVpolyUVs[gNumTVs] = uv + 4;
     gNumTVs = gNumTVs + 1;
-    node->index = gNumTVs;
+    node->sub = gNumTVs;
     if (gNumTVs == 1) {
         gTVsTPage[0] = GetTPage(2, 0, 64, 0);
         gTVsTPage[1] = GetTPage(2, 0, 384, 0);
@@ -255,17 +255,17 @@ void UAeffectInitTV(EffNode* node)
 INCLUDE_ASM("asm/nonmatchings/tm1/UAEFFECT", UAeffectInitTV);
 #endif
 
-void UAeffectInitMonsterTruckWheel(WheelNode* node)
+void UAeffectInitMonsterTruckWheel(DbRot* node)
 {
     s32 id;
 
     if (node == 0) {
         return;
     }
-    if (node->type != 5) {
+    if (node->op != 5) {
         return;
     }
-    id = node->wheelId;
+    id = node->sub;
     if (id >= 1 && id <= 4) {
         gTruckWheel[id - 1] = node;
     }
@@ -392,7 +392,7 @@ void UAeffectClearFreezeLight(Cs* node)
     node->env = lightGetEnv(0);
 }
 
-void UAeffectInitHealthStandLightning(EffNode* node)
+void UAeffectInitHealthStandLightning(DbObject* node)
 {
     u8* p;
     s32 i;
@@ -400,13 +400,13 @@ void UAeffectInitHealthStandLightning(EffNode* node)
     if (node == 0) {
         return;
     }
-    if (node->type != 0) {
+    if (node->op != 0) {
         return;
     }
-    if (node->kind != 4) {
+    if (node->nPoly != 4) {
         return;
     }
-    p = node->prim;
+    p = node->polys;
     if (p == 0) {
         gLightningPart[3] = 0;
         gLightningPart[2] = 0;

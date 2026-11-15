@@ -354,7 +354,7 @@ void uaInitDB(u32 level)
         do {
             cs = GetAICs3D(aiCarInfo[i].playerIdx);
             if (cs != NULL) {
-                aiCarInfo[i].stats.colorId = ((DrawNode*)cs->epNode)->drawFlag;
+                aiCarInfo[i].stats.colorId = ((DbGroup*)cs->epNode)->nChild;
             } else {
                 aiCarInfo[i].stats.colorId = 1;
             }
@@ -2569,7 +2569,7 @@ void uaDontDrawCar(s16 idx, u8 isPlayer)
     } else {
         cs = aiCarCs[idx];
     }
-    ((DrawNode*)cs->epNode)->drawFlag = 0;
+    ((DbGroup*)cs->epNode)->nChild = 0;
 }
 
 void uaDrawCar(s16 idx, u8 isPlayer)
@@ -2585,7 +2585,7 @@ void uaDrawCar(s16 idx, u8 isPlayer)
         v = aiCarInfo[idx].stats.colorId;
     }
     if (v != 0) {
-        ((DrawNode*)cs->epNode)->drawFlag = v;
+        ((DbGroup*)cs->epNode)->nChild = v;
     }
 }
 
