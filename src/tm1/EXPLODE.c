@@ -146,8 +146,8 @@ s32 find_free_explosion(void)
 //     s32 cy;
 //     s32 hfov;
 //     s32 vfov;
-//     EyeTrans *eye;
-//     EyeMat *mat;
+//     VECTOR3 *eye;
+//     MATRIX *mat;
 //     u32 *ot;
 //     Explosion *e;
 //     GrSprite *f;
@@ -189,9 +189,9 @@ s32 find_free_explosion(void)
 //         if (which > 0 && pyro[i].lifetime == 1 && pyro[i].unk2C == 0) {
 //             continue;
 //         }
-//         v[0] = pyro[i].pos.vx + eye->x;
-//         v[1] = pyro[i].pos.vy + eye->y;
-//         v[2] = pyro[i].pos.vz + eye->z;
+//         v[0] = pyro[i].pos.vx + eye->vx;
+//         v[1] = pyro[i].pos.vy + eye->vy;
+//         v[2] = pyro[i].pos.vz + eye->vz;
 //         mathMulVec(mat, v, r);
 //         z = r[2];
 //         if (z < -32) {
@@ -251,9 +251,9 @@ s32 find_free_explosion(void)
 //                     p->tpage = f->tpage;
 //                     p->clut = f->clut;
 //                     if (e->unk0C == 1) {
-//                         v[0] = pyro[i].pos.vx + eye->x;
-//                         v[1] = pyro[i].pos.vy + eye->y;
-//                         v[2] = pyro[i].pos.vz + eye->z + e->unk20;
+//                         v[0] = pyro[i].pos.vx + eye->vx;
+//                         v[1] = pyro[i].pos.vy + eye->vy;
+//                         v[2] = pyro[i].pos.vz + eye->vz + e->unk20;
 //                         mathMulVec(mat, v, r);
 //                         ny = cy + (r[1] * vfov / zz);
 //                         nx = cx + (r[0] * hfov / zz);
@@ -554,7 +554,7 @@ void display_stars(u_long* ot, s32 view)
     hfov = viewGetCurrentHorzFOVH(view);
     vfov = viewGetCurrentVertFOVH(view);
     SetTransMatrix(&starMatrix);
-    SetRotMatrix((MATRIX*)viewGetEyeMat(view));
+    SetRotMatrix(viewGetEyeMat(view));
     for (i = 0; i < 100; i++) {
         ph = starz[i].phase;
         starz[i].phase = (ph + 1) % 512;
@@ -821,8 +821,8 @@ void explodeDisplayFragments(Db* cdb, s32 which)
     s32 cy;
     s32 hfov;
     s32 vfov;
-    EyeTrans* eye;
-    EyeMat* mat;
+    VECTOR3* eye;
+    MATRIX* mat;
     u32* ot;
     s32 z;
     s32 sx;
@@ -846,9 +846,9 @@ void explodeDisplayFragments(Db* cdb, s32 which)
     for (i = 0; i < 20; i++) {
         if (fragment[i].lifetime > 0) {
             frame = fragment[i].frame;
-            v[0] = fragment[i].pos.vx + eye->x;
-            v[1] = fragment[i].pos.vy + eye->y;
-            v[2] = fragment[i].pos.vz + eye->z;
+            v[0] = fragment[i].pos.vx + eye->vx;
+            v[1] = fragment[i].pos.vy + eye->vy;
+            v[2] = fragment[i].pos.vz + eye->vz;
             mathMulVec(mat, v, r);
             z = r[2];
             if (z >= -32) {

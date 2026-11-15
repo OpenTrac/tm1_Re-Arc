@@ -371,7 +371,7 @@ void uaInitDB(u32 level)
 void uaInitView(Db* db, s32 entry, s32 which)
 {
     if (camera[which] == NULL) {
-        viewCreate((ViewDb*)db, entry, which);
+        viewCreate(db, entry, which);
         camera[which] = csCreate();
         viewSetParent(camera[which], which);
     }

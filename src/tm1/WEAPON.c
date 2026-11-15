@@ -425,8 +425,8 @@ void display_bullets(Db* db, s32 which)
     s32 cy;
     u_long* ot;
     s32 vfov;
-    EyeMat* mat;
-    EyeTrans* eye;
+    MATRIX* mat;
+    VECTOR3* eye;
 
     sz = 1;
     ot = (u_long*)db->small;
@@ -449,13 +449,13 @@ void display_bullets(Db* db, s32 which)
             continue;
         }
         b = &blist[i];
-        in.vx = b->pos.vx + eye->x;
-        in.vy = b->pos.vy + eye->y;
-        in.vz = b->pos.vz + eye->z;
+        in.vx = b->pos.vx + eye->vx;
+        in.vy = b->pos.vy + eye->vy;
+        in.vz = b->pos.vz + eye->vz;
         mathMulVec(mat, &in, &r0);
-        in.vx = b->prev.vx + eye->x;
-        in.vy = b->prev.vy + eye->y;
-        in.vz = b->prev.vz + eye->z;
+        in.vx = b->prev.vx + eye->vx;
+        in.vy = b->prev.vy + eye->vy;
+        in.vz = b->prev.vz + eye->vz;
         mathMulVec(mat, &in, &r1);
         z0 = r0.vz;
         z1 = r1.vz;
@@ -1537,8 +1537,8 @@ void bulBoltZap(VECTOR* p1, VECTOR* p2)
     s32 i;
     s32 hfov;
     s32 vfov;
-    EyeTrans* eye;
-    EyeMat* mat;
+    VECTOR3* eye;
+    MATRIX* mat;
     LINE_G2* line;
     VECTOR v;
     VECTOR3 pts[16];
@@ -1577,9 +1577,9 @@ void bulBoltZap(VECTOR* p1, VECTOR* p2)
     }
 
     for (i = 0; i < 16; i++) {
-        v.vx = pts[i].vx + eye->x;
-        v.vy = pts[i].vy + eye->y;
-        v.vz = pts[i].vz + eye->z;
+        v.vx = pts[i].vx + eye->vx;
+        v.vy = pts[i].vy + eye->vy;
+        v.vz = pts[i].vz + eye->vz;
         mathMulVec(mat, &v, scr[i]);
         if (scr[i][2] > 0) {
             scr[i][0] = cx + scr[i][0] * hfov / scr[i][2];

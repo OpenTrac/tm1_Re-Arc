@@ -958,7 +958,7 @@ void draw_tasers(RenderCtx* ctx, s32 view)
     s32 cx;
     s32 cy;
     MATRIX* mat;
-    EyeTrans* tr;
+    VECTOR3* tr;
     u32* ot;
     s32 hfov;
     s32 vfov;
@@ -972,7 +972,7 @@ void draw_tasers(RenderCtx* ctx, s32 view)
     hfov = viewGetCurrentHorzFOVH(view);
     vfov = viewGetCurrentVertFOVH(view);
     tr = viewGetEyeTrans(view);
-    mat = (MATRIX*)viewGetEyeMat(view);
+    mat = viewGetEyeMat(view);
     for (i = 0; i < 3; i++) {
         if (taser[i].life > 0) {
             if (taser[i].target < 0) {
@@ -1002,9 +1002,9 @@ void draw_tasers(RenderCtx* ctx, s32 view)
                 pt[j][0] -= 8 - (rand() & 0xF);
             }
             for (j = 0; j < 16; j++) {
-                w[0] = pt[j][0] + tr->x;
-                w[1] = pt[j][1] + tr->y;
-                w[2] = pt[j][2] + tr->z;
+                w[0] = pt[j][0] + tr->vx;
+                w[1] = pt[j][1] + tr->vy;
+                w[2] = pt[j][2] + tr->vz;
                 mathMulVec(mat, w, sc[j]);
                 z = sc[j][2];
                 if (z > 0) {
@@ -1277,7 +1277,7 @@ void drawOil(OilPrim* prim, s32* pos, s32 view)
     viewGetCenter(view, &cx, &cy);
     hfov = viewGetCurrentHorzFOVH(view);
     vfov = viewGetCurrentVertFOVH(view);
-    mat = (MATRIX*)viewGetEyeMat(view);
+    mat = viewGetEyeMat(view);
     v.vx = pos[0] - 48;
     v.vy = pos[1] - 48;
     v.vz = pos[2];
@@ -1320,7 +1320,7 @@ void displayDropWeapons(RenderCtx* ctx, s32 view)
     s32 cy;
     OilPrim* p;
     GrSprite* sp;
-    EyeTrans* tr;
+    VECTOR3* tr;
     MATRIX* mat;
     s32 hfov;
     s32 vfov;
@@ -1340,7 +1340,7 @@ void displayDropWeapons(RenderCtx* ctx, s32 view)
     hfov = viewGetCurrentHorzFOVH(view);
     vfov = viewGetCurrentVertFOVH(view);
     tr = viewGetEyeTrans(view);
-    mat = (MATRIX*)viewGetEyeMat(view);
+    mat = viewGetEyeMat(view);
     for (i = 0; i < 12; i++) {
         if (dropweapon[i].life > 0) {
             // Keep the height read separate for PsyQ load scheduling.
@@ -1356,9 +1356,9 @@ void displayDropWeapons(RenderCtx* ctx, s32 view)
             }
             --dropweapon[i].life;
             check_dropweap_impact(i);
-            w[0] = dropweapon[i].pos[0] + tr->x;
-            w[1] = dropweapon[i].pos[1] + tr->y;
-            w[2] = dropweapon[i].pos[2] + tr->z;
+            w[0] = dropweapon[i].pos[0] + tr->vx;
+            w[1] = dropweapon[i].pos[1] + tr->vy;
+            w[2] = dropweapon[i].pos[2] + tr->vz;
             mathMulVec(mat, w, t);
             z = t[2];
             if (abs(t[0]) < 641) {
