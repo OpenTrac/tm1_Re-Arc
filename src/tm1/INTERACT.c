@@ -261,7 +261,7 @@ void UpdatePlayerWeaponPadStatus(PlayerCar* car)
         car->skid[0x0F] = 0;
         start = car->weap.cur;
         car->weap.cur = start + 1;
-        for (;;) {
+        while (1) {
             if (car->weap.cur >= WEAPON_MAX) {
                 car->weap.cur = WEAPON_FIRE_MISSILE;
             }
@@ -287,7 +287,7 @@ void UpdatePlayerWeaponPadStatus(PlayerCar* car)
         if (car->weap.ammo[car->weap.cur] > 0) {
             return;
         }
-        for (;;) {
+        while (1) {
             if (car->weap.cur == start) {
                 return;
             }
