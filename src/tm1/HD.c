@@ -124,7 +124,7 @@ push:
     hdPush(node, pos, matIdx, t0, t1);
     while (res->depth == 0 && hdPop(&e) >= 0) {
         switch (e->node->h.op) {
-        case 0: {
+        case DB_OP_OBJECT: {
             DbObject* n = &e->node->obj;
 
             if (n->skip == 1) {
@@ -140,7 +140,7 @@ push:
             hdSetHitTag(res, n->kind, n->sub, e);
             break;
         }
-        case 7: {
+        case DB_OP_BOX: {
             DbBox* n = &e->node->box;
 
             if (n->code == -2) {
@@ -155,7 +155,7 @@ push:
             hdSetHitTag(res, n->kind, n->code, e);
             break;
         }
-        case 8: {
+        case DB_OP_VOLUME: {
             DbVolume* n = &e->node->vol;
 
             if (n->code == -2) {
@@ -170,15 +170,15 @@ push:
             hdSetHitTag(res, n->kind, n->sub, e);
             break;
         }
-        case 1: {
+        case DB_OP_GROUP: {
             DbGroup* n = &e->node->grp;
             s32 i;
             s32 cnt;
 
-            if (n->flags & 1) {
+            if (n->flags & DB_NODE_NO_COLLIDE) {
                 break;
             }
-            if (!(n->flags & 4)) {
+            if (!(n->flags & DB_NODE_NO_BOUNDS_TEST)) {
                 if (hdIsPtInSphere(&n->center, n->radius, &e->v, slack) == 0) {
                     break;
                 }
@@ -197,14 +197,14 @@ push:
             }
             break;
         }
-        case 2:
+        case DB_OP_LOD:
             hdLod(&e->node->lod, e);
             break;
-        case 4: {
+        case DB_OP_TRANS: {
             DbTrans* n = &e->node->trans;
             s32 i;
 
-            if (n->flags & 1) {
+            if (n->flags & DB_NODE_NO_COLLIDE) {
                 break;
             }
             e->v.vx = e->v.vx - n->ofs.vx;
@@ -216,13 +216,13 @@ push:
             }
             break;
         }
-        case 5: {
+        case DB_OP_ROT: {
             DbRot* n = &e->node->rot;
             VECTOR v;
             s32 dead[2];
             s32 i;
 
-            if (n->flags & 1) {
+            if (n->flags & DB_NODE_NO_COLLIDE) {
                 break;
             }
             e->v.vx = e->v.vx - n->mat.t[0];
@@ -240,7 +240,7 @@ push:
             }
             break;
         }
-        case 9: {
+        case DB_OP_SWITCH: {
             DbSwitch* n = &e->node->sw;
 
             hdSetNodeIds(&id0, &id1, e, n->kind, n->sub);
@@ -251,7 +251,7 @@ push:
             pos = &e->v;
             goto push;
         }
-        case 3: {
+        case DB_OP_ANIM: {
             DbAnim* n = &e->node->anim;
 
             hdSetNodeIds(&id0, &id1, e, n->kind, n->sub);
@@ -262,10 +262,10 @@ push:
             pos = &e->v;
             goto push;
         }
-        case 11: {
+        case DB_OP_CTRL: {
             DbCtrl* n = &e->node->ctrl;
 
-            if (n->flags & 1) {
+            if (n->flags & DB_NODE_NO_COLLIDE) {
                 break;
             }
             hdSetNodeIds(&id0, &id1, e, n->kind, n->sub);
@@ -750,7 +750,7 @@ void HdCsTest(Cs* cs, HdCsHit* hit, s32 doWorld, MATRIX* otherMat, VECTOR3* othe
     hdCsSelf = cs;
     hdCsOtherPos = otherPos;
     info = &cs->epNode->grp;
-    if (info == 0 || info->op != 1) {
+    if (info == 0 || info->op != DB_OP_GROUP) {
         rad = 100;
     } else {
         rad = info->radius;

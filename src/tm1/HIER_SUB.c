@@ -1,5 +1,4 @@
 #include "common.h"
-#include <LIBETC.H>
 #include <LIBGPU.H>
 
 #include "tm1/HIER_SUB.H"
@@ -349,9 +348,9 @@ void subLoadPoly4Words(s32 col, s32 row)
 void subAddPrim(Db* db, SubPoly* f, DR_MODE** cursor, void** extra)
 {
     if ((f->poly->numUV & DB_POLY_DRAW_MODE) != 0 || f->dither != 0) {
-        (*cursor)->tag = *getScratchAddr(0x18);
-        (*cursor)->code[0] = *getScratchAddr(0x19);
-        (*cursor)->code[1] = *getScratchAddr(0x1A);
+        (*cursor)->tag = SPAD_DRMODE->tag;
+        (*cursor)->code[0] = SPAD_DRMODE->code[0];
+        (*cursor)->code[1] = SPAD_DRMODE->code[1];
         AddPrim(db->ot + f->otIdx, *cursor);
         *cursor += 1;
         AddPrim(db->ot + f->otIdx, f->prim);
@@ -359,13 +358,13 @@ void subAddPrim(Db* db, SubPoly* f, DR_MODE** cursor, void** extra)
         AddPrim(db->ot + f->otIdx, extra[1]);
         AddPrim(db->ot + f->otIdx, extra[2]);
         if (f->dither != 0) {
-            (*cursor)->tag = *getScratchAddr(0x1B);
-            (*cursor)->code[0] = *getScratchAddr(0x1C);
-            (*cursor)->code[1] = *getScratchAddr(0x1D);
+            (*cursor)->tag = SPAD_DRMODE_DITHER->tag;
+            (*cursor)->code[0] = SPAD_DRMODE_DITHER->code[0];
+            (*cursor)->code[1] = SPAD_DRMODE_DITHER->code[1];
         } else {
-            (*cursor)->tag = *getScratchAddr(0x18);
-            (*cursor)->code[0] = *getScratchAddr(0x19);
-            (*cursor)->code[1] = *getScratchAddr(0x1A);
+            (*cursor)->tag = SPAD_DRMODE->tag;
+            (*cursor)->code[0] = SPAD_DRMODE->code[0];
+            (*cursor)->code[1] = SPAD_DRMODE->code[1];
         }
         if ((f->poly->numUV & DB_POLY_DRAW_MODE) != 0) {
             (*cursor)->code[1] = *f->texWindow;

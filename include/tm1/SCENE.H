@@ -65,6 +65,20 @@ typedef struct DbPoly {
  * The texture window word follows the DbPolyUV. */
 #define DB_POLY_DRAW_MODE 0x80
 
+/* DbNodeHdr.op: selects the node layout. */
+#define DB_OP_OBJECT 0
+#define DB_OP_GROUP 1
+#define DB_OP_LOD 2
+#define DB_OP_ANIM 3
+#define DB_OP_TRANS 4
+#define DB_OP_ROT 5
+#define DB_OP_UNK_6 6
+#define DB_OP_BOX 7
+#define DB_OP_VOLUME 8
+#define DB_OP_SWITCH 9
+#define DB_OP_UNK_10 10
+#define DB_OP_CTRL 11
+
 typedef struct DbNodeHdr {
     /* 0x00 */ u8 op;
     /* 0x01 */ u8 pad01;
@@ -76,7 +90,6 @@ typedef struct DbNodeHdr {
 #define DB_OBJ_DITHER 0x20000
 #define DB_OBJ_SUBDIVIDE 0x40000 /* subdivide near polygons (see HIER_SUB) */
 
-/* op 0 */
 typedef struct DbObject {
     /* 0x00 */ u8 op;
     /* 0x01 */ u8 pad01;
@@ -93,7 +106,11 @@ typedef struct DbObject {
     /* 0x2C */ HdBox box;
 } DbObject;
 
-/* op 1 */
+/* DbGroup, DbTrans, DbRot and DbCtrl flags. */
+#define DB_NODE_NO_COLLIDE 0x1
+#define DB_NODE_HIDDEN 0x2
+#define DB_NODE_NO_BOUNDS_TEST 0x4
+
 typedef struct DbGroup {
     /* 0x00 */ u8 op;
     /* 0x01 */ u8 pad01;
@@ -112,7 +129,6 @@ typedef struct DbLodRec {
     /* 0x08 */ DbNode* child;
 } DbLodRec;
 
-/* op 2 */
 typedef struct DbLod {
     /* 0x00 */ u8 op;
     /* 0x01 */ u8 pad01;
@@ -122,7 +138,6 @@ typedef struct DbLod {
     /* 0x14 */ DbLodRec* rec[1];
 } DbLod;
 
-/* op 3 */
 typedef struct DbAnim {
     /* 0x00 */ u8 op;
     /* 0x01 */ u8 pad01;
@@ -139,7 +154,6 @@ typedef struct DbAnim {
     /* 0x10 */ DbNode* child[1];
 } DbAnim;
 
-/* op 4 */
 typedef struct DbTrans {
     /* 0x00 */ u8 op;
     /* 0x01 */ u8 pad01;
@@ -151,7 +165,6 @@ typedef struct DbTrans {
     /* 0x14 */ DbNode* child[1];
 } DbTrans;
 
-/* op 5 */
 typedef struct DbRot {
     /* 0x00 */ u8 op;
     /* 0x01 */ u8 pad01;
@@ -163,7 +176,6 @@ typedef struct DbRot {
     /* 0x28 */ DbNode* child[1];
 } DbRot;
 
-/* op 7 */
 typedef struct DbBox {
     /* 0x00 */ u8 op;
     /* 0x01 */ u8 pad01;
@@ -172,7 +184,6 @@ typedef struct DbBox {
     /* 0x08 */ HdBox box;
 } DbBox;
 
-/* op 8 */
 typedef struct DbVolume {
     /* 0x00 */ u8 op;
     /* 0x01 */ u8 pad01;
@@ -186,7 +197,6 @@ typedef struct DbVolume {
     /* 0x50 */ SVECTOR d1;
 } DbVolume;
 
-/* op 9 */
 typedef struct DbSwitch {
     /* 0x00 */ u8 op;
     /* 0x01 */ u8 pad01;
@@ -197,7 +207,6 @@ typedef struct DbSwitch {
     /* 0x08 */ DbNode* child[1];
 } DbSwitch;
 
-/* op 11 */
 typedef struct DbCtrl {
     /* 0x00 */ u8 op;
     /* 0x01 */ u8 pad01;

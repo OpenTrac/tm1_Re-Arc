@@ -23,7 +23,7 @@ u32 grutilsParse2DScreenSprite(DbObject* obj, GrScreenSprite* out, u32 max)
     DbPolyUV* tex;
     int i;
 
-    if (obj == 0 || obj->op != 0) {
+    if (obj == 0 || obj->op != DB_OP_OBJECT) {
         return 0;
     }
     verts = obj->verts;
@@ -54,7 +54,7 @@ u32 grutilsParse3DSprite(DbObject* obj, GrSprite* out, u32 max)
     DbPolyUV* tex;
     int i;
 
-    if (obj == 0 || obj->op != 0) {
+    if (obj == 0 || obj->op != DB_OP_OBJECT) {
         return 0;
     }
     poly = obj->polys;

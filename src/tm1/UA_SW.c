@@ -30,7 +30,7 @@ void uaswInitDbSwitch(DbNode* node, s32 type)
     case UA_UNK_1009:
     case UA_UNK_1010:
     case UA_UNK_1017:
-        if (node->h.op == 9) {
+        if (node->h.op == DB_OP_SWITCH) {
             idx = numDestroySwitches;
             if (idx < 30) {
                 destroySwitch[idx] = &node->sw;
@@ -40,29 +40,29 @@ void uaswInitDbSwitch(DbNode* node, s32 type)
         }
         break;
     case UA_BREAKING_WINDOW:
-        if (node->h.op == 9) {
+        if (node->h.op == DB_OP_SWITCH) {
             BreakingWindowSwitch = &node->sw;
         }
         break;
     case UA_BAZ_COP:
-        if (node->h.op == 9) {
+        if (node->h.op == DB_OP_SWITCH) {
             bazCopSwitch = &node->sw;
         }
         break;
     case UA_HOVER_COP:
-        if (node->h.op == 9) {
+        if (node->h.op == DB_OP_SWITCH) {
             hoverCopSwitch = &node->sw;
         }
         break;
     case UA_HEALTH_STAND:
-        if (node->h.op == 9) {
+        if (node->h.op == DB_OP_SWITCH) {
             if (node->sw.sub < 11) {
                 healthstandSwitch[node->sw.sub - 1] = &node->sw;
             }
         }
         break;
     case UA_BARRICADE:
-        if (node->h.op == 9) {
+        if (node->h.op == DB_OP_SWITCH) {
             barricadeSwitch[node->sw.sub - 1] = &node->sw;
         }
         break;
@@ -85,7 +85,7 @@ void uaswInitDbSwitch(DbNode* node, s32 type)
     case UA_CORVETTE_HEADLIGHTS:
     case UA_MAD_MAX_HEADLIGHTS:
     case UA_BOSS_CAR_HEADLIGHTS:
-        if (node->h.op == 1) {
+        if (node->h.op == DB_OP_GROUP) {
             if (node->grp.sub < 4) {
                 if (node->grp.sub != 0) {
                     carHeadlightSwitch[UA_CAR_SLOT(type)][node->grp.sub - 1] = &node->grp;
@@ -168,7 +168,7 @@ void uaswInitCarSwitch(Cs* cs, s32 id)
         return;
     }
     kind = p->h.op;
-    if (kind != 1) {
+    if (kind != DB_OP_GROUP) {
         return;
     }
     p = p->grp.child[0];
@@ -182,7 +182,7 @@ void uaswInitCarSwitch(Cs* cs, s32 id)
     if (q == 0) {
         return;
     }
-    if (q->h.op != 9) {
+    if (q->h.op != DB_OP_SWITCH) {
         return;
     }
     idx = UA_CAR_SLOT(id);
@@ -214,7 +214,7 @@ void uaswInitCarTire(DbNode* n)
     if (n == 0) {
         return;
     }
-    if (n->h.op != 9) {
+    if (n->h.op != DB_OP_SWITCH) {
         return;
     }
     idx = UA_CAR_SLOT(n->sw.kind);
@@ -259,7 +259,7 @@ void uaswInitCarShadow(DbNode* n)
     if (n == 0) {
         return;
     }
-    if (n->h.op != 1) {
+    if (n->h.op != DB_OP_GROUP) {
         return;
     }
     idx = UA_CAR_SLOT(n->grp.kind);
@@ -316,7 +316,7 @@ void uaswInitDbEditNumChildren(DbNode* node, s32 type)
     case UA_UNK_430:
     case UA_UNK_431:
     case UA_PICKUP_SPECIAL:
-        if (node->h.op == 4) {
+        if (node->h.op == DB_OP_TRANS) {
             idx = node->trans.sub - 1;
             if (idx < 50) {
                 gWeaponPickup[idx] = &node->trans;
@@ -333,7 +333,7 @@ void uaswInitDbEditNumChildren(DbNode* node, s32 type)
     case UA_UNK_1005:
     case UA_UNK_1008:
     case UA_UNK_1015:
-        if (node->h.op == 1) {
+        if (node->h.op == DB_OP_GROUP) {
             idx = numDestroyGroups;
             if (idx < 30) {
                 destroyGroup[idx] = &node->grp;

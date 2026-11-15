@@ -110,10 +110,10 @@ void dbScanForInteractiveStuff(DbNode* group)
         if (node != NULL) {
             loc = &location[sp];
             switch (node->h.op) {
-            case 0:
+            case DB_OP_OBJECT:
                 kind = node->h.kind;
                 break;
-            case 1: {
+            case DB_OP_GROUP: {
                 s32 i, n;
                 kind = node->h.kind;
                 n = node->grp.nChild;
@@ -126,7 +126,7 @@ void dbScanForInteractiveStuff(DbNode* group)
                 }
                 break;
             }
-            case 2: {
+            case DB_OP_LOD: {
                 s32 i, n;
                 kind = node->h.kind;
                 n = node->lod.nRec;
@@ -139,7 +139,7 @@ void dbScanForInteractiveStuff(DbNode* group)
                 }
                 break;
             }
-            case 3: {
+            case DB_OP_ANIM: {
                 s32 i, n;
                 kind = node->h.kind;
                 if (node->anim.mode == 1) {
@@ -155,7 +155,7 @@ void dbScanForInteractiveStuff(DbNode* group)
                 }
                 break;
             }
-            case 4: {
+            case DB_OP_TRANS: {
                 s32 i, n;
                 loc->vx = loc->vx + node->trans.ofs.vx;
                 loc->vy = loc->vy + node->trans.ofs.vy;
@@ -174,7 +174,7 @@ void dbScanForInteractiveStuff(DbNode* group)
                 }
                 break;
             }
-            case 5: {
+            case DB_OP_ROT: {
                 s32 i, n;
                 kind = node->h.kind;
                 parentLoc.vx = loc->vx;
@@ -197,12 +197,12 @@ void dbScanForInteractiveStuff(DbNode* group)
                 }
                 break;
             }
-            case 6:
-            case 7:
-            case 8:
+            case DB_OP_UNK_6:
+            case DB_OP_BOX:
+            case DB_OP_VOLUME:
                 kind = 0;
                 break;
-            case 9: {
+            case DB_OP_SWITCH: {
                 s32 i;
                 kind = node->h.kind;
                 for (i = 0; i < node->sw.nChild; i++) {
@@ -214,7 +214,7 @@ void dbScanForInteractiveStuff(DbNode* group)
                 }
                 break;
             }
-            case 11:
+            case DB_OP_CTRL:
                 location[sp].vx = loc->vx;
                 location[sp].vy = loc->vy;
                 location[sp].vz = loc->vz;
@@ -227,7 +227,7 @@ void dbScanForInteractiveStuff(DbNode* group)
                 sp++;
                 kind = node->h.kind;
                 break;
-            case 10:
+            case DB_OP_UNK_10:
             default:
                 kind = 0;
                 printf("Bad hierarchy opcode %d \n", node->h.op);
@@ -378,7 +378,7 @@ void dbProcessInteractives(s32 type, DbNode* node, VECTOR3* loc, s32 parent, VEC
         break;
     case UA_BAZ_COP:
     case UA_HOVER_COP:
-        if (node->h.op == 1) {
+        if (node->h.op == DB_OP_GROUP) {
             init_merc(type, node);
         }
         break;
