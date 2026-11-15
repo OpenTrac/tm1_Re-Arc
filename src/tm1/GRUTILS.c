@@ -17,7 +17,7 @@ u16 Load4BitClut(u32* data, int x, int y)
 
 u32 grutilsParse2DScreenSprite(GrObj* obj, GrScreenSprite* out, u32 max)
 {
-    GrVert* verts;
+    SVECTOR* verts;
     u8* poly;
     u8* base;
     GrTexUV* tex;
@@ -34,12 +34,12 @@ u32 grutilsParse2DScreenSprite(GrObj* obj, GrScreenSprite* out, u32 max)
     for (i = 0; i < (int)max; i++) {
         base = poly + 16;
         tex = (GrTexUV*)(base + ((poly[15] >> 2) & 0x1c));
-        out[i].x = verts[(s16) * (u16*)(poly + 4)].x / 8;
-        out[i].y = -verts[(s16) * (u16*)(poly + 4)].y / 8;
+        out[i].x = verts[(s16) * (u16*)(poly + 4)].vx / 8;
+        out[i].y = -verts[(s16) * (u16*)(poly + 4)].vy / 8;
         out[i].u0 = tex->u0;
         out[i].v0 = tex->v0;
-        out[i].w = (verts[(s16) * (u16*)(poly + 6)].x - verts[(s16) * (u16*)(poly + 4)].x) / 8;
-        out[i].h = (verts[(s16) * (u16*)(poly + 4)].y - verts[(s16) * (u16*)(poly + 8)].y) / 8;
+        out[i].w = (verts[(s16) * (u16*)(poly + 6)].vx - verts[(s16) * (u16*)(poly + 4)].vx) / 8;
+        out[i].h = (verts[(s16) * (u16*)(poly + 4)].vy - verts[(s16) * (u16*)(poly + 8)].vy) / 8;
         out[i].clut = tex->clut;
         out[i].tpage = tex->tpage;
         poly += 4 * poly[2];

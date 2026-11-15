@@ -7,33 +7,6 @@
 #include "tm1/MATH.H"
 
 typedef struct {
-    /* 0x00 */ u8 pad00[3];
-    /* 0x03 */ u8 len;
-    /* 0x04 */ u8 pad04[3];
-    /* 0x07 */ u8 code;
-    /* 0x08 */ s16 x0;
-    /* 0x0A */ s16 y0;
-    /* 0x0C */ u8 u0;
-    /* 0x0D */ u8 v0;
-    /* 0x0E */ u16 clut;
-    /* 0x10 */ s16 x1;
-    /* 0x12 */ s16 y1;
-    /* 0x14 */ u8 u1;
-    /* 0x15 */ u8 v1;
-    /* 0x16 */ u16 tpage;
-    /* 0x18 */ s16 x2;
-    /* 0x1A */ s16 y2;
-    /* 0x1C */ u8 u2;
-    /* 0x1D */ u8 v2;
-    /* 0x1E */ u16 pad1E;
-    /* 0x20 */ s16 x3;
-    /* 0x22 */ s16 y3;
-    /* 0x24 */ u8 u3;
-    /* 0x25 */ u8 v3;
-    /* 0x26 */ u16 pad26;
-} OilPrim;
-
-typedef struct {
     /* 0x00 */ u32* ot;
     /* 0x04 */ u8 pad04[4];
     /* 0x08 */ u8* prim;
@@ -59,7 +32,7 @@ void carInitDropWeaps(void);
 s32 FindFreeDropWeap(void);
 u8 carDropWeapon(u32 kind, s32 idx, s32* pos, s32 power);
 void check_dropweap_impact(s32 i);
-void drawOil(OilPrim* prim, s32* pos, s32 view);
+void drawOil(POLY_FT4* prim, s32* pos, s32 view);
 void displayDropWeapons(RenderCtx* ctx, s32 view);
 void carLockon(u8 who, VECTOR3** out);
 void carLockon2(u8 who, VECTOR3** out);

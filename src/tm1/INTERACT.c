@@ -27,23 +27,6 @@
 #define MAX(a, b) ((a) < (b) ? (b) : (a))
 
 typedef struct {
-    /* 0x00 */ u8 pad00[3];
-    /* 0x03 */ u8 len;
-    /* 0x04 */ u8 r0;
-    /* 0x05 */ u8 g0;
-    /* 0x06 */ u8 b0;
-    /* 0x07 */ u8 code;
-    /* 0x08 */ s16 x0;
-    /* 0x0A */ s16 y0;
-    /* 0x0C */ u8 r1;
-    /* 0x0D */ u8 g1;
-    /* 0x0E */ u8 b1;
-    /* 0x0F */ u8 pad0F;
-    /* 0x10 */ s16 x1;
-    /* 0x12 */ s16 y1;
-} TaserLine;
-
-typedef struct {
     /* 0x00 */ s32* pos;
     /* 0x04 */ s32* targetPos;
     /* 0x08 */ s16 life;
@@ -962,7 +945,7 @@ void draw_tasers(RenderCtx* ctx, s32 view)
     u32* ot;
     s32 hfov;
     s32 vfov;
-    TaserLine* p;
+    LINE_G2* p;
     s32 i;
     s32 j;
     s32 z;
@@ -1034,10 +1017,9 @@ void draw_tasers(RenderCtx* ctx, s32 view)
             }
             for (j = 0; j < 15; j++) {
                 if (sc[j][2] > 0 && sc[j + 1][2] > 0 && sc[j][2] < 4091 && sc[j + 1][2] < 4091) {
-                    p = (TaserLine*)ctx->prim;
+                    p = (LINE_G2*)ctx->prim;
                     if ((u32)(ctx->prim + 0x50) < (u32)ctx->primEnd) {
-                        p->len = 4;
-                        p->code = 0x50;
+                        setLineG2(p);
                         ctx->prim = ctx->prim + 0x50;
                         p->r0 = -6 - j * 12;
                         p->g0 = -6 - j * 12;
@@ -1262,7 +1244,7 @@ void check_dropweap_impact(s32 i)
     }
 }
 
-void drawOil(OilPrim* prim, s32* pos, s32 view)
+void drawOil(POLY_FT4* prim, s32* pos, s32 view)
 {
     VECTOR3 out[4];
     volatile VECTOR3 v;
@@ -1318,7 +1300,7 @@ void displayDropWeapons(RenderCtx* ctx, s32 view)
     s32 t[3];
     s32 cx;
     s32 cy;
-    OilPrim* p;
+    POLY_FT4* p;
     GrSprite* sp;
     VECTOR3* tr;
     MATRIX* mat;
@@ -1364,12 +1346,11 @@ void displayDropWeapons(RenderCtx* ctx, s32 view)
             if (abs(t[0]) < 641) {
                 if (abs(t[1]) < 641 && z >= 16) {
                     if (z < 30001) {
-                        p = (OilPrim*)ctx->prim;
+                        p = (POLY_FT4*)ctx->prim;
                         if ((u8*)p < ctx->primEnd) {
                             ctx->prim = ctx->prim + 160;
-                            p->len = 9;
-                            p->code = 0x2C;
-                            p->code = p->code | 1;
+                            setPolyFT4(p);
+                            setShadeTex(p, 1);
                             sp = dropweapon[i].sprite;
                             p->u0 = sp->u0;
                             p->v0 = sp->v0;
