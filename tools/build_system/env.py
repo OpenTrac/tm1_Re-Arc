@@ -289,6 +289,7 @@ class EnvironmentToolchain:
                 "tm1/CAR": ["-fbuiltin"],
                 "tm1/CARUPD": ["-fbuiltin"],
                 "tm1/FONT": ["-fbuiltin"],
+                "tm1/INTERACT": ["-fbuiltin"],
                 "tm1/SCREEN": ["-fbuiltin"],
             }
         )

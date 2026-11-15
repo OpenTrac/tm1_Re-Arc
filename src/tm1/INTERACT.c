@@ -320,11 +320,11 @@ void UpdateAIWeaponPadStatus(AICar* car)
         if (car->unk45 == 0) {
             n = 2;
         }
-        if (__builtin_abs(car->unk2C) < n * 136 && car->unk34 < 4800) {
+        if (abs(car->unk2C) < n * 136 && car->unk34 < 4800) {
             car->skid[9] = 1;
         }
         if (car->uaIndex == UA_BOSS_CAR && car->direction == DIRECTION_REAR) {
-            if (__builtin_abs(car->unk2C) > (((180 - n * 10) << 12) / 360)) {
+            if (abs(car->unk2C) > (((180 - n * 10) << 12) / 360)) {
                 car->skid[9] = 1;
             }
         }
@@ -335,10 +335,10 @@ void UpdateAIWeaponPadStatus(AICar* car)
             && (car->uaIndex == UA_HUMVEE || car->uaIndex == UA_CORVETTE)) {
             n += 2;
         }
-        if (__builtin_abs(car->unk2C) < n * 113) {
+        if (abs(car->unk2C) < n * 113) {
             car->skid[10] = 1;
         } else if (car->direction == DIRECTION_REAR) {
-            if (__builtin_abs(car->unk2C) > (((180 - n * 10) << 12) / 360)) {
+            if (abs(car->unk2C) > (((180 - n * 10) << 12) / 360)) {
                 car->skid[10] = 1;
             }
         }
@@ -905,9 +905,8 @@ s32 fire_taser(Car* car, s32 isPlayer)
     best = taserRange + 400;
     for (i = 0; i < numP; i++) {
         other = GetPlayerCs3D(i);
-        dist = MAX(__builtin_abs(m->pos.vx - other->pos.vx),
-                   MAX(__builtin_abs(m->pos.vy - other->pos.vy),
-                       __builtin_abs(m->pos.vz - other->pos.vz)))
+        dist = MAX(abs(m->pos.vx - other->pos.vx),
+                   MAX(abs(m->pos.vy - other->pos.vy), abs(m->pos.vz - other->pos.vz)))
             >> 3;
         if (other->unkC0 != myId) {
             if (dist < taserRange) {
@@ -923,9 +922,8 @@ s32 fire_taser(Car* car, s32 isPlayer)
         s32 aiIndex = i;
         if (GetAICarInfo(aiIndex)->stats.unk40 > 0) {
             other = GetAICs3D(aiIndex);
-            dist = MAX(__builtin_abs(m->pos.vx - other->pos.vx),
-                       MAX(__builtin_abs(m->pos.vy - other->pos.vy),
-                           __builtin_abs(m->pos.vz - other->pos.vz)))
+            dist = MAX(abs(m->pos.vx - other->pos.vx),
+                       MAX(abs(m->pos.vy - other->pos.vy), abs(m->pos.vz - other->pos.vz)))
                 >> 3;
             if (other->unkC0 != myId) {
                 if (dist < taserRange) {
@@ -1363,8 +1361,8 @@ void displayDropWeapons(RenderCtx* ctx, s32 view)
             w[2] = dropweapon[i].pos[2] + tr->z;
             mathMulVec(mat, w, t);
             z = t[2];
-            if (__builtin_abs(t[0]) < 641) {
-                if (__builtin_abs(t[1]) < 641 && z >= 16) {
+            if (abs(t[0]) < 641) {
+                if (abs(t[1]) < 641 && z >= 16) {
                     if (z < 30001) {
                         p = (OilPrim*)ctx->prim;
                         if ((u8*)p < ctx->primEnd) {
