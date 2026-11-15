@@ -910,7 +910,7 @@ void screenInitCarOccupants(DbObject* model)
             Face[i].g0 = 0xbf;
             Face[i].b0 = 0xbf;
             base = (u8*)(prim + 1);
-            uv = (DbPolyUV*)(base + prim->uvOfs * 4);
+            uv = (DbPolyUV*)(base + prim->uvOffset * 4);
             Face[i].u0 = uv->u0;
             Face[i].v0 = uv->v1;
             Face[i].u1 = uv->u1;

@@ -39,22 +39,24 @@ typedef struct UVWord {
 
 /*
  * Header of a polygon record in a DbObject's polygon list.
- * Records are `len` words long. The header is followed by `uvOfs` words of
- * colour data, then a DbPolyUV.
+ * The header is followed by:
+ * - `numColor` colour words
+ * - the normal indices (at word `normalOffset`)
+ * - a DbPolyUV (at word `uvOffset`).
  */
 typedef struct DbPoly {
-    /* 0x00 */ u8 unk00;
-    /* 0x01 */ u8 unk01;
-    /* 0x02 */ u8 len;
-    /* 0x03 */ u8 unk03;
+    /* 0x00 */ u8 numUV; /* bits 0-6: UV words; bit 7: also emit a draw-mode packet */
+    /* 0x01 */ u8 numColor;
+    /* 0x02 */ u8 len; /* total number of words in the record */
+    /* 0x03 */ u8 primLen; /* GPU primitive length in words */
     /* 0x04 */ s16 vi[4];
     /* 0x0C */ u32 unk0C : 16;
-    u32 unk0C_16 : 3;
-    u32 unk0C_19 : 3;
-    u32 unk0C_22 : 2;
-    u32 unk0C_24 : 4;
-    u32 uvOfs : 3;
-    u32 unk0C_31 : 1;
+    u32 numVert : 3; /* 0x3 = triangle, 0x4 = quad; others indicate a sprite */
+    u32 numNormal : 3; /* 0x0 = unlit, 0x1 = flat; others indicate per-vertex */
+    u32 vertStride : 2; /* words between vertices in the GPU primitive */
+    u32 normalOffset : 4;
+    u32 uvOffset : 3;
+    u32 doubleSided : 1; /* skips back-face culling */
 } DbPoly; /* 0x10 */
 
 #define DB_POLY_NEXT(p) ((DbPoly*)((u8*)(p) + (p)->len * 4))
@@ -71,7 +73,7 @@ typedef struct DbObject {
     /* 0x01 */ u8 pad01;
     /* 0x02 */ u16 kind;
     /* 0x04 */ SVECTOR* verts;
-    /* 0x08 */ s32 unk08;
+    /* 0x08 */ SVECTOR* normals;
     /* 0x0C */ DbPoly* polys;
     /* 0x10 */ s32 nPoly;
     /* 0x14 */ u16 sub;

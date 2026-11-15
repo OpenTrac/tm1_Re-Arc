@@ -33,7 +33,7 @@ u32 grutilsParse2DScreenSprite(DbObject* obj, GrScreenSprite* out, u32 max)
     }
     for (i = 0; i < (int)max; i++) {
         base = (u8*)(poly + 1);
-        tex = (DbPolyUV*)(base + poly->uvOfs * 4);
+        tex = (DbPolyUV*)(base + poly->uvOffset * 4);
         out[i].x = verts[poly->vi[0]].vx / 8;
         out[i].y = -verts[poly->vi[0]].vy / 8;
         out[i].u0 = tex->u0;
@@ -63,7 +63,7 @@ u32 grutilsParse3DSprite(DbObject* obj, GrSprite* out, u32 max)
     }
     for (i = 0; i < (int)max; i++) {
         base = (u8*)(poly + 1);
-        tex = (DbPolyUV*)(base + poly->uvOfs * 4);
+        tex = (DbPolyUV*)(base + poly->uvOffset * 4);
         out[i].u0 = tex->u0;
         out[i].v0 = tex->v0;
         out[i].w = tex->u3 - tex->u2;
