@@ -92,7 +92,7 @@ Cs* csCreate(void)
         cs->mat4.t[2] = 0;
         cs->parent = world;
         cs->epNode = NULL;
-        cs->unk00 = 0;
+        cs->otIndex = 0;
         cs->unk0C = 1;
         cs->unkC0 = 0;
         cs->drawMode = 1;

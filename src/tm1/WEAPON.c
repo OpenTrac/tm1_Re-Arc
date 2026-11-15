@@ -777,7 +777,7 @@ void InitContrails(void)
         mlist[i].obj.verts = tp;
         mlist[i].obj.normals = 0;
         fp = &mlist[i].obj.flags;
-        *fp = 0x2000;
+        *fp = DB_OBJ_NO_FOV_TEST;
         mlist[i].obj.sub = 0;
         vp = &mlist[i].obj.center;
         vp->vx = 0;

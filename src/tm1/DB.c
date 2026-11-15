@@ -249,7 +249,7 @@ void dbProcessInteractives(s32 type, DbNode* node, VECTOR3* loc, s32 parent, VEC
         Cs* cs;
 
         cs = dbInitCsForAModel(node);
-        cs->unk00 = 0xFFE;
+        cs->otIndex = 0xFFE;
         cs->unk0C = 0;
         break;
     }

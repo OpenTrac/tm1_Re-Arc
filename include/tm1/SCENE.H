@@ -45,7 +45,7 @@ typedef struct UVWord {
  * - a DbPolyUV (at word `uvOffset`).
  */
 typedef struct DbPoly {
-    /* 0x00 */ u8 numUV; /* bits 0-6: UV words; bit 7: also emit a draw-mode packet */
+    /* 0x00 */ u8 numUV; /* bits 0-6: UV words; bit 7: DB_POLY_DRAW_MODE */
     /* 0x01 */ u8 numColor;
     /* 0x02 */ u8 len; /* total number of words in the record */
     /* 0x03 */ u8 primLen; /* GPU primitive length in words */
@@ -61,11 +61,20 @@ typedef struct DbPoly {
 
 #define DB_POLY_NEXT(p) ((DbPoly*)((u8*)(p) + (p)->len * 4))
 
+/* Set this polygon's texture page and window with a draw-mode packet.
+ * The texture window word follows the DbPolyUV. */
+#define DB_POLY_DRAW_MODE 0x80
+
 typedef struct DbNodeHdr {
     /* 0x00 */ u8 op;
     /* 0x01 */ u8 pad01;
     /* 0x02 */ u16 kind;
 } DbNodeHdr;
+
+/* DbObject.flags. Bits 19-30 hold a fixed OT index (0 = sort by depth). */
+#define DB_OBJ_NO_FOV_TEST 0x2000
+#define DB_OBJ_DITHER 0x20000
+#define DB_OBJ_SUBDIVIDE 0x40000 /* subdivide near polygons (see HIER_SUB) */
 
 /* op 0 */
 typedef struct DbObject {
