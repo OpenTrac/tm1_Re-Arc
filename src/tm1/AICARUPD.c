@@ -171,7 +171,7 @@ void AIPickAttackWeapon(AICar* car)
     lvl = car->weap.ammo[WEAPON_SPECIAL];
     car->weap.cur = WEAPON_NONE;
     if (lvl >= 6 && AIInSpecialParameters(car)) {
-        if (rand() % 24 < (s16)car->weap.ammo[WEAPON_SPECIAL]) {
+        if (rand() % 24 < car->weap.ammo[WEAPON_SPECIAL]) {
             car->weap.cur = WEAPON_SPECIAL;
             return;
         }
