@@ -977,10 +977,10 @@ void draw_tasers(Db* db, s32 view)
             pt[15].vy = taser[i].targetPos->vy;
             pt[15].vz = taser[i].targetPos->vz;
             for (j = 1; j < 15; j++) {
-                /* Indexing through a pointer rather than the array is needed to match. */
-                ((VECTOR3*)pt)[j].vx = taser[i].pos->vx + d.vx * j / 16;
-                ((VECTOR3*)pt)[j].vy = taser[i].pos->vy + d.vy * j / 16;
-                ((VECTOR3*)pt)[j].vz = (taser[i].pos->vz + 30) + (d.vz * j / 16);
+                /* `-fvolatile` only affects pointer accesses; `pt[j].vx` doesn't match. */
+                (&pt[j])->vx = taser[i].pos->vx + d.vx * j / 16;
+                (&pt[j])->vy = taser[i].pos->vy + d.vy * j / 16;
+                (&pt[j])->vz = (taser[i].pos->vz + 30) + (d.vz * j / 16);
                 pt[j].vz -= 32 - (rand() & 0x3F);
                 pt[j].vy -= 8 - (rand() & 0xF);
                 pt[j].vx -= 8 - (rand() & 0xF);
