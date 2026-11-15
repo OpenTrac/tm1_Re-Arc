@@ -318,3 +318,243 @@ While developers didn't intentionally insert barriers, it is _possible_ that bar
 exist in the original compiled code. Most commonly, they can be an artifact of
 stubbed debug macros whose contents were removed or disabled. Their presence is
 more likely in TUs with a lot of `printf()` output and debug strings.
+
+## Bitfields vs. masks
+
+Bitfield accesses can usually also be written as shifts and masks on a `u32`.
+In theory, both forms should produce semantically equivalent operations.
+In practice, however, codegen can differ between the two in some cases.
+
+The examples below use these two equivalent layouts:
+
+```c
+typedef struct {
+    u32 a, b, c;
+    u32 lo : 16;
+    u32 numVert : 3;
+    u32 numNormal : 3;
+    u32 rest : 10;
+} Poly;
+
+typedef struct {
+    u32 a, b, c;
+    u32 w;
+} PolyM; /* `w` holds the bitfields as one word */
+
+extern Poly gp;
+extern PolyM gpm;
+```
+
+### Without `-fvolatile`
+
+These results also apply to TUs compiled with `-fvolatile`, as long as the
+struct isn't accessed through a pointer (globals, array elements, locals).
+
+Most bitfield operations generate exactly the same code as the equivalent mask:
+
+| Bitfield         | Mask                                |
+|------------------|-------------------------------------|
+| `x = gp.numVert` | `x = (gpm.w >> 16) & 7`             |
+| `gp.numVert = 0` | `gpm.w &= ~0x70000`                 |
+| `gp.numVert = 7` | `gpm.w \|= 0x70000`                 |
+| `gp.numVert = n` | `gpm.w = (gpm.w & ~0x70000) \| ((n & 7) << 16)` |
+
+They differ in the following cases.
+
+#### Comparisons With A Constant
+
+Comparisons with a constant compare the masked word against a shifted
+constant. Only an explicit mask matches:
+
+```
+ gp.numVert == 4         (gpm.w & 0x70000) == 0x40000   ((gpm.w >> 16) & 7) == 4
+ lw   $2,gp+12           lw   $2,gpm+12                 lhu  $2,gpm+14
+ li   $3,0x70000         li   $3,0x70000                li   $3,0x4
+ and  $2,$2,$3           and  $2,$2,$3                  andi $2,$2,0x7
+ li   $3,0x40000         li   $3,0x40000                bne  $2,$3,...
+ bne  $2,$3,...          bne  $2,$3,...
+```
+
+Array elements with a variable index (`gpa[i].numVert == 4`) will always compile
+to the "non-explicit mask" pattern (the third column).
+
+#### Ordering Comparisons
+
+Ordering comparisons (`<`, `>`, ...) on a bitfield are signed, because the field
+is promoted to `int`. A mask needs an `(s32)` cast to match:
+
+```
+ gp.numVert < 3          ((gpm.w >> 16) & 7) < 3        (s32)((gpm.w >> 16) & 7) < 3
+ lhu  $2,gp+14           lhu  $2,gpm+14                 lhu  $2,gpm+14
+ andi $2,$2,0x7          andi $2,$2,0x7                 andi $2,$2,0x7
+ slt  $2,$2,3            sltu $2,$2,3                   slt  $2,$2,3
+```
+
+#### Aligned 8-bit and 16-bit Fields
+
+Aligned 8-bit and 16-bit fields are written with a single `sb`/`sh`.
+A mask always reads and writes the whole word:
+
+```
+ gp.lo = 5               gpm.w = (gpm.w & ~0xFFFF) | 5
+ li   $2,0x5             la   $2,gpm+12
+ sh   $2,gp+12           lw   $3,0($2)
+                         li   $4,-65536
+                         and  $3,$3,$4
+                         ori  $3,$3,0x5
+                         sw   $3,0($2)
+```
+
+#### Writing a Variable
+
+Writing a variable always masks the value first (`andi`), so the mask must include
+the `& 7` to match. `(n << 16)` alone drops the `andi`, except for a field at the top
+of the word.
+
+```c
+/* A */ gp.numVert = n;
+/* B */ gpm.w = (gpm.w & ~0x70000) | ((n & 7) << 16);
+/* C */ gpm.w = (gpm.w & ~0x70000) | (n << 16);
+```
+
+```
+ A                       B                       C
+ la   $5,gp+12           la   $5,gpm+12          la   $5,gpm+12
+ lw   $2,0($5)           lw   $2,0($5)           lw   $2,0($5)
+ li   $3,-524288         li   $3,-524288         li   $3,-524288
+ ori  $3,$3,0xffff       ori  $3,$3,0xffff       ori  $3,$3,0xffff
+ andi $4,$4,0x7          andi $4,$4,0x7
+ sll  $4,$4,16           sll  $4,$4,16           sll  $4,$4,16
+ and  $2,$2,$3           and  $2,$2,$3           and  $2,$2,$3
+ or   $2,$2,$4           or   $2,$2,$4           or   $2,$2,$4
+ sw   $2,0($5)           sw   $2,0($5)           sw   $2,0($5)
+```
+
+#### Consecutive Writes to the Same Word
+
+Consecutive writes to the same word are merged into one `lw` ... `sw`. A series of
+mask statements generates the same instructions, but the first constant load is
+scheduled differently, so it won't match exactly.
+
+```c
+/* Bitfield */
+gp.numVert = 4;
+gp.numNormal = 1;
+
+/* Mask */
+gpm.w = (gpm.w & ~0x70000) | 0x40000;
+gpm.w = (gpm.w & ~0x380000) | 0x80000;
+```
+
+```
+ Bitfield                    Mask
+ la   $5,gp+12           <   li   $3,-524288
+ lw   $2,0($5)           <   la   $5,gpm+12
+ li   $3,-524288         <   lw   $2,0($5)
+ ori  $3,$3,0xffff           ori  $3,$3,0xffff
+ li   $4,-3735552            li   $4,-3735552
+ ori  $4,$4,0xffff           ori  $4,$4,0xffff
+ and  $2,$2,$3               and  $2,$2,$3
+ li   $3,0x40000             li   $3,0x40000
+ or   $2,$2,$3               or   $2,$2,$3
+ and  $2,$2,$4               and  $2,$2,$4
+ li   $3,0x80000             li   $3,0x80000
+ or   $2,$2,$3               or   $2,$2,$3
+ sw   $2,0($5)               sw   $2,0($5)
+```
+
+### With `-fvolatile`
+
+The following applies to bitfields accessed through a pointer (`p->numVert`, `p[i].numVert`).
+
+#### Reads and Writes
+
+Reads and writes use the **smallest aligned unit that contains the field**
+(byte or halfword). Only a field crossing a halfword boundary uses the full word.
+A mask always uses the full word, so it can't match:
+
+```
+ return p->numNormal;    return (p->w >> 19) & 7;
+ lbu  $2,14($4)          lw   $2,12($4)
+ srl  $2,$2,3            srl  $2,$2,19
+ andi $2,$2,0x7          andi $2,$2,0x7
+
+ p->numVert = 4;         p->w = (p->w & ~0x70000) | 0x40000;
+ lbu  $2,14($4)          lw   $2,12($4)
+ andi $2,$2,0xf8         li   $3,-524288
+ ori  $2,$2,0x4          ori  $3,$3,0xffff
+ sb   $2,14($4)          and  $2,$2,$3
+                         li   $3,0x40000
+                         or   $2,$2,$3
+                         sw   $2,12($4)
+```
+
+**Comparisons with a constant are the exception.** They still use the full word,
+exactly as without `-fvolatile`. `if (p->numVert == 4)` matches
+`if ((p->w & 0x70000) == 0x40000)`.
+
+#### Consecutive Writes
+
+**Consecutive writes are not merged.** Each field is read, modified and written
+separately:
+
+```
+ p->numVert = 4;
+ p->numNormal = 1;
+ lbu  $2,14($4)
+ andi $2,$2,0xf8
+ ori  $2,$2,0x4
+ sb   $2,14($4)
+ lbu  $2,14($4)
+ andi $2,$2,0xc7
+ ori  $2,$2,0x8
+ sb   $2,14($4)
+```
+
+#### Increments
+
+**Increments reload the field.** `p->numVert += 1` and `p->numVert = p->numVert + 1`
+load the field twice. `p->numVert++` loads it three times, plus once more after the store:
+
+```
+ p->numVert += 1;        p->numVert++;
+ lbu  $2,14($4)          lbu  $2,14($4)
+ lbu  $3,14($4)          lbu  $2,14($4)
+ andi $2,$2,0x7          lbu  $3,14($4)
+ addu $2,$2,1            andi $2,$2,0x7
+ andi $2,$2,0x7          addu $2,$2,1
+ andi $3,$3,0xf8         andi $2,$2,0x7
+ or   $3,$3,$2           andi $3,$3,0xf8
+ sb   $3,14($4)          or   $3,$3,$2
+                         sb   $3,14($4)
+                         lbu  $2,14($4)
+```
+
+#### 4-Byte Structs
+
+**A pointer to a struct that is exactly 4 bytes behaves differently.**
+Reads are still narrowed, but writes use the full word (and match the mask).
+The exceptions are 1-bit fields set to a constant, and aligned 8-bit and 16-bit fields,
+which are still narrowed:
+
+```c
+typedef struct {
+    u32 lo : 16;
+    u32 numVert : 3;
+    u32 rest : 13;
+} Word;
+```
+
+```
+ return q->numVert;      q->numVert = 4;
+ lbu  $2,2($4)           lw   $2,0($4)
+ andi $2,$2,0x7          li   $3,-524288
+                         ori  $3,$3,0xffff
+                         and  $2,$2,$3
+                         li   $3,0x40000
+                         or   $2,$2,$3
+                         sw   $2,0($4)
+```
+
+In short, a pointer access in the target that reads or writes only part of a word
+(such as `lbu; andi; ori; sb`, or `lbu; srl; andi`) is very likely a bitfield.
