@@ -292,6 +292,7 @@ class EnvironmentToolchain:
                 "tm1/INTERACT": ["-fbuiltin"],
                 "tm1/SCREEN": ["-fbuiltin"],
                 "tm1/AI_CAR": ["-fbuiltin"],
+                "tm1/WEAPON": ["-fbuiltin"],
             }
         )
 

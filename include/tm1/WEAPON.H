@@ -107,6 +107,6 @@ void move_missiles(void);
 void bulBoltZap(VECTOR* p1, VECTOR* p2);
 void SetFXSheet(s32 count, s32 r, s32 g, s32 b);
 void DisplayFXSheet(u_long* ot);
-s32 bulDispatchDamage(s32 id, s32 a, s32 b, s32 damage, VECTOR3* dir, s32 owner);
+u8 bulDispatchDamage(s32 id, s32 a, s32 b, s32 damage, VECTOR3* dir, s32 owner);
 
 #endif /* __TM1_WEAPON_H__ */

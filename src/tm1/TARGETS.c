@@ -926,7 +926,7 @@ void move_pedestrians(void)
 INCLUDE_ASM("asm/nonmatchings/tm1/TARGETS", move_pedestrians);
 #endif
 
-void pedestrian_takehit(s32 id, s32 damage)
+void pedestrian_takehit(s32 id, VECTOR3* dir)
 {
     s32 i;
     s32 k;
@@ -959,13 +959,13 @@ void pedestrian_takehit(s32 id, s32 damage)
     RotMatrixYXZ(&pedestrian[i].obj->rot, &pedestrian[i].obj->mat);
 }
 
-void ped_takehit(s32 num, s32 damage)
+void ped_takehit(s32 num, VECTOR3* dir)
 {
-    pedestrian_takehit(pedestrian[num].id, damage);
+    pedestrian_takehit(pedestrian[num].id, dir);
 }
 
 #ifdef NON_MATCHING
-s32 check_ped_hits(VECTOR3* pos, s32 damage)
+s32 check_ped_hits(VECTOR3* pos, VECTOR3* dir)
 {
     s32 k;
 
@@ -976,7 +976,7 @@ s32 check_ped_hits(VECTOR3* pos, s32 damage)
                          ABS(pos->vz - pedestrian[k].obj->pos.vz)))
                     >> 3)
                 < 7) {
-                pedestrian_takehit(pedestrian[k].id, damage);
+                pedestrian_takehit(pedestrian[k].id, dir);
                 return 1;
             }
         }

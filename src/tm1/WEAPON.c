@@ -23,25 +23,27 @@
 
 #include "tm1/WEAPON.H"
 
-#define BIGGER(a, b) (ABS(a) < ABS(b) ? (b) : (a))
+#define FIRST_SPECIAL_BULLET_KIND 15
+#define SPECIAL_BULLET_FRAME_COUNT 4
 
-#define CONTRAIL_UV(p, q)                                                                          \
-    (p)->u1 = contrailInfo[q].u0;                                                                  \
-    (p)->v1 = contrailInfo[q].v0;                                                                  \
-    (p)->u0 = contrailInfo[q].u0 + contrailInfo[q].w;                                              \
-    (p)->v0 = contrailInfo[q].v0;                                                                  \
-    (p)->u3 = contrailInfo[q].u0;                                                                  \
-    (p)->v3 = contrailInfo[q].v0 + contrailInfo[q].h;                                              \
-    (p)->u2 = contrailInfo[q].u0 + contrailInfo[q].w;                                              \
-    (p)->v2 = contrailInfo[q].v0 + contrailInfo[q].h;                                              \
-    (p)->clut = contrailInfo[q].clut;                                                              \
-    (p)->tpage = contrailInfo[q].tpage;
+#define BIGGER(a, b) (abs(a) < abs(b) ? (b) : (a))
+
+#define CONTRAIL_UV(k, q)                                                                          \
+    m->pts[k].uv.u1 = contrailInfo[q].u0;                                                          \
+    m->pts[k].uv.v1 = contrailInfo[q].v0;                                                          \
+    m->pts[k].uv.u0 = contrailInfo[q].u0 + contrailInfo[q].w;                                      \
+    m->pts[k].uv.v0 = contrailInfo[q].v0;                                                          \
+    m->pts[k].uv.u3 = contrailInfo[q].u0;                                                          \
+    m->pts[k].uv.v3 = contrailInfo[q].v0 + contrailInfo[q].h;                                      \
+    m->pts[k].uv.u2 = contrailInfo[q].u0 + contrailInfo[q].w;                                      \
+    m->pts[k].uv.v2 = contrailInfo[q].v0 + contrailInfo[q].h;                                      \
+    m->pts[k].uv.clut = contrailInfo[q].clut;                                                      \
+    m->pts[k].uv.tpage = contrailInfo[q].tpage;
 
 #define CONTRAIL_PT(k)                                                                             \
     mathMulTransVec(&m->cs->mat, &in, &out);                                                       \
-    m->trail[k].vx = m->cs->pos.vx + out.vx - m->pos.vx;                                           \
-    m->trail[k].vy = m->cs->pos.vy + out.vy - m->pos.vy;                                           \
-    m->trail[k].vz = m->cs->pos.vz + out.vz - m->pos.vz;
+    setVector(&m->trail[k], m->cs->pos.vx + out.vx - m->pos.vx,                                    \
+        m->cs->pos.vy + out.vy - m->pos.vy, m->cs->pos.vz + out.vz - m->pos.vz);
 
 static s32 bulletFlipFlop = 0;
 DbNode* fire_missile_node = 0;
@@ -128,7 +130,6 @@ void bulMakeSpecialBullet(s32 id, DbNode* node)
     }
 }
 
-#ifdef NON_MATCHING
 s32 CAR_HD(VECTOR3* pt, s32 owner, s32 flag)
 {
     s32 i;
@@ -136,15 +137,16 @@ s32 CAR_HD(VECTOR3* pt, s32 owner, s32 flag)
     s32 nai;
     Cs* cs;
     Target* t;
+    Target* targets;
     VECTOR3* p;
 
-    np = (s16)GetNumPlayers();
+    np = GetNumPlayers();
     i = 0;
-    nai = (s16)GetNumAICars();
+    nai = GetNumAICars();
     for (i = 0; i < np; i++) {
         cs = GetPlayerCs3D(i);
         if (cs->unkC0 != owner) {
-            if (ABS(BIGGER(pt->vx - cs->pos.vx, BIGGER(pt->vy - cs->pos.vy, pt->vz - cs->pos.vz)))
+            if (abs(BIGGER(pt->vx - cs->pos.vx, BIGGER(pt->vy - cs->pos.vy, pt->vz - cs->pos.vz)))
                 >> 3 < flag + 6) {
                 return cs->unkC0;
             }
@@ -153,16 +155,17 @@ s32 CAR_HD(VECTOR3* pt, s32 owner, s32 flag)
     for (i = 0; i < nai; i++) {
         cs = GetAICs3D(i);
         if (cs->unkC0 != owner) {
-            if (ABS(BIGGER(pt->vx - cs->pos.vx, BIGGER(pt->vy - cs->pos.vy, pt->vz - cs->pos.vz)))
+            if (abs(BIGGER(pt->vx - cs->pos.vx, BIGGER(pt->vy - cs->pos.vy, pt->vz - cs->pos.vz)))
                 >> 3 < flag + 6) {
                 return cs->unkC0;
             }
         }
     }
-    t = get_targets();
-    for (i = 0; i < 50; i++, t++) {
+    targets = get_targets();
+    for (i = 0; i < 50; i++) {
+        t = &targets[i];
         if (t->kind > 0 && t->type != -owner) {
-            if (ABS(BIGGER(pt->vx - t->pos.vx, BIGGER(pt->vy - t->pos.vy, pt->vz - t->pos.vz))) >> 3
+            if (abs(BIGGER(pt->vx - t->pos.vx, BIGGER(pt->vy - t->pos.vy, pt->vz - t->pos.vz))) >> 3
                 < flag + 5) {
                 return i + 500;
             }
@@ -174,7 +177,7 @@ s32 CAR_HD(VECTOR3* pt, s32 owner, s32 flag)
     for (i = 0; i < 2; i++) {
         p = get_hcop_position(i);
         if (p != 0) {
-            if (ABS(BIGGER(pt->vx - p->vx, BIGGER(pt->vy - p->vy, pt->vz - p->vz))) >> 3
+            if (abs(BIGGER(pt->vx - p->vx, BIGGER(pt->vy - p->vy, pt->vz - p->vz))) >> 3
                 < flag + 4) {
                 return i + 100;
             }
@@ -182,9 +185,6 @@ s32 CAR_HD(VECTOR3* pt, s32 owner, s32 flag)
     }
     return 0;
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/tm1/WEAPON", CAR_HD);
-#endif
 
 void init_bullets(void)
 {
@@ -206,13 +206,11 @@ void destroy_all_bullets(void)
     }
 }
 
-#ifdef NON_MATCHING
 void create_bullet(s32 owner, VECTOR3* dir, VECTOR3* pos, s32 damage)
 {
     s32 i;
     s32 big;
     s32 mag;
-    s32 life;
     VECTOR3 vel;
     Bullet* b;
 
@@ -220,7 +218,7 @@ void create_bullet(s32 owner, VECTOR3* dir, VECTOR3* pos, s32 damage)
     if (i >= 0) {
         b = &blist[i];
         big = BIGGER(dir->vx, BIGGER(dir->vy, dir->vz));
-        mag = ABS(big);
+        mag = abs(big);
         if (mag <= 0) {
             mag = 1;
         }
@@ -228,26 +226,18 @@ void create_bullet(s32 owner, VECTOR3* dir, VECTOR3* pos, s32 damage)
             vel.vx = dir->vx * 250 / mag;
             vel.vy = dir->vy * 250 / mag;
             vel.vz = dir->vz * 250 / mag;
-            life = 15;
+            b->life = 15;
         } else {
-            vel.vx = dir->vx * 250 / mag;
-            vel.vy = dir->vy * 250 / mag;
-            vel.vz = dir->vz * 250 / mag;
-            life = 15;
+            setVector(&vel, dir->vx * 250 / mag, dir->vy * 250 / mag, dir->vz * 250 / mag);
             if (owner >= 50) {
-                life = 20;
+                b->life = 20;
+            } else {
+                b->life = 15;
             }
         }
-        b->life = life;
-        b->prev.vx = pos->vx;
-        b->prev.vy = pos->vy;
-        b->prev.vz = pos->vz;
-        b->vel.vx = vel.vx;
-        b->vel.vy = vel.vy;
-        b->vel.vz = vel.vz;
-        b->pos.vx = pos->vx;
-        b->pos.vy = pos->vy;
-        b->pos.vz = pos->vz;
+        setVector(&b->prev, pos->vx, pos->vy, pos->vz);
+        setVector(&b->vel, vel.vx, vel.vy, vel.vz);
+        setVector(&b->pos, pos->vx, pos->vy, pos->vz);
         b->owner = owner;
         b->kind = 0;
         b->unk30 = 0;
@@ -255,11 +245,7 @@ void create_bullet(s32 owner, VECTOR3* dir, VECTOR3* pos, s32 damage)
         b->unk38 = 0;
     }
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/tm1/WEAPON", create_bullet);
-#endif
 
-#ifdef NON_MATCHING
 void s_create_bullet(
     s32 owner, VECTOR3* dir, VECTOR3* pos, s32 kind, s32 damage, s32 life, s32 arg6)
 {
@@ -273,28 +259,24 @@ void s_create_bullet(
     if (i >= 0) {
         b = &blist[i];
         big = BIGGER(dir->vx, BIGGER(dir->vy, dir->vz));
-        mag = ABS(big);
+        mag = abs(big);
         if (mag <= 0) {
             mag = 1;
         }
-        if (kind == 4 || kind == 6) {
+        if (kind == 4) {
+            mag = mag * 5 / 4;
+        } else if (kind == 6) {
             mag = mag * 5 / 4;
         }
-        if (kind >= 15 || kind == 5) {
-            mag = mag * 2;
+        if (kind >= FIRST_SPECIAL_BULLET_KIND || kind == 5) {
+            mag *= 2;
+            setVector(&vel, dir->vx * 250 / mag, dir->vy * 250 / mag, dir->vz * 250 / mag);
+        } else {
+            setVector(&vel, dir->vx * 250 / mag, dir->vy * 250 / mag, dir->vz * 250 / mag);
         }
-        vel.vx = dir->vx * 250 / mag;
-        vel.vy = dir->vy * 250 / mag;
-        vel.vz = dir->vz * 250 / mag;
-        b->prev.vx = pos->vx;
-        b->prev.vy = pos->vy;
-        b->prev.vz = pos->vz;
-        b->vel.vx = vel.vx;
-        b->vel.vy = vel.vy;
-        b->vel.vz = vel.vz;
-        b->pos.vx = pos->vx;
-        b->pos.vy = pos->vy;
-        b->pos.vz = pos->vz;
+        setVector(&b->prev, pos->vx, pos->vy, pos->vz);
+        setVector(&b->vel, vel.vx, vel.vy, vel.vz);
+        setVector(&b->pos, pos->vx, pos->vy, pos->vz);
         b->life = life;
         b->owner = owner;
         b->kind = kind;
@@ -303,17 +285,13 @@ void s_create_bullet(
         b->unk38 = arg6;
     }
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/tm1/WEAPON", s_create_bullet);
-#endif
 
-#ifdef NON_MATCHING
 void move_bullets(void)
 {
     s32 i;
     s32 k;
     s32 range;
-    u8 hitok;
+    s32 hitok;
     Bullet* b;
     HdCsHit* hit;
     VECTOR3 p;
@@ -323,24 +301,17 @@ void move_bullets(void)
     for (i = 0; i < 40; i++) {
         if (blist[i].life > 0) {
             b = &blist[i];
-            b->life--;
-            b->prev.vx = b->pos.vx;
-            b->prev.vy = b->pos.vy;
-            b->prev.vz = b->pos.vz;
+            b->life -= 1;
+            setVector(&b->prev, b->pos.vx, b->pos.vy, b->pos.vz);
             b->pos.vx += b->vel.vx;
             b->pos.vy += b->vel.vy;
             b->pos.vz += b->vel.vz;
-            p.vx = b->prev.vx;
-            p.vy = b->prev.vy;
-            p.vz = b->prev.vz;
+            setVector(&p, b->prev.vx, b->prev.vy, b->prev.vz);
             for (k = 3; k >= 0; k--) {
-                q.vx = p.vx;
-                q.vy = p.vy;
-                q.vz = p.vz;
-                p.vx = b->pos.vx - ((b->vel.vx * k) >> 2);
-                p.vy = b->pos.vy - ((b->vel.vy * k) >> 2);
-                p.vz = b->pos.vz - ((b->vel.vz * k) >> 2);
-                b->unk30 = CAR_HD(&p, b->owner, (b->kind >= 15) * 4);
+                setVector(&q, p.vx, p.vy, p.vz);
+                setVector(&p, b->pos.vx - ((b->vel.vx * k) >> 2),
+                    b->pos.vy - ((b->vel.vy * k) >> 2), b->pos.vz - ((b->vel.vz * k) >> 2));
+                b->unk30 = CAR_HD(&p, b->owner, (b->kind >= FIRST_SPECIAL_BULLET_KIND) * 4);
                 if (b->unk30 == b->owner) {
                     b->unk30 = 0;
                 }
@@ -358,9 +329,7 @@ void move_bullets(void)
                 }
                 if (b->unk30 > 0) {
                     if (b->unk30 == 1) {
-                        q.vx = p.vx;
-                        q.vy = p.vy;
-                        q.vz = p.vz;
+                        setVector(&q, p.vx, p.vy, p.vz);
                     }
                     do_simple_spark(&q);
                     if (rand() < 20000) {
@@ -369,7 +338,7 @@ void move_bullets(void)
                     if (b->unk30 != 8) {
                         do_flash(&q);
                     }
-                    if (b->kind >= 15) {
+                    if (b->kind >= FIRST_SPECIAL_BULLET_KIND) {
                         do_simple_explosion(&q);
                         q.vz = 0;
                         do_flames(&q);
@@ -393,15 +362,11 @@ void move_bullets(void)
         }
     }
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/tm1/WEAPON", move_bullets);
-#endif
 
-#ifdef NON_MATCHING
 void display_bullets(Db* db, s32 which)
 {
     s32 i;
-    s32 k;
+    s32 frameIndex;
     s32 d;
     s32 e;
     u8* next;
@@ -414,7 +379,7 @@ void display_bullets(Db* db, s32 which)
     s32 x1;
     s32 y1;
     Bullet* b;
-    GrSprite* sp;
+    GrSprite* spriteFrames;
     POLY_FT4* ft;
     LINE_G2* ln;
     POLY_G3* g3;
@@ -547,37 +512,37 @@ void display_bullets(Db* db, s32 which)
                 g3->b2 = 0;
             }
         } else if (b->kind == 1) {
-            k = b->life & 3;
-            ft->u0 = eyeWeaponInfo[k].u0;
-            ft->v0 = eyeWeaponInfo[k].v0;
-            ft->u1 = eyeWeaponInfo[k].u0 + eyeWeaponInfo[k].w;
-            ft->v1 = eyeWeaponInfo[k].v0;
-            ft->u2 = eyeWeaponInfo[k].u0;
-            ft->v2 = eyeWeaponInfo[k].v0 + eyeWeaponInfo[k].h;
-            ft->u3 = eyeWeaponInfo[k].u0 + eyeWeaponInfo[k].w;
-            ft->v3 = eyeWeaponInfo[k].v0 + eyeWeaponInfo[k].h;
-            ft->clut = eyeWeaponInfo[k].clut;
+            frameIndex = b->life & 3;
+            ft->u0 = eyeWeaponInfo[frameIndex].u0;
+            ft->v0 = eyeWeaponInfo[frameIndex].v0;
+            ft->u1 = eyeWeaponInfo[frameIndex].u0 + eyeWeaponInfo[frameIndex].w;
+            ft->v1 = eyeWeaponInfo[frameIndex].v0;
+            ft->u2 = eyeWeaponInfo[frameIndex].u0;
+            ft->v2 = eyeWeaponInfo[frameIndex].v0 + eyeWeaponInfo[frameIndex].h;
+            ft->u3 = eyeWeaponInfo[frameIndex].u0 + eyeWeaponInfo[frameIndex].w;
+            ft->v3 = eyeWeaponInfo[frameIndex].v0 + eyeWeaponInfo[frameIndex].h;
+            ft->clut = eyeWeaponInfo[frameIndex].clut;
             ft->r0 = 0xAC;
             ft->g0 = 0xAC;
             ft->b0 = 0xAC;
             sz = (hfov << 7) / z0;
-            ft->tpage = eyeWeaponInfo[k].tpage;
+            ft->tpage = eyeWeaponInfo[frameIndex].tpage;
         } else if (b->kind == 3) {
-            k = b->life & 3;
+            frameIndex = b->life & 3;
             sz = (b->damage >> 1) + 72;
             if (sz >= 256) {
                 sz = 255;
             }
-            ft->u0 = plasmaInfo[k].u0;
-            ft->v0 = plasmaInfo[k].v0;
-            ft->u1 = plasmaInfo[k].u0 + plasmaInfo[k].w;
-            ft->v1 = plasmaInfo[k].v0;
-            ft->u2 = plasmaInfo[k].u0;
-            ft->v2 = plasmaInfo[k].v0 + plasmaInfo[k].h;
-            ft->u3 = plasmaInfo[k].u0 + plasmaInfo[k].w;
-            ft->v3 = plasmaInfo[k].v0 + plasmaInfo[k].h;
-            ft->clut = plasmaInfo[k].clut;
-            ft->tpage = plasmaInfo[k].tpage;
+            ft->u0 = plasmaInfo[frameIndex].u0;
+            ft->v0 = plasmaInfo[frameIndex].v0;
+            ft->u1 = plasmaInfo[frameIndex].u0 + plasmaInfo[frameIndex].w;
+            ft->v1 = plasmaInfo[frameIndex].v0;
+            ft->u2 = plasmaInfo[frameIndex].u0;
+            ft->v2 = plasmaInfo[frameIndex].v0 + plasmaInfo[frameIndex].h;
+            ft->u3 = plasmaInfo[frameIndex].u0 + plasmaInfo[frameIndex].w;
+            ft->v3 = plasmaInfo[frameIndex].v0 + plasmaInfo[frameIndex].h;
+            ft->clut = plasmaInfo[frameIndex].clut;
+            ft->tpage = plasmaInfo[frameIndex].tpage;
             switch (b->life & 3) {
             case 0:
                 ft->r0 = sz;
@@ -606,23 +571,23 @@ void display_bullets(Db* db, s32 which)
                 sz = 320 * hfov / z0;
             }
             b->damage--;
-            k = b->life & 3;
-            ft->clut = plasmaInfo[k].clut;
-            ft->tpage = plasmaInfo[k].tpage;
+            frameIndex = b->life & 3;
+            ft->clut = plasmaInfo[frameIndex].clut;
+            ft->tpage = plasmaInfo[frameIndex].tpage;
             if (b->damage <= 0) {
                 b->life = 0;
             }
         } else if (b->kind == 5 || b->kind == 7) {
-            k = b->life & 3;
-            ft->u0 = BulletSprites[k].u0;
-            ft->v0 = BulletSprites[k].v0;
-            ft->u1 = BulletSprites[k].u0 + BulletSprites[k].w;
-            ft->v1 = BulletSprites[k].v0;
-            ft->u2 = BulletSprites[k].u0;
-            ft->v2 = BulletSprites[k].v0 + BulletSprites[k].h;
-            ft->u3 = BulletSprites[k].u0 + BulletSprites[k].w;
-            ft->v3 = BulletSprites[k].v0 + BulletSprites[k].h;
-            ft->clut = BulletSprites[k].clut;
+            frameIndex = b->life & 3;
+            ft->u0 = BulletSprites[frameIndex].u0;
+            ft->v0 = BulletSprites[frameIndex].v0;
+            ft->u1 = BulletSprites[frameIndex].u0 + BulletSprites[frameIndex].w;
+            ft->v1 = BulletSprites[frameIndex].v0;
+            ft->u2 = BulletSprites[frameIndex].u0;
+            ft->v2 = BulletSprites[frameIndex].v0 + BulletSprites[frameIndex].h;
+            ft->u3 = BulletSprites[frameIndex].u0 + BulletSprites[frameIndex].w;
+            ft->v3 = BulletSprites[frameIndex].v0 + BulletSprites[frameIndex].h;
+            ft->clut = BulletSprites[frameIndex].clut;
             if (b->kind == 5) {
                 ft->r0 = 0x96;
                 ft->g0 = 0xFF;
@@ -633,32 +598,35 @@ void display_bullets(Db* db, s32 which)
                 ft->b0 = 0x14;
             }
             sz = (hfov << 6) / z0;
-            ft->tpage = BulletSprites[k].tpage;
+            ft->tpage = BulletSprites[frameIndex].tpage;
         } else if (b->kind == 9) {
-            k = rand() & 7;
-            ft->u0 = fireballInfo[k].u0;
-            ft->v0 = fireballInfo[k].v0;
-            ft->u1 = fireballInfo[k].u0 + fireballInfo[k].w;
-            ft->v1 = fireballInfo[k].v0;
-            ft->u2 = fireballInfo[k].u0;
-            ft->v2 = fireballInfo[k].v0 + fireballInfo[k].h;
-            ft->u3 = fireballInfo[k].u0 + fireballInfo[k].w;
-            ft->v3 = fireballInfo[k].v0 + fireballInfo[k].h;
-            ft->clut = fireballInfo[k].clut;
+            frameIndex = rand() & 7;
+            ft->u0 = fireballInfo[frameIndex].u0;
+            ft->v0 = fireballInfo[frameIndex].v0;
+            ft->u1 = fireballInfo[frameIndex].u0 + fireballInfo[frameIndex].w;
+            ft->v1 = fireballInfo[frameIndex].v0;
+            ft->u2 = fireballInfo[frameIndex].u0;
+            ft->v2 = fireballInfo[frameIndex].v0 + fireballInfo[frameIndex].h;
+            ft->u3 = fireballInfo[frameIndex].u0 + fireballInfo[frameIndex].w;
+            ft->v3 = fireballInfo[frameIndex].v0 + fireballInfo[frameIndex].h;
+            ft->clut = fireballInfo[frameIndex].clut;
             sz = (hfov << 8) / z0;
-            ft->tpage = fireballInfo[k].tpage;
-        } else if (b->kind >= 15 && (b->kind & 1)) {
-            sp = &BulletSprites[((b->kind - 15) >> 1) * 4 + ((b->life >> 1) & 3)];
-            ft->u0 = sp->u0;
-            ft->v0 = sp->v0;
-            ft->u1 = sp->u0 + sp->w;
-            ft->v1 = sp->v0;
-            ft->u2 = sp->u0;
-            ft->v2 = sp->v0 + sp->h;
-            ft->u3 = sp->u0 + sp->w;
-            ft->v3 = sp->v0 + sp->h;
-            ft->tpage = sp->tpage;
-            ft->clut = sp->clut;
+            ft->tpage = fireballInfo[frameIndex].tpage;
+        } else if (b->kind >= FIRST_SPECIAL_BULLET_KIND && (b->kind & 1)) {
+            s32 spriteGroup = (b->kind - FIRST_SPECIAL_BULLET_KIND) >> 1;
+
+            spriteFrames = &BulletSprites[spriteGroup * SPECIAL_BULLET_FRAME_COUNT];
+            frameIndex = MOD_POW2(b->life >> 1, SPECIAL_BULLET_FRAME_COUNT);
+            ft->u0 = spriteFrames[frameIndex].u0;
+            ft->v0 = spriteFrames[frameIndex].v0;
+            ft->u1 = spriteFrames[frameIndex].u0 + spriteFrames[frameIndex].w;
+            ft->v1 = spriteFrames[frameIndex].v0;
+            ft->u2 = spriteFrames[frameIndex].u0;
+            ft->v2 = spriteFrames[frameIndex].v0 + spriteFrames[frameIndex].h;
+            ft->u3 = spriteFrames[frameIndex].u0 + spriteFrames[frameIndex].w;
+            ft->v3 = spriteFrames[frameIndex].v0 + spriteFrames[frameIndex].h;
+            ft->tpage = spriteFrames[frameIndex].tpage;
+            ft->clut = spriteFrames[frameIndex].clut;
             if (b->kind != 17) {
                 ft->r0 = 0x80;
                 ft->g0 = 0x80;
@@ -707,9 +675,6 @@ void display_bullets(Db* db, s32 which)
         }
     }
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/tm1/WEAPON", display_bullets);
-#endif
 
 void kill_bullet(s32 i)
 {
@@ -735,14 +700,12 @@ void update_bullets(void)
     jays_ownship = GetPlayerCs3D(0);
 }
 
-#ifdef NON_MATCHING
 void InitContrails(void)
 {
+    u8 unused[16]; // Padding for the original 0x40-byte stack frame.
     s32 i;
     s32 j;
     SVECTOR* tp;
-    VECTOR3* vp;
-    u32* fp;
 
     for (i = 0; i < 10; i++) {
         for (j = 0; j < 18; j++) {
@@ -776,26 +739,18 @@ void InitContrails(void)
         mlist[i].obj.h.kind = 0;
         mlist[i].obj.verts = tp;
         mlist[i].obj.normals = 0;
-        fp = &mlist[i].obj.flags;
-        *fp = DB_OBJ_NO_FOV_TEST;
+        mlist[i].obj.flags = 0;
+        mlist[i].obj.flags |= DB_OBJ_NO_FOV_TEST;
         mlist[i].obj.sub = 0;
-        vp = &mlist[i].obj.center;
-        vp->vx = 0;
-        vp->vy = 0;
-        vp->vz = 0;
+        setVector(&mlist[i].obj.center, 0, 0, 0);
         mlist[i].obj.radius = 0x7FFF;
         mlist[i].csB = csCreate();
         mlist[i].csB->epNode = (DbNode*)&mlist[i].obj;
         mlist[i].csB->drawMode = 0;
-        mlist[i].csB->pos.vx = 0;
-        mlist[i].csB->pos.vy = 0;
-        mlist[i].csB->pos.vz = 0;
+        setVector(&mlist[i].csB->pos, 0, 0, 0);
         csAddToCsList(mlist[i].csB);
     }
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/tm1/WEAPON", InitContrails);
-#endif
 
 void setContrailColor(u32 i, u8 r, u8 g, u8 b)
 {
@@ -812,7 +767,6 @@ void setContrailColor(u32 i, u8 r, u8 g, u8 b)
     }
 }
 
-#ifdef NON_MATCHING
 void startContrail(s32 i)
 {
     Missile* m;
@@ -837,34 +791,20 @@ void startContrail(s32 i)
         m->pts[j * 3 + 2].poly.vi[0] = 0;
         m->pts[j * 3 + 2].poly.vi[1] = 0;
     }
-    back.vx = 0;
-    back.vy = -200;
-    back.vz = 0;
+    setVector(&back, 0, -200, 0);
     mathMulTransVec(&m->cs->mat, &back, &out);
-    m->csB->pos.vx = m->cs->pos.vx;
-    m->csB->pos.vy = m->cs->pos.vy;
-    m->csB->pos.vz = m->cs->pos.vz;
+    setVector(&m->csB->pos, m->cs->pos.vx, m->cs->pos.vy, m->cs->pos.vz);
     for (j = 0; j < m->unk54 + 1; j++) {
         k = j * 3;
-        m->trail[k].vx = out.vx;
-        m->trail[k].vy = out.vy;
-        m->trail[k].vz = out.vz;
+        setVector(&m->trail[k], out.vx, out.vy, out.vz);
         k++;
-        m->trail[k].vx = out.vx;
-        m->trail[k].vy = out.vy;
-        m->trail[k].vz = out.vz;
+        setVector(&m->trail[k], out.vx, out.vy, out.vz);
         k++;
-        m->trail[k].vx = out.vx;
-        m->trail[k].vy = out.vy;
-        m->trail[k].vz = out.vz;
+        setVector(&m->trail[k], out.vx, out.vy, out.vz);
     }
     m->csB->drawMode = 1;
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/tm1/WEAPON", startContrail);
-#endif
 
-#ifdef NON_MATCHING
 void animate_contrails(Missile* m)
 {
     s32 head;
@@ -876,20 +816,17 @@ void animate_contrails(Missile* m)
     for (j = 0; j < m->unk54; j++) {
         q = (j * 8 + (m->unk54 >> 1)) / m->unk54;
         k = head * 3;
-        CONTRAIL_UV(&m->pts[k].uv, q)
+        CONTRAIL_UV(k, q)
         k++;
-        CONTRAIL_UV(&m->pts[k].uv, q)
+        CONTRAIL_UV(k, q)
         k++;
-        CONTRAIL_UV(&m->pts[k].uv, q)
+        CONTRAIL_UV(k, q)
         head--;
         if (head < 0) {
             head = m->unk54 - 1;
         }
     }
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/tm1/WEAPON", animate_contrails);
-#endif
 
 void init_missiles(void)
 {
@@ -932,30 +869,29 @@ s32 find_free_missile(s32 i)
     return -1;
 }
 
-#ifdef NON_MATCHING
 void drop_contrail(Missile* m, s32 i)
 {
     VECTOR in;
     VECTOR out;
     s32 h;
-    s32 a;
     s32 b;
 
-    m->unk55--;
+    s32 radius = 8;
+    m->unk55 -= 1;
     if (m->unk55 == 0) {
-        a = m->unk4D * 3;
-        m->unk4C++;
+        b = m->unk4D * 3;
+        m->unk4C += 1;
         if (m->unk4C >= m->unk54) {
             m->unk4C = 0;
         }
         h = m->unk4C * 3;
-        m->pts[h].poly.vi[3] = a + 1;
-        m->pts[h].poly.vi[1] = a;
-        m->pts[h + 1].poly.vi[3] = a + 2;
-        m->pts[h + 1].poly.vi[1] = a + 1;
-        m->pts[h + 2].poly.vi[3] = a;
-        m->pts[h + 2].poly.vi[1] = a + 2;
-        m->unk4D++;
+        m->pts[h].poly.vi[3] = b + 1;
+        m->pts[h].poly.vi[1] = b;
+        m->pts[h + 1].poly.vi[3] = b + 2;
+        m->pts[h + 1].poly.vi[1] = b + 1;
+        m->pts[h + 2].poly.vi[3] = b;
+        m->pts[h + 2].poly.vi[1] = b + 2;
+        m->unk4D += 1;
         if (m->unk4D >= 7) {
             m->unk4D = 0;
         }
@@ -966,39 +902,28 @@ void drop_contrail(Missile* m, s32 i)
         m->pts[h + 1].poly.vi[0] = b + 1;
         m->pts[h + 2].poly.vi[2] = b;
         m->pts[h + 2].poly.vi[0] = b + 2;
-        in.vx = 0;
-        in.vy = 0;
-        in.vz = 8;
+        setVector(&in, 0, 0, radius);
         CONTRAIL_PT(b)
-        in.vx = 8;
-        in.vy = 0;
-        in.vz = -8;
-        CONTRAIL_PT(b + 1)
-        in.vx = -8;
-        in.vy = 0;
-        in.vz = -8;
-        CONTRAIL_PT(b + 2)
+        setVector(&in, radius, 0, -radius);
+        b += 1;
+        CONTRAIL_PT(b)
+        setVector(&in, -radius, 0, -radius);
+        b += 1;
+        CONTRAIL_PT(b)
         m->unk55 = 2;
         animate_contrails(m);
     } else {
-        in.vx = 0;
-        in.vy = 0;
-        in.vz = 8;
         b = m->unk4D * 3;
+        setVector(&in, 0, 0, radius);
         CONTRAIL_PT(b)
-        in.vx = 8;
-        in.vy = 0;
-        in.vz = -8;
-        CONTRAIL_PT(b + 1)
-        in.vx = -8;
-        in.vy = 0;
-        in.vz = -8;
-        CONTRAIL_PT(b + 2)
+        setVector(&in, radius, 0, -radius);
+        b += 1;
+        CONTRAIL_PT(b)
+        setVector(&in, -radius, 0, -radius);
+        b += 1;
+        CONTRAIL_PT(b)
     }
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/tm1/WEAPON", drop_contrail);
-#endif
 
 void basic_missile_launch(Missile* m, VECTOR3* rot, VECTOR3* pos)
 {
@@ -1010,15 +935,9 @@ void basic_missile_launch(Missile* m, VECTOR3* rot, VECTOR3* pos)
     m->unk4D = 1;
     m->target = 0;
     m->unk54 = 6;
-    cs->rot.vx = rot->vx;
-    cs->rot.vy = rot->vy;
-    cs->rot.vz = rot->vz;
-    cs->pos.vx = pos->vx;
-    cs->pos.vy = pos->vy;
-    cs->pos.vz = pos->vz;
-    m->pos.vx = pos->vx;
-    m->pos.vy = pos->vy;
-    m->pos.vz = pos->vz;
+    setVector(&cs->rot, rot->vx, rot->vy, rot->vz);
+    setVector(&cs->pos, pos->vx, pos->vy, pos->vz);
+    setVector(&m->pos, pos->vx, pos->vy, pos->vz);
     if (cs->epNode == 0) {
         cs->drawMode = 0;
     } else {
@@ -1101,15 +1020,12 @@ s16 create_POWER_missile(s32 owner, VECTOR3* rot, VECTOR3* pos, s32 damage)
     return i;
 }
 
-#ifdef NON_MATCHING
 s16 create_REAR_missile(s32 owner, VECTOR3* target, VECTOR3* rot, VECTOR3* pos, s32 damage)
 {
     VECTOR3 back;
     s16 i;
 
-    back.vx = rot->vx;
-    back.vy = rot->vy;
-    back.vz = (rot->vz + 2048) & 0xFFF;
+    setVector(&back, rot->vx, rot->vy, (rot->vz + 2048) & 0xFFF);
     i = create_HOMING_missile(owner, target, &back, pos, damage);
     if (i >= 0) {
         mlist[i].unk3C = 10;
@@ -1122,9 +1038,6 @@ s16 create_REAR_missile(s32 owner, VECTOR3* target, VECTOR3* rot, VECTOR3* pos, 
     }
     return i;
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/tm1/WEAPON", create_REAR_missile);
-#endif
 
 s16 create_SINGING_missile(s32 owner, VECTOR3* rot, VECTOR3* pos, s32 damage)
 {
@@ -1197,7 +1110,6 @@ s16 create_LOS_missile(s32 owner, VECTOR3* rot, VECTOR3* pos, s32 damage)
     }
 }
 
-#ifdef NON_MATCHING
 s16 create_HOMING_missile(s32 owner, VECTOR3* target, VECTOR3* rot, VECTOR3* pos, s32 damage)
 {
     s32 i;
@@ -1236,9 +1148,6 @@ s16 create_HOMING_missile(s32 owner, VECTOR3* target, VECTOR3* rot, VECTOR3* pos
         return i;
     }
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/tm1/WEAPON", create_HOMING_missile);
-#endif
 
 s16 create_SWARM_missile(s32 owner, VECTOR3* target, VECTOR3* rot, VECTOR3* pos, s32 damage)
 {
@@ -1272,7 +1181,6 @@ s16 create_SWARM_missile(s32 owner, VECTOR3* target, VECTOR3* rot, VECTOR3* pos,
     }
 }
 
-#ifdef NON_MATCHING
 void turn_heatseeker(Missile* m)
 {
     VECTOR3* tgt;
@@ -1285,7 +1193,6 @@ void turn_heatseeker(Missile* m)
     s32 yaw;
     s32 pitch;
     s32 cur;
-    s32 d;
 
     tgt = m->target;
     dx = tgt->vx - m->cs->pos.vx;
@@ -1293,16 +1200,17 @@ void turn_heatseeker(Missile* m)
     dz = tgt->vz - m->cs->pos.vz;
     yaw = (ratan2(dx, dy) + 0x1000) % 0x1000;
 
-    amin = ABS(dx);
-    amax = ABS(dy);
+    amin = abs(dx);
+    amax = abs(dy);
     if (amax < amin) {
         amin = amax;
     }
     amin = amin >> 1;
-    if (ABS(dx) < amax) {
-        dist = amax + amin;
+    dist = abs(dx);
+    if (dist >= amax) {
+        dist = dist + amin;
     } else {
-        dist = ABS(dx) + amin;
+        dist = amax + amin;
     }
     pitch = (0x1000 - ratan2(dz, dist)) % 0x1000;
     if (pitch > 0x400 && pitch < 0xC00) {
@@ -1316,18 +1224,16 @@ void turn_heatseeker(Missile* m)
     if (yaw - cur >= 0x801) {
         yaw -= 0x1000;
     }
-    d = cur - yaw;
-    if (d < 0) {
-        d = -d;
-    }
-    if (m->unk3C >= d) {
+    if (m->unk3C >= abs(cur - yaw)) {
         m->cs->rot.vz = yaw;
     } else if (cur < yaw) {
         m->cs->rot.vz = m->cs->rot.vz + m->unk3C;
     } else {
         m->cs->rot.vz = m->cs->rot.vz - m->unk3C;
     }
-    if (m->unk2C == 2 || m->unk2C == 3) {
+    if (m->unk2C == 2) {
+        m->cs->rot.vz = m->cs->rot.vz + ((rand() % (m->unk3C * 4)) - (m->unk3C * 2));
+    } else if (m->unk2C == 3) {
         m->cs->rot.vz = m->cs->rot.vz + ((rand() % (m->unk3C * 4)) - (m->unk3C * 2));
     }
     if (m->cs->rot.vz >= 0x1000) {
@@ -1344,11 +1250,7 @@ void turn_heatseeker(Missile* m)
     if (pitch - cur >= 0x801) {
         pitch -= 0x1000;
     }
-    d = cur - pitch;
-    if (d < 0) {
-        d = -d;
-    }
-    if (m->unk3C >= d) {
+    if (m->unk3C >= abs(cur - pitch)) {
         m->cs->rot.vx = pitch;
     } else if (cur < pitch) {
         m->cs->rot.vx = m->cs->rot.vx + m->unk3C;
@@ -1370,16 +1272,12 @@ void turn_heatseeker(Missile* m)
     }
     RotMatrixYXZ(&m->cs->rot, &m->cs->mat);
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/tm1/WEAPON", turn_heatseeker);
-#endif
 
-#ifdef NON_MATCHING
 void move_missile(Missile* m)
 {
     HdCsHit* hit;
     s32 exploded;
-    u8 idx;
+    s32 idx;
     s32 i;
     VECTOR fwd;
     VECTOR3 d;
@@ -1404,9 +1302,7 @@ void move_missile(Missile* m)
             m->unk38 = 150;
         }
         mathMulTransVec(&m->cs->mat, &fwd, &d);
-        pt.vx = m->cs->pos.vx;
-        pt.vy = m->cs->pos.vy;
-        pt.vz = m->cs->pos.vz;
+        setVector(&pt, m->cs->pos.vx, m->cs->pos.vy, m->cs->pos.vz);
         m->cs->pos.vx += d.vx;
         m->cs->pos.vy += d.vy;
         m->cs->pos.vz += d.vz;
@@ -1422,12 +1318,9 @@ void move_missile(Missile* m)
         uasoundPlayCarWeaponLaunchOrInflight(
             m->unk48, soundGetCalculatedSoundRange(), soundGetCalculatedSoundXPosition());
         for (i = 1; i >= 0; i--) {
-            prev.vx = pt.vx;
-            prev.vy = pt.vy;
-            prev.vz = pt.vz;
-            pt.vx = m->cs->pos.vx - ((d.vx * i) >> 1);
-            pt.vy = m->cs->pos.vy - ((d.vy * i) >> 1);
-            pt.vz = m->cs->pos.vz - ((d.vz * i) >> 1);
+            setVector(&prev, pt.vx, pt.vy, pt.vz);
+            setVector(&pt, m->cs->pos.vx - ((d.vx * i) >> 1), m->cs->pos.vy - ((d.vy * i) >> 1),
+                m->cs->pos.vz - ((d.vz * i) >> 1));
             m->unk44 = CAR_HD(&pt, m->unk50, 3);
             if (m->unk44 == m->unk50) {
                 m->unk44 = 0;
@@ -1501,9 +1394,6 @@ void move_missile(Missile* m)
             m->unk48, soundGetCalculatedSoundRange(), soundGetCalculatedSoundXPosition(), 99);
     }
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/tm1/WEAPON", move_missile);
-#endif
 
 Missile* get_missile(u32 i)
 {
@@ -1529,7 +1419,6 @@ void move_missiles(void)
     }
 }
 
-#ifdef NON_MATCHING
 void bulBoltZap(VECTOR* p1, VECTOR* p2)
 {
     Db* cdb;
@@ -1555,21 +1444,14 @@ void bulBoltZap(VECTOR* p1, VECTOR* p2)
     eye = viewGetEyeTrans(0);
     mat = viewGetEyeMat(0);
 
-    delta.vx = p2->vx - p1->vx;
-    delta.vy = p2->vy - p1->vy;
-    delta.vz = p2->vz - p1->vz;
+    setVector(&delta, p2->vx - p1->vx, p2->vy - p1->vy, p2->vz - p1->vz);
 
-    pts[0].vx = p1->vx;
-    pts[0].vy = p1->vy;
-    pts[0].vz = p1->vz + 30;
-    pts[15].vx = p2->vx;
-    pts[15].vy = p2->vy;
-    pts[15].vz = p2->vz;
+    setVector(&pts[0], p1->vx, p1->vy, p1->vz + 30);
+    setVector(&pts[15], p2->vx, p2->vy, p2->vz);
 
     for (i = 1; i < 15; i++) {
-        pts[i].vx = p1->vx + delta.vx * i / 16;
-        pts[i].vy = p1->vy + delta.vy * i / 16;
-        pts[i].vz = delta.vz * i / 16 + 30 + p1->vz;
+        setVector(&pts[i], p1->vx + delta.vx * i / 16, p1->vy + delta.vy * i / 16,
+            (p1->vz + 30) + (delta.vz * i / 16));
         pts[i].vz += (rand() & 0xff) - 128;
         pts[i].vy += (rand() & 0x3f) - 32;
         pts[i].vx += (rand() & 0x3f) - 32;
@@ -1614,9 +1496,6 @@ void bulBoltZap(VECTOR* p1, VECTOR* p2)
         }
     }
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/tm1/WEAPON", bulBoltZap);
-#endif
 
 void SetFXSheet(s32 count, s32 r, s32 g, s32 b)
 {
@@ -1657,8 +1536,7 @@ void DisplayFXSheet(u_long* ot)
     }
 }
 
-#ifdef NON_MATCHING
-s32 bulDispatchDamage(s32 id, s32 a, s32 b, s32 damage, VECTOR3* dir, s32 owner)
+u8 bulDispatchDamage(s32 id, s32 a, s32 b, s32 damage, VECTOR3* dir, s32 owner)
 {
     Target* t;
 
@@ -1680,10 +1558,10 @@ s32 bulDispatchDamage(s32 id, s32 a, s32 b, s32 damage, VECTOR3* dir, s32 owner)
             return 1;
         }
         if (id >= 150) {
-            ped_takehit(id - 150, (s32)dir);
+            ped_takehit(id - 150, dir);
             return 1;
         }
-        carTakeHit((s16)id, damage, dir, 0);
+        carTakeHit(id, damage, dir, 0);
         return 1;
     }
     switch (a) {
@@ -1737,11 +1615,8 @@ s32 bulDispatchDamage(s32 id, s32 a, s32 b, s32 damage, VECTOR3* dir, s32 owner)
     case UA_UNK_778:
     case UA_UNK_781:
     case UA_UNK_782:
-        pedestrian_takehit(a, (s32)dir);
+        pedestrian_takehit(a, dir);
         return 1;
     }
     return 0;
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/tm1/WEAPON", bulDispatchDamage);
-#endif
